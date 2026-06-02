@@ -1,0 +1,79 @@
+{
+  "records": [
+    {
+      "id": "20260602_111821",
+      "timestamp": "2026-06-02T11:18:21.158769",
+      "stock1": "600519",
+      "stock2": "000858",
+      "period_days": 7,
+      "winner": "000858",
+      "comparison": {
+        "stock1": {
+          "change_percent": 4.0,
+          "end_price": 1950.0,
+          "pe_percentile": 48.4,
+          "volatility": 0.18
+        },
+        "stock2": {
+          "change_percent": 4.26,
+          "end_price": 178.5,
+          "pe_percentile": 54.4,
+          "volatility": 0.59
+        },
+        "winner": "000858"
+      },
+      "ai_summary": "000858 走势强劲，但需警惕追高风险；600519 虽短期承压，但估值安全边际较高。可考虑均衡配置。",
+      "report_path": "/Users/mac/AI Coding/solo coder/00003/output/reports/compare_600519_000858_7d_20260602_111821.html"
+    },
+    {
+      "id": "20260602_111148",
+      "timestamp": "2026-06-02T11:11:48.709899",
+      "stock1": "600519",
+      "stock2": "000858",
+      "period_days": 5,
+      "winner": "000858",
+      "comparison": {
+        "stock1": {
+          "change_percent": 2.9,
+          "end_price": 1950.0,
+          "pe_percentile": 49.2,
+          "volatility": 0.12
+        },
+        "stock2": {
+          "change_percent": 3.3,
+          "end_price": 178.5,
+          "pe_percentile": 50.4,
+          "volatility": 0.12
+        },
+        "winner": "000858"
+      },
+      "ai_summary": "000858 技术面占优，600519 基本面有支撑。两者各有千秋，根据风险偏好选择配置方向。",
+      "report_path": "/Users/mac/AI Coding/solo coder/00003"
+    },
+    {
+      "id": "20260602_105831",
+      "timestamp": "2026-06-02T10:58:31.189346",
+      "stock1": "600519",
+      "stock2": "000858",
+      "period_days": 7,
+      "comparison": {
+        "stock1": {
+          "change_percent": 4.0,
+          "end_price": 1950.0,
+          "pe_percentile": 48.4,
+          "volatility": 0.18
+        },
+        "stock2": {
+          "change_percent": 4.26,
+          "end_price": 178.5,
+          "pe_percentile": 54.4,
+          "volatility": 0.59
+        },
+        "winner": "000858"
+      },
+      "ai_summary": "000858 走势强劲，但需警惕追高风险；600519 虽短期承压，但估值安全边际较高。可考虑均衡配置。",
+      "report_path": "/Users/mac/AI Coding/solo coder/00003/output/reports/compare_600519_000858_7d_20260602_105831.html",
+      "winner": "000858"
+    }
+  ]
+}

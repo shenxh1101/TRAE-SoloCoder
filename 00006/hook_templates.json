@@ -1,0 +1,101 @@
+{
+  "templates": [
+    {
+      "id": "question_shock",
+      "style": "疑问冲击型",
+      "description": "用反问引发好奇心，制造认知冲突",
+      "templates": [
+        "你还在为{pain}发愁？{product}直接终结你的痛苦！",
+        "为什么99%的人{pain}都做错了？{product}告诉你答案！",
+        "{pain}？那是因为你还没遇到{product}！"
+      ]
+    },
+    {
+      "id": "number_data",
+      "style": "数字数据型",
+      "description": "用具体数字制造权威感和可信度",
+      "templates": [
+        "3秒解决{pain}，{product}让{count}万人疯狂下单！",
+        "{count}万人亲测有效！{product}告别{pain}只要一步",
+        "回购率高达{rate}%！{product}才是{pain}的终极答案"
+      ]
+    },
+    {
+      "id": "story_scene",
+      "style": "故事场景型",
+      "description": "用场景化叙事引发共鸣代入",
+      "templates": [
+        "闺蜜聚会被嘲笑{pain}？回来怒用{product}一周后...",
+        "出差被同事看到{pain}，尴尬到想钻地缝！幸好有{product}",
+        "每次{pain}都想哭，直到闺蜜塞给我{product}..."
+      ]
+    },
+    {
+      "id": "contrast_reversal",
+      "style": "对比反转型",
+      "description": "前后对比制造强烈视觉冲击",
+      "templates": [
+        "用了{product}之前 vs 之后，{pain}彻底消失了！",
+        "左边是{pain}的我，右边是用{product}后的我，差距太大了！",
+        "同一张脸，用了{product}简直判若两人！{pain}？不存在的"
+      ]
+    },
+    {
+      "id": "authority_endorse",
+      "style": "权威背书型",
+      "description": "借助专家或机构增加说服力",
+      "templates": [
+        "皮肤科医生都在用的{product}，{pain}终于有救了！",
+        "实验室研发{years}年，{product}专克{pain}！",
+        "行业专家推荐！{product}解决{pain}的原理竟然是..."
+      ]
+    },
+    {
+      "id": "urgent_fomo",
+      "style": "紧迫感型",
+      "description": "制造限时稀缺，触发冲动消费",
+      "templates": [
+        "限量{limit}件！{product}解决{pain}，手慢无！",
+        "最后{hours}小时！{product}告别{pain}的机会不等人",
+        "被抢空3次终于补货！{product}解决{pain}，速来！"
+      ]
+    },
+    {
+      "id": "pain_exaggeration",
+      "style": "痛点放大型",
+      "description": "把痛点放大到极致引发强烈共鸣",
+      "templates": [
+        "{pain}真的太折磨人了！试遍所有方法都不行？{product}一试就灵！",
+        "谁懂{pain}的痛啊！每天都是煎熬，直到遇见{product}",
+        "被{pain}折磨到崩溃？{product}让你重新找回自信！"
+      ]
+    },
+    {
+      "id": "curiosity_gap",
+      "style": "好奇心缺口型",
+      "description": "制造信息差，让观众忍不住看完",
+      "templates": [
+        "我后悔没有早点发现{product}，{pain}的解法竟然这么简单！",
+        "全网都在搜的{product}，{pain}的救星你居然还不知道？",
+        "原来解决{pain}只需要{product}，我居然才知道！"
+      ]
+    }
+  ],
+  "style_keywords": {
+    "疑问冲击": ["question_shock"],
+    "数字数据": ["number_data"],
+    "故事场景": ["story_scene"],
+    "对比反转": ["contrast_reversal"],
+    "权威背书": ["authority_endorse"],
+    "紧迫感": ["urgent_fomo"],
+    "痛点放大": ["pain_exaggeration"],
+    "好奇心": ["curiosity_gap"]
+  },
+  "default_fill": {
+    "count": "50",
+    "rate": "97",
+    "years": "5",
+    "limit": "500",
+    "hours": "24"
+  }
+}

@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF8E7 0%, #FFE4C4 50%, #FFDAB9 100%);
+  background-attachment: fixed;
+}
+
+.bg-texture {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(124, 179, 66, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(212, 175, 55, 0.06) 0%, transparent 40%);
+}
+
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.vote-btn {
+  transition: all 0.2s ease;
+}
+
+.vote-btn:active {
+  transform: scale(0.9);
+}
+
+.vote-btn.voted {
+  animation: voteBounce 0.4s ease;
+}
+
+@keyframes voteBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.cooking-loader {
+  animation: cooking 1.5s ease-in-out infinite;
+}
+
+@keyframes cooking {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.steam {
+  animation: steam 2s ease-out infinite;
+}
+
+@keyframes steam {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-20px) scale(1.2); }
+}
