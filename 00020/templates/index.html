@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI白日梦交易市场</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🌙 AI白日梦交易市场</h1>
+            <div class="user-info">
+                <span class="user-name" id="userName">{{ session.user_name }}</span>
+                <span class="coins">💰 {{ user.coins }} 币</span>
+                <button class="btn-small" id="renameBtn">改名</button>
+                <a href="{{ url_for('admin') }}" class="btn-small btn-outline">管理</a>
+            </div>
+        </header>
+
+        <div class="action-bar">
+            <button class="btn-primary" id="createDreamBtn">✨ 发布白日梦</button>
+            <div class="sort-options">
+                <span>排序：</span>
+                <a href="?sort=hot" class="sort-link {{ 'active' if sort_by == 'hot' }}">🔥 热度</a>
+                <a href="?sort=new" class="sort-link {{ 'active' if sort_by == 'new' }}">🆕 最新</a>
+                <a href="?sort=investment" class="sort-link {{ 'active' if sort_by == 'investment' }}">💰 投资</a>
+            </div>
+        </div>
+
+        <div class="dreams-grid" id="dreamsGrid">
+            {% for dream in dreams %}
+            <div class="dream-card" data-id="{{ dream.id }}">
+                <div class="dream-card-header">
+                    <h3 class="dream-title">{{ dream.title }}</h3>
+                    <span class="dream-author">by {{ dream.author_name }}</span>
+                </div>
+                <p class="dream-desc">{{ (dream.description or '')[:100] }}{% if dream.description and dream.description|length > 100 %}...{% endif %}</p>
+                <div class="dream-stats">
+                    <span>👥 {{ dream.investors|length }} 人投资</span>
+                    <span>💰 {{ dream.total_investment }} 币</span>
+                    {% if dream.solution %}
+                    <span class="has-solution">✅ 已有方案</span>
+                    {% endif %}
+                </div>
+                <div class="dream-actions">
+                    <a href="{{ url_for('dream_detail', dream_id=dream.id) }}" class="btn-secondary">查看详情</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>还没有白日梦，快来发布第一个吧！</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>发布你的白日梦</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>梦想标题</label>
+                    <input type="text" id="dreamTitle" placeholder="比如：我想学会跟猫说话" required>
+                </div>
+                <div class="form-group">
+                    <label>详细描述</label>
+                    <textarea id="dreamDesc" rows="4" placeholder="描述一下你的梦想..." required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">发布梦想</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="renameModal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>修改昵称</h2>
+                <button class="close-btn" id="closeRenameModal">&times;</button>
+            </div>
+            <form id="renameForm">
+                <div class="form-group">
+                    <label>新昵称</label>
+                    <input type="text" id="newName" placeholder="输入新昵称" required>
+                </div>
+                <button type="submit" class="btn-primary">确定</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

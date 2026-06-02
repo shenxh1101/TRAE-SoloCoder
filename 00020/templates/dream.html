@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dream.title }} - AI白日梦交易市场</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><a href="{{ url_for('index') }}" class="home-link">🌙 AI白日梦交易市场</a></h1>
+            <div class="user-info">
+                <span class="user-name">{{ session.user_name }}</span>
+                <span class="coins">💰 {{ user.coins }} 币</span>
+            </div>
+        </header>
+
+        <div class="dream-detail">
+            <div class="dream-header">
+                <h1 class="dream-title-lg">{{ dream.title }}</h1>
+                <p class="dream-meta">发布者：{{ dream.author_name }} · {{ dream.created_at[:10] }}</p>
+            </div>
+
+            <div class="dream-description">
+                <h3>📝 梦想描述</h3>
+                <p>{{ dream.description if dream.description else '暂无详细描述' }}</p>
+            </div>
+
+            <div class="dream-investment">
+                <h3>💰 投资信息</h3>
+                <div class="investment-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ dream.investors|length }}</span>
+                        <span class="stat-label">投资人</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ dream.total_investment }}</span>
+                        <span class="stat-label">总投资</span>
+                    </div>
+                    <div class="stat-item">
+                        {% set investor_count = dream.investors|length %}
+                        {% set remaining = [3 - investor_count, 0]|max %}
+                        <span class="stat-value">{{ remaining }}</span>
+                        <span class="stat-label">距离解锁AI方案</span>
+                    </div>
+                </div>
+
+                <div class="investment-actions">
+                    {% if not dream.solution %}
+                    <div class="invest-form">
+                        <select id="investAmount">
+                            <option value="10">投资 10 币</option>
+                            <option value="50">投资 50 币</option>
+                            <option value="100">投资 100 币</option>
+                            <option value="500">投资 500 币</option>
+                        </select>
+                        <button class="btn-primary" id="investBtn">投资这个梦</button>
+                    </div>
+
+                    {% if dream.author_id == user['id'] %}
+                    <div class="incubate-box">
+                        <p>💡 作为创作者，你可以支付 <strong>200 币</strong> 立即孵化梦想，获得AI方案！</p>
+                        <button class="btn-secondary" id="incubateBtn">🥚 立即孵化</button>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                {% if dream.investors %}
+                <div class="investors-list">
+                    <h4>投资人列表</h4>
+                    <ul>
+                        {% for inv in dream.investors %}
+                        <li>{{ inv.user_name }} - {{ inv.amount }} 币</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if dream.solution %}
+            <div class="solution-box">
+                <div class="solution-header">
+                    <h3>🤖 AI 圆梦方案</h3>
+                    <span class="success-rate">成功率：{{ dream.solution.success_rate }}%</span>
+                </div>
+                <p class="solution-intro">{{ dream.solution.introduction }}</p>
+                <p class="solution-category">分类：{{ dream.solution.category }}</p>
+
+                <div class="solution-steps">
+                    <h4>📋 三步实现计划</h4>
+                    {% for step in dream.solution.steps %}
+                    <div class="step-item">
+                        <span class="step-number">{{ loop.index }}</span>
+                        <p>{{ step.split('：', 1)[1] if '：' in step else step }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="solution-resources">
+                    <h4>🛠️ 所需资源</h4>
+                    <ul>
+                        {% for res in dream.solution.resources %}
+                        <li>{{ res }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <p class="solution-note">{{ dream.solution.ai_note }}</p>
+            </div>
+            {% endif %}
+
+            <div class="comments-section">
+                <h3>💬 评论区</h3>
+
+                <div class="comment-form">
+                    <textarea id="commentContent" placeholder="写下你对这个方案的看法..." rows="3"></textarea>
+                    <button class="btn-primary" id="submitComment">发表评论</button>
+                </div>
+
+                <div class="comments-list" id="commentsList">
+                    {% for comment in comments %}
+                    <div class="comment-item" data-id="{{ comment.id }}">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ comment.user_name }}</span>
+                            <span class="comment-time">{{ comment.created_at[:10] }}</span>
+                        </div>
+                        <p class="comment-text">{{ comment.content }}</p>
+                        <div class="comment-votes">
+                            <button class="vote-btn helpful" data-type="helpful">
+                                👍 有帮助 ({{ comment.helpful }})
+                            </button>
+                            <button class="vote-btn bullshit" data-type="bullshit">
+                                👎 扯淡 ({{ comment.bullshit }})
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="no-comments">暂无评论，来说两句吧～</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const DREAM_ID = '{{ dream.id }}';
+        const USER_ID = '{{ user.id }}';
+    </script>
+    <script src="{{ url_for('static', filename='js/dream.js') }}"></script>
+</body>
+</html>

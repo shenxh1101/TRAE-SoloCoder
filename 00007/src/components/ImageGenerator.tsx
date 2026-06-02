@@ -4,9 +4,10 @@ import { RecipeVariant, VARIANT_CONFIG } from '../types';
 
 interface ImageGeneratorProps {
   variant: RecipeVariant;
+  allergens?: string[];
 }
 
-export function ImageGenerator({ variant }: ImageGeneratorProps) {
+export function ImageGenerator({ variant, allergens = [] }: ImageGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,8 +27,14 @@ export function ImageGenerator({ variant }: ImageGeneratorProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const ingredientCount = variant.fullIngredients.length;
+    const changeCount = variant.ingredientChanges.length;
+    const baseHeight = 1000;
+    const extraIngredientHeight = Math.max(0, ingredientCount - 10) * 20;
+    const extraChangeHeight = Math.max(0, changeCount - 3) * 60;
+    const allergenHeight = allergens.length > 0 ? 60 : 0;
+    const height = baseHeight + extraIngredientHeight + extraChangeHeight + allergenHeight;
     const width = 800;
-    const height = 1000;
     canvas.width = width;
     canvas.height = height;
 
@@ -45,7 +52,7 @@ export function ImageGenerator({ variant }: ImageGeneratorProps) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.beginPath();
     ctx.roundRect(40, 40, width - 80, height - 80, 24);
     ctx.fill();
@@ -59,47 +66,88 @@ export function ImageGenerator({ variant }: ImageGeneratorProps) {
     ctx.fillStyle = '#666';
     ctx.fillText(`原版: ${variant.originalDish}`, width / 2, 160);
 
+    let currentY = 220;
+
+    if (allergens.length > 0) {
+      ctx.font = 'bold 20px "Noto Sans SC", sans-serif';
+      ctx.fillStyle = '#d32f2f';
+      ctx.textAlign = 'left';
+      ctx.fillText('⚠️ 饮食限制', 80, currentY);
+      currentY += 35;
+      ctx.font = '16px "Noto Sans SC", sans-serif';
+      ctx.fillStyle = '#c62828';
+      ctx.fillText(`已避开: ${allergens.join('、')}`, 80, currentY);
+      currentY += 40;
+    }
+
     ctx.font = 'bold 24px "Noto Sans SC", sans-serif';
     ctx.fillStyle = '#444';
     ctx.textAlign = 'left';
-    ctx.fillText('📋 食材清单', 80, 220);
+    ctx.fillText('📋 完整食材清单', 80, currentY);
+    currentY += 40;
 
     ctx.font = '18px "Noto Sans SC", sans-serif';
     ctx.fillStyle = '#555';
-    const ingredientsPerColumn = Math.ceil(variant.fullIngredients.length / 2);
+    const ingredientsPerColumn = Math.ceil(ingredientCount / 2);
     variant.fullIngredients.forEach((ing, idx) => {
       const col = Math.floor(idx / ingredientsPerColumn);
       const row = idx % ingredientsPerColumn;
       const x = 80 + col * 320;
-      const y = 260 + row * 36;
+      const y = currentY + row * 36;
       ctx.fillText(`• ${ing}`, x, y);
     });
 
-    const changesY = 260 + Math.min(ingredientsPerColumn, variant.fullIngredients.length) * 36 + 40;
+    currentY += Math.min(ingredientsPerColumn, ingredientCount) * 36 + 30;
+
     ctx.font = 'bold 24px "Noto Sans SC", sans-serif';
     ctx.fillStyle = '#444';
-    ctx.fillText('✨ 创意改动', 80, changesY);
+    ctx.fillText('✨ 创意改动说明', 80, currentY);
+    currentY += 40;
 
     ctx.font = '16px "Noto Sans SC", sans-serif';
     ctx.fillStyle = '#666';
     variant.ingredientChanges.forEach((change, idx) => {
-      const y = changesY + 40 + idx * 70;
-      if (y > height - 120) return;
+      const y = currentY + idx * 70;
+      if (y > height - 100) return;
       
-      ctx.fillStyle = '#888';
-      ctx.fillText(`❌ ${change.original}`, 80, y);
-      ctx.fillStyle = '#4CAF50';
-      ctx.fillText(`✅ ${change.replacement}`, 80, y + 26);
-      ctx.fillStyle = '#888';
+      ctx.fillStyle = '#e53935';
+      ctx.fillText(`❌ 替换: ${change.original}`, 80, y);
+      ctx.fillStyle = '#43a047';
+      ctx.fillText(`✅ 改为: ${change.replacement}`, 80, y + 28);
+      ctx.fillStyle = '#666';
       ctx.font = '14px "Noto Sans SC", sans-serif';
-      ctx.fillText(`   ${change.reason}`, 80, y + 50);
+      ctx.fillText(`   💡 ${change.reason}`, 80, y + 52);
       ctx.font = '16px "Noto Sans SC", sans-serif';
     });
+
+    currentY += changeCount * 70 + 20;
+
+    if (currentY < height - 120) {
+      ctx.font = 'italic 16px "Noto Sans SC", sans-serif';
+      ctx.fillStyle = '#888';
+      ctx.textAlign = 'left';
+      const words = variant.description.split('');
+      let line = '';
+      let lineY = currentY;
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > 640 && i > 0) {
+          ctx.fillText(line, 80, lineY);
+          line = words[i];
+          lineY += 24;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, 80, lineY);
+    }
 
     ctx.font = '16px "Noto Sans SC", sans-serif';
     ctx.fillStyle = '#999';
     ctx.textAlign = 'center';
-    ctx.fillText('🍳 AI 菜谱变形记 - 让家常菜变有趣', width / 2, height - 70);
+    const dateStr = new Date().toLocaleDateString('zh-CN');
+    ctx.fillText(`🍳 AI 菜谱变形记 · 生成于 ${dateStr}`, width / 2, height - 50);
 
     const dataUrl = canvas.toDataURL('image/png');
     setImageUrl(dataUrl);

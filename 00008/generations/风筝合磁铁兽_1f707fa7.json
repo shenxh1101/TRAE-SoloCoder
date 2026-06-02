@@ -1,0 +1,22 @@
+{
+  "id": "1f707fa7-0341-4962-bea1-cad36eed3773",
+  "name": "风筝合磁铁兽",
+  "scientific_name": "风筝磁铁us imaginarius",
+  "habitat": "栖息于风筝与磁铁交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了风筝的优雅形态与磁铁的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用风筝的特性进行伪装，同时以磁铁的规律进行迁徙",
+  "keywords": [
+    "风筝",
+    "磁铁"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "风筝",
+    "keyword2": "磁铁",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.959141"
+}

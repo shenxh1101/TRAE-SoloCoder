@@ -1,0 +1,22 @@
+{
+  "id": "cbc2bf86-28c3-4826-9128-3eacc6c2a8ab",
+  "name": "仙人掌合气球兽",
+  "scientific_name": "仙人掌气球us imaginarius",
+  "habitat": "栖息于仙人掌与气球交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了仙人掌的优雅形态与气球的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用仙人掌的特性进行伪装，同时以气球的规律进行迁徙",
+  "keywords": [
+    "仙人掌",
+    "气球"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "仙人掌",
+    "keyword2": "气球",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T13:59:26.814155"
+}

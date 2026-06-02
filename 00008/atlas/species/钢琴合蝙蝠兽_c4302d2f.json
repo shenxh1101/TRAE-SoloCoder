@@ -1,0 +1,22 @@
+{
+  "id": "c4302d2f-743a-4a01-b817-4b788f2d508c",
+  "name": "钢琴合蝙蝠兽",
+  "scientific_name": "钢琴蝙蝠us imaginarius",
+  "habitat": "栖息于钢琴与蝙蝠交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了钢琴的优雅形态与蝙蝠的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用钢琴的特性进行伪装，同时以蝙蝠的规律进行迁徙",
+  "keywords": [
+    "钢琴",
+    "蝙蝠"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "钢琴",
+    "keyword2": "蝙蝠",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T13:59:26.814543"
+}

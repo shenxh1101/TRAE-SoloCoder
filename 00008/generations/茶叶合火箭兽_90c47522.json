@@ -1,0 +1,22 @@
+{
+  "id": "90c47522-1daf-4c59-8f76-b526f1ad8df5",
+  "name": "茶叶合火箭兽",
+  "scientific_name": "茶叶火箭us imaginarius",
+  "habitat": "栖息于茶叶与火箭交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了茶叶的优雅形态与火箭的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用茶叶的特性进行伪装，同时以火箭的规律进行迁徙",
+  "keywords": [
+    "茶叶",
+    "火箭"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "茶叶",
+    "keyword2": "火箭",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.959274"
+}

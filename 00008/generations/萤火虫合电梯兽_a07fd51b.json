@@ -1,0 +1,26 @@
+{
+  "id": "a07fd51b-ae15-42ba-8fcc-62127b180020",
+  "name": "萤火虫合电梯兽",
+  "scientific_name": "萤火虫电梯us imaginarius",
+  "habitat": "栖息于萤火虫与电梯交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了萤火虫的优雅形态与电梯的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用萤火虫的特性进行伪装，同时以电梯的规律进行迁徙",
+  "keywords": [
+    "萤火虫",
+    "电梯"
+  ],
+  "niche_score": {
+    "predator": 0.8,
+    "herbivore": 0.1,
+    "parasite": 0.1
+  },
+  "generation_params": {
+    "keyword1": "萤火虫",
+    "keyword2": "电梯",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": 42,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:14:32.166591"
+}

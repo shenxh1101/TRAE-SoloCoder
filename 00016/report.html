@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💩 代码屎山吐槽报告</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .file-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 3px solid #e9ecef;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #495057;
+        }
+        .score-section {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .score {
+            font-size: 5em;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        .score-label {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        .metaphor {
+            font-size: 1.5em;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 30px;
+            display: inline-block;
+        }
+        .section {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .overall-roast {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #8b4513;
+        }
+        .roast-list {
+            list-style: none;
+        }
+        .roast-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        .roast-item:hover {
+            transform: translateX(5px);
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .metric-label {
+            color: #495057;
+            font-size: 0.9em;
+        }
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+        .suggestion-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        .suggestion-problem {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+        .suggestion-text {
+            color: #388e3c;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .badge-high { background: #ff4444; color: white; }
+        .badge-medium { background: #ffbb33; color: #333; }
+        .badge-low { background: #00C851; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💩 代码屎山吐槽机</h1>
+            <p>专业吐槽，童叟无欺</p>
+        </div>
+        
+        <div class="file-info">
+            <p><strong>📁 文件：</strong>test_bad_code.py</p>
+            <p><strong>💻 语言：</strong>python</p>
+            <p><strong>📝 总行数：</strong>117 行</p>
+            <p><strong>🎭 吐槽风格：</strong>⚔️ 战争现场</p>
+        </div>
+        
+        <div class="score-section">
+            <div class="score">🌟 80/100</div>
+            <div class="score-label">代码质量评分</div>
+            <div class="metaphor">🏰 皇家园林</div>
+        </div>
+        
+        <div class="section">
+            <h2>🔥 总吐槽</h2>
+            <div class="overall-roast">
+                ✨ 这份代码质量还不错，继续保持！（但别骄傲，我下次会挑出毛病的）
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>💢 具体槽点</h2>
+            <ul class="roast-list">
+                <li class="roast-item">🔴 发现 6 处重复代码片段 - 看来战术只有一种啊！📋 全军覆没都不带改的。</li><li class="roast-item">🟢 积压了 11 个待办事项 - 这重复率比阅兵式还整齐！🎖️ 正步走得真标准。</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>📊 指标一览</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">📏 最长函数</div>
+                    <div class="metric-value">38 行 (very_long_function)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">🎁 最深嵌套</div>
+                    <div class="metric-value">1 层</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">🧬 重复代码</div>
+                    <div class="metric-value">6 处</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">📝 注释率</div>
+                    <div class="metric-value">14.53%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">🔧 函数数量</div>
+                    <div class="metric-value">4 个</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">✏️  超长行</div>
+                    <div class="metric-value">1 行</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>💡 重构建议 TOP 3</h2>
+            
+        <div class="suggestion-item">
+            <div class="suggestion-problem">🎯 发现 6 处重复代码片段 <span class="badge badge-high">HIGH</span></div>
+            <div class="suggestion-text">💡 建议：创建统一的配置或常量管理</div>
+        </div>
+        
+        <div class="suggestion-item">
+            <div class="suggestion-problem">🎯 积压了 11 个待办事项 <span class="badge badge-low">LOW</span></div>
+            <div class="suggestion-text">💡 建议：把TODO分配给具体的人和截止日期</div>
+        </div>
+        
+        <div class="suggestion-item">
+            <div class="suggestion-problem">🎯 代码整体需要优化 <span class="badge badge-medium">MEDIUM</span></div>
+            <div class="suggestion-text">💡 建议：考虑使用静态分析工具定期检查代码质量</div>
+        </div>
+        
+        </div>
+        
+        <div class="footer">
+            <p>🤖 本报告由代码屎山吐槽机自动生成 | 2026-06-02 15:27:59</p>
+            <p>⚠️ 吐槽仅供娱乐，重构还需谨慎</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ 代码屎山对比报告</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .vs-badge {
+            display: inline-block;
+            background: white;
+            color: #ff6b6b;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #e9ecef;
+        }
+        .file-column {
+            padding: 20px;
+            background: white;
+        }
+        .file-title {
+            text-align: center;
+            font-size: 1.1em;
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .score-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        .score-box.file1 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        .score-box.file2 {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        .score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #495057;
+        }
+        .metaphor {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .roast-snippet {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85em;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+        .diff-section {
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .diff-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .diff-summary {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .diff-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .diff-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .diff-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .diff-value.positive { color: #81c784; }
+        .diff-value.negative { color: #ff8a80; }
+        .diff-value.neutral { color: white; }
+        .focus-change {
+            padding: 25px 30px;
+            background: #fff3e0;
+        }
+        .focus-change h2 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+        .focus-list {
+            list-style: none;
+        }
+        .focus-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+        }
+        .focus-item.good { background: #c8e6c9; color: #2e7d32; }
+        .focus-item.bad { background: #ffcdd2; color: #c62828; }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚔️ 代码屎山大对决</h1>
+            <div class="vs-badge">VS</div>
+            <p style="margin-top: 15px; opacity: 0.9;">看看哪份代码更烂！</p>
+        </div>
+        
+        <div class="comparison-grid">
+            <div class="file-column">
+                <div class="file-title">📁 test_bad_code.py</div>
+                <div class="score-box file1">
+                    <div class="score">55/100</div>
+                    <div class="metaphor">🌿 路边公园</div>
+                </div>
+                <div class="roast-snippet">
+                    💬 这代码比公司组织架构还乱！📊 找个变量像走流程一样难。...
+                </div>
+            </div>
+            <div class="file-column">
+                <div class="file-title">📁 test_better_code.py</div>
+                <div class="score-box file2">
+                    <div class="score">100/100</div>
+                    <div class="metaphor">✨ 米其林三星厨房</div>
+                </div>
+                <div class="roast-snippet">
+                    💬 ✨ 这份代码质量还不错，继续保持！（但别骄傲，我下次会挑出毛病的）...
+                </div>
+            </div>
+        </div>
+        
+        <div class="diff-section">
+            <h2>📊 变化统计</h2>
+            <div class="diff-summary">📈 分数变化: +45</div>
+            <div class="diff-grid">
+                
+        <div class="diff-item">
+            <div class="diff-label">总行数</div>
+            <div class="diff-value positive">-81 (-69.23%)</div>
+        </div>
+        
+                
+        <div class="diff-item">
+            <div class="diff-label">最长函数</div>
+            <div class="diff-value positive">-27</div>
+        </div>
+        
+                
+        <div class="diff-item">
+            <div class="diff-label">最深嵌套</div>
+            <div class="diff-value positive">-7</div>
+        </div>
+        
+                
+        <div class="diff-item">
+            <div class="diff-label">重复代码</div>
+            <div class="diff-value positive">-6</div>
+        </div>
+        
+                
+        <div class="diff-item">
+            <div class="diff-label">函数数量</div>
+            <div class="diff-value neutral">0</div>
+        </div>
+        
+                
+        <div class="diff-item">
+            <div class="diff-label">TODO数量</div>
+            <div class="diff-value positive">-11</div>
+        </div>
+        
+            </div>
+        </div>
+        
+        <div class="focus-change">
+            <h2>🎯 吐槽焦点变化</h2>
+            <ul class="focus-list">
+                <li class="focus-item good">🎉 修复问题：duplicate_code</li>
+<li class="focus-item good">🎉 修复问题：deep_nesting</li>
+<li class="focus-item good">🎉 修复问题：many_todos</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>🤖 本报告由代码屎山吐槽机自动生成 | 2026-06-02 15:28:41</p>
+            <p>⚔️ 没有最烂，只有更烂</p>
+        </div>
+    </div>
+</body>
+</html>

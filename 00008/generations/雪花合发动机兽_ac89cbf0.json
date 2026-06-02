@@ -1,0 +1,22 @@
+{
+  "id": "ac89cbf0-a0ca-4e17-9fa2-c4696d7398c3",
+  "name": "雪花合发动机兽",
+  "scientific_name": "雪花发动机us imaginarius",
+  "habitat": "栖息于雪花与发动机交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了雪花的优雅形态与发动机的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用雪花的特性进行伪装，同时以发动机的规律进行迁徙",
+  "keywords": [
+    "雪花",
+    "发动机"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "雪花",
+    "keyword2": "发动机",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.958841"
+}

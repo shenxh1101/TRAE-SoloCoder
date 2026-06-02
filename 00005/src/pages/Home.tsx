@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Scene, type GlWithRefs } from '@/components/Scene';
 import { Toolbar } from '@/components/Toolbar';
 import { ImageViewer } from '@/components/ImageViewer';
+import '@/utils/test-large-config';
 
 export default function Home() {
   const [gl, setGl] = useState<GlWithRefs | null>(null);

@@ -1,0 +1,26 @@
+{
+  "id": "d7c69862-019f-4c96-90d5-d488d82e831f",
+  "name": "水母合时钟兽",
+  "scientific_name": "水母时钟us imaginarius",
+  "habitat": "栖息于水母与时钟交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了水母的优雅形态与时钟的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用水母的特性进行伪装，同时以时钟的规律进行迁徙，作为顶级捕食者，拥有敏锐的夜视能力和闪电般的突袭速度。",
+  "keywords": [
+    "水母",
+    "时钟"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "水母",
+    "keyword2": "时钟",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": {
+      "predator": 0.8,
+      "herbivore": 0.09999999999999998,
+      "parasite": 0.09999999999999998
+    }
+  },
+  "created_at": "2026-06-02T13:59:20.142988"
+}

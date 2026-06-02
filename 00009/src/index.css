@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: 'Crimson Pro', serif;
+    line-height: 1.6;
+    font-weight: 400;
+    color: #2c1810;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1b3d 0%, #0f1025 50%, #1a1b3d 100%);
+    background-attachment: fixed;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+@layer components {
+  .parchment-bg {
+    background: linear-gradient(135deg, #f5e6c8 0%, #e8d5a8 50%, #f5e6c8 100%);
+    position: relative;
+  }
+
+  .parchment-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.08;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .corner-decoration {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #d4a84b;
+    opacity: 0.6;
+  }
+
+  .corner-decoration.top-left {
+    top: 12px;
+    left: 12px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .corner-decoration.top-right {
+    top: 12px;
+    right: 12px;
+    border-left: none;
+    border-bottom: none;
+  }
+
+  .corner-decoration.bottom-left {
+    bottom: 12px;
+    left: 12px;
+    border-right: none;
+    border-top: none;
+  }
+
+  .corner-decoration.bottom-right {
+    bottom: 12px;
+    right: 12px;
+    border-left: none;
+    border-top: none;
+  }
+
+  .vintage-border {
+    border: 1px solid rgba(212, 168, 75, 0.4);
+    box-shadow: 
+      inset 0 0 30px rgba(44, 24, 16, 0.1),
+      0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .choice-btn {
+    @apply relative overflow-hidden transition-all duration-300;
+    @apply border-2 font-semibold py-4 px-6 rounded-lg;
+    @apply hover:translate-y-[-2px] active:translate-y-[1px];
+  }
+
+  .choice-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .choice-btn:hover::after {
+    opacity: 1;
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: #2c1810;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .glass-toolbar {
+    background: rgba(26, 27, 61, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 168, 75, 0.3);
+  }
+
+  .tree-node {
+    transition: all 0.3s ease;
+  }
+
+  .tree-node:hover {
+    filter: brightness(1.2);
+  }
+
+  .tree-node.current {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  .tree-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 1s ease-out forwards;
+  }
+
+  @keyframes drawLine {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@layer utilities {
+  .text-shadow-gold {
+    text-shadow: 0 0 10px rgba(212, 168, 75, 0.5);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(26, 27, 61, 0.3);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(212, 168, 75, 0.5);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 168, 75, 0.7);
+  }
+}

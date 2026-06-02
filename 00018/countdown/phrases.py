@@ -1,0 +1,205 @@
+import random
+
+PHRASES = {
+    "suspense": {
+        "openings": [
+            "暗流涌动",
+            "风暴将至",
+            "帷幕即将拉开",
+            "未知正在逼近",
+            "沉默之后是惊雷",
+            "隐秘的力量正在觉醒",
+            "迷雾深处",
+            "地平线上的暗影",
+            "风眼之中",
+            "黎明前的最深处",
+        ],
+        "transitions": [
+            "一切即将改变",
+            "真相浮出水面",
+            "线索正在汇聚",
+            "拼图即将完整",
+            "倒计时不会停下",
+            "齿轮已经开始转动",
+            "命运的指针在移动",
+            "最后一块碎片就位",
+            "暗号已发出",
+            "信号已锁定",
+        ],
+        "closings": [
+            "谜底即将揭晓",
+            "你准备好见证了吗",
+            "答案就在前方",
+            "等待终结",
+            "揭晓的时刻近了",
+            "当最后一块遮布落下",
+            "悬念不会永远悬而未决",
+            "真相只差一步",
+            "见证的那一刻正在到来",
+            "光明即将刺破黑暗",
+        ],
+        "date_phrases": [
+            "还有{days}天",
+            "倒数{days}天",
+            "{days}天后",
+            "距揭晓仅剩{days}天",
+            "第{days}天倒数",
+            "还剩{days}天",
+            "倒计时{days}天",
+            "当{days}天归零",
+            "T-{days}天",
+        ],
+        "keyword_templates": [
+            "还有{days}天，{kw1}背后的{kw2}即将{kw3}",
+            "倒数{days}天——{kw1}与{kw2}的{kw3}即将上演",
+            "{days}天后，{kw1}将用{kw2}{kw3}",
+            "距揭晓仅剩{days}天，{kw1}暗藏{kw2}，{kw3}在即",
+            "倒计时{days}天，{kw1}的{kw2}即将{kw3}",
+            "还有{days}天，{kw2}会在{kw1}中{kw3}",
+            "{days}天后，当{kw1}遇见{kw2}，{kw3}将无法阻挡",
+            "{kw1}即将{kw3}，{kw2}只差{days}天",
+            "{kw1}已就位，{kw2}蓄势待发，{kw3}倒计时{days}天",
+            "距{kw1}发布还有{days}天，{kw2}升级{kw3}在即",
+        ],
+    },
+    "tech": {
+        "openings": [
+            "算力觉醒",
+            "架构革新",
+            "性能突破边界",
+            "底层逻辑重写",
+            "算法跃迁",
+            "芯片之心跳动",
+            "数据洪流汇聚",
+            "系统即将升级",
+            "参数已就绪",
+            "引擎预热完毕",
+        ],
+        "transitions": [
+            "重新定义行业标准",
+            "突破技术天花板",
+            "参数超越想象",
+            "性能指标刷新纪录",
+            "架构从不妥协",
+            "代码在沉默中爆发",
+            "每个像素都在进化",
+            "帧率即将翻倍",
+            "延迟归零的瞬间",
+            "算力即将满格",
+        ],
+        "closings": [
+            "以技术之名",
+            "代码改变世界",
+            "极致从不需要解释",
+            "性能即正义",
+            "未来由代码书写",
+            "这才是下一代",
+            "用数据说话",
+            "技术无止境",
+            "标准由我们定义",
+            "领先不止一步",
+        ],
+        "date_phrases": [
+            "还有{days}天",
+            "倒数{days}天",
+            "{days}天后",
+            "距发布仅剩{days}天",
+            "T-{days}天",
+            "Launch-{days}",
+            "还剩{days}天",
+            "倒计时{days}天",
+            "距上线{days}天",
+        ],
+        "keyword_templates": [
+            "还有{days}天，{kw1}搭载{kw2}实现{kw3}",
+            "倒数{days}天——{kw1}×{kw2}={kw3}",
+            "{days}天后，{kw1}以{kw2}{kw3}",
+            "距发布仅剩{days}天，{kw1}通过{kw2}完成{kw3}",
+            "T-{days}：{kw2}驱动{kw1}，{kw3}即将上线",
+            "还有{days}天，{kw1}的{kw2}将{kw3}",
+            "{kw1}+{kw2}={kw3}，倒计时{days}天",
+            "倒计时{days}天，{kw2}赋能{kw1}，{kw3}在即",
+            "{kw1}架构升级，{kw2}性能突破，{kw3}倒计时{days}天",
+            "距{kw1}发布{days}天，{kw2}算力觉醒，{kw3}一触即发",
+        ],
+    },
+    "emotional": {
+        "openings": [
+            "那些年追逐的梦",
+            "从起点到此刻",
+            "一路走来的坚持",
+            "心中那团火从未熄灭",
+            "因为热爱",
+            "走过漫长等待",
+            "每一步都是故事",
+            "远方的光越来越近",
+            "黎明前最深的夜",
+            "那些不曾放弃的瞬间",
+        ],
+        "transitions": [
+            "每一步都算数",
+            "因热爱而坚持",
+            "所有等待都值得",
+            "梦想不负赶路人",
+            "时光不会辜负认真的人",
+            "我们一直都在",
+            "初心从未改变",
+            "风雨中依然前行",
+            "陪伴是最长的告白",
+            "每个日夜都在靠近",
+        ],
+        "closings": [
+            "与你同行",
+            "因为有你",
+            "感恩每一次期待",
+            "我们终将相遇",
+            "一起迎接那一天",
+            "这一路感谢有你",
+            "最好的尚未到来",
+            "故事还在继续",
+            "未完待续",
+            "下一个篇章，我们一起书写",
+        ],
+        "date_phrases": [
+            "还有{days}天",
+            "倒数{days}天",
+            "{days}天后",
+            "距相见仅剩{days}天",
+            "第{days}天倒数",
+            "还剩{days}天",
+            "倒计时{days}天",
+            "再等{days}天",
+            "等待{days}天",
+        ],
+        "keyword_templates": [
+            "还有{days}天，带着{kw1}，用{kw2}去{kw3}",
+            "倒数{days}天——{kw1}、{kw2}与{kw3}的旅程",
+            "{days}天后，{kw1}因{kw2}而{kw3}",
+            "距相见仅剩{days}天，{kw1}是{kw2}最好的{kw3}",
+            "还有{days}天，为{kw1}{kw3}，{kw2}从未缺席",
+            "倒计时{days}天，{kw1}中的{kw2}终将{kw3}",
+            "{kw1}引领{kw2}，{kw3}就在{days}天后",
+            "因为{kw2}，{kw1}终将{kw3}——还有{days}天",
+            "{kw1}见证{kw2}，{kw3}相伴{days}天",
+            "距{kw1}见面还有{days}天，{kw2}相伴，{kw3}可期",
+        ],
+    },
+}
+
+
+def get_random_phrase(style: str, category: str) -> str:
+    phrases = PHRASES.get(style, {}).get(category, [])
+    if not phrases:
+        return ""
+    return random.choice(phrases)
+
+
+def get_random_combination(style: str) -> tuple:
+    opening = get_random_phrase(style, "openings")
+    transition = get_random_phrase(style, "transitions")
+    closing = get_random_phrase(style, "closings")
+    return opening, transition, closing
+
+
+def get_all_styles() -> list:
+    return list(PHRASES.keys())

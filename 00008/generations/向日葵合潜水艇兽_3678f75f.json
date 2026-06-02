@@ -1,0 +1,22 @@
+{
+  "id": "3678f75f-2a0f-46aa-aceb-f06aa778ebbc",
+  "name": "向日葵合潜水艇兽",
+  "scientific_name": "向日葵潜水艇us imaginarius",
+  "habitat": "栖息于向日葵与潜水艇交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了向日葵的优雅形态与潜水艇的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用向日葵的特性进行伪装，同时以潜水艇的规律进行迁徙",
+  "keywords": [
+    "向日葵",
+    "潜水艇"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "向日葵",
+    "keyword2": "潜水艇",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.959535"
+}

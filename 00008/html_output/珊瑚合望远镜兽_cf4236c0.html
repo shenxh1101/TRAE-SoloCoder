@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>珊瑚合望远镜兽 - 物种卡片</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: linear-gradient(145deg, #f5f0e6 0%, #e8dfd0 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            border: 3px solid #8b7355;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+            color: #f5f0e6;
+            padding: 30px;
+            text-align: center;
+        }
+        .species-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .scientific-name {
+            font-style: italic;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .keywords {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .keyword-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 15px;
+            margin: 0 5px;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 1.2em;
+            color: #2d5016;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #8b7355;
+            padding-bottom: 5px;
+        }
+        .section-content {
+            color: #3d3d3d;
+            line-height: 1.8;
+            font-size: 1em;
+        }
+        .niche-score {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        .niche-item {
+            text-align: center;
+            flex: 1;
+            padding: 10px;
+        }
+        .niche-bar {
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .niche-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .predator .niche-fill { background: #c0392b; }
+        .herbivore .niche-fill { background: #27ae60; }
+        .parasite .niche-fill { background: #8e44ad; }
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: #8b7355;
+            color: #f5f0e6;
+            font-size: 0.85em;
+        }
+        .id {
+            font-family: monospace;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <div class="species-name">珊瑚合望远镜兽</div>
+            <div class="scientific-name">珊瑚望远镜us imaginarius</div>
+            <div class="keywords">
+                
+                <span class="keyword-tag">珊瑚</span>
+                
+                <span class="keyword-tag">望远镜</span>
+                
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="section">
+                <div class="section-title">栖息地</div>
+                <div class="section-content">栖息于珊瑚与望远镜交汇的神秘领域，如黄昏时分的交界地带</div>
+            </div>
+            <div class="section">
+                <div class="section-title">外形描述</div>
+                <div class="section-content">体型融合了珊瑚的优雅形态与望远镜的机械质感，体表散发着微弱的荧光</div>
+            </div>
+            <div class="section">
+                <div class="section-title">独特习性</div>
+                <div class="section-content">能够利用珊瑚的特性进行伪装，同时以望远镜的规律进行迁徙</div>
+            </div>
+            
+        </div>
+        <div class="footer">
+            <div class="id">ID: cf4236c0-e228-4316-a65d-e59aa6a359d6</div>
+            <div>生成时间: 2026-06-02 14:01:11.959000</div>
+        </div>
+    </div>
+</body>
+</html>

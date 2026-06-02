@@ -1,0 +1,22 @@
+{
+  "id": "cf4236c0-e228-4316-a65d-e59aa6a359d6",
+  "name": "珊瑚合望远镜兽",
+  "scientific_name": "珊瑚望远镜us imaginarius",
+  "habitat": "栖息于珊瑚与望远镜交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了珊瑚的优雅形态与望远镜的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用珊瑚的特性进行伪装，同时以望远镜的规律进行迁徙",
+  "keywords": [
+    "珊瑚",
+    "望远镜"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "珊瑚",
+    "keyword2": "望远镜",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.959000"
+}

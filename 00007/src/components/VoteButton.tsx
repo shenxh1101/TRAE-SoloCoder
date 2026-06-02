@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { VariantType } from '../types';
 
 interface VoteButtonProps {
   variantId: string;
   upvotes: number;
   downvotes: number;
   userVote: 'up' | 'down' | null;
-  onVote: (variantId: string, direction: 'up' | 'down') => void;
+  onVote: (variantId: string, direction: 'up' | 'down', variantType?: VariantType) => void;
 }
 
 export function VoteButton({ variantId, upvotes, downvotes, userVote, onVote }: VoteButtonProps) {

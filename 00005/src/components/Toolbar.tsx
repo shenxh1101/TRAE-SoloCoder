@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
-import { Upload, Camera, Save, FolderOpen, RotateCcw, Moon, Sun, Sparkles } from 'lucide-react';
+import { Upload, Camera, Save, FolderOpen, RotateCcw, Moon, Sun, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
 import { useSceneStore } from '../store/useSceneStore';
 import { useScreenshot } from '../hooks/useScreenshot';
 import { fileToBase64, downloadConfig, deserializeConfig } from '../utils/config';
@@ -13,6 +13,8 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const configInputRef = useRef<HTMLInputElement>(null);
   const [showReplaceHint, setShowReplaceHint] = useState(false);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   const lucidity = useSceneStore((state) => state.config.lucidity);
   const selectedFragmentId = useSceneStore((state) => state.selectedFragmentId);
@@ -21,7 +23,6 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
   const updateFragmentImage = useSceneStore((state) => state.updateFragmentImage);
   const loadConfig = useSceneStore((state) => state.loadConfig);
   const resetToDefault = useSceneStore((state) => state.resetToDefault);
-  const closeViewer = useSceneStore((state) => state.closeViewer);
 
   const takeScreenshot = useScreenshot(gl);
 
@@ -40,10 +41,16 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
       if (!file || !selectedFragmentId) return;
 
       try {
+        setLoadingMessage(`正在处理图片: ${file.name}...`);
         const base64 = await fileToBase64(file);
         updateFragmentImage(selectedFragmentId, base64, file.name);
+        setLoadingMessage('图片更新成功！');
+        setTimeout(() => setLoadingMessage(null), 2000);
       } catch (err) {
         console.error('Failed to read file:', err);
+        const errorMsg = err instanceof Error ? err.message : '文件读取失败';
+        setLoadingMessage(`❌ ${errorMsg}`);
+        setTimeout(() => setLoadingMessage(null), 4000);
       }
 
       e.target.value = '';
@@ -52,7 +59,16 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
   );
 
   const handleSaveConfig = useCallback(() => {
-    downloadConfig(config);
+    try {
+      setLoadingMessage('正在生成配置文件...');
+      downloadConfig(config);
+      setTimeout(() => setLoadingMessage(null), 2000);
+    } catch (err) {
+      console.error('保存失败:', err);
+      const errorMsg = err instanceof Error ? err.message : '保存失败';
+      setLoadingMessage(`❌ ${errorMsg}`);
+      setTimeout(() => setLoadingMessage(null), 4000);
+    }
   }, [config]);
 
   const handleLoadConfig = useCallback(() => {
@@ -60,21 +76,54 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
   }, []);
 
   const handleConfigFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result as string;
-        const loadedConfig = deserializeConfig(content);
-        if (loadedConfig) {
-          loadConfig(loadedConfig);
-        } else {
-          alert('无效的配置文件');
+      const fileSizeMB = file.size / (1024 * 1024);
+      if (fileSizeMB > 30) {
+        alert(`配置文件过大 (${fileSizeMB.toFixed(1)}MB)，最大支持 30MB`);
+        e.target.value = '';
+        return;
+      }
+
+      setIsLoadingConfig(true);
+      setLoadingMessage(`正在加载配置 (${fileSizeMB.toFixed(1)}MB)...`);
+
+      try {
+        const content = await file.text();
+        const result = await deserializeConfig(content);
+
+        if (result.error) {
+          setLoadingMessage(`❌ ${result.error}`);
+          setTimeout(() => setLoadingMessage(null), 5000);
+          return;
         }
-      };
-      reader.readAsText(file);
+
+        if (result.warning) {
+          const showWarning = confirm(`⚠️  ${result.warning}\n\n是否继续加载？`);
+          if (!showWarning) {
+            setLoadingMessage('加载已取消');
+            setTimeout(() => setLoadingMessage(null), 2000);
+            e.target.value = '';
+            return;
+          }
+        }
+
+        if (result.config) {
+          loadConfig(result.config);
+          setLoadingMessage(`✅ 配置加载成功！(${result.totalSizeMB.toFixed(1)}MB)`);
+          setTimeout(() => setLoadingMessage(null), 3000);
+        }
+      } catch (err) {
+        console.error('加载配置失败:', err);
+        const errorMsg = err instanceof Error ? err.message : '加载失败';
+        setLoadingMessage(`❌ ${errorMsg}`);
+        setTimeout(() => setLoadingMessage(null), 5000);
+      } finally {
+        setIsLoadingConfig(false);
+      }
+
       e.target.value = '';
     },
     [loadConfig]
@@ -143,6 +192,7 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
 
             <button
               onClick={takeScreenshot}
+              aria-label="截图"
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/30 transition-all duration-300"
             >
               <Camera className="w-4 h-4" />
@@ -159,9 +209,15 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
 
             <button
               onClick={handleLoadConfig}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/30 transition-all duration-300"
+              aria-label="加载配置"
+              disabled={isLoadingConfig}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/10 hover:border-white/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FolderOpen className="w-4 h-4" />
+              {isLoadingConfig ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <FolderOpen className="w-4 h-4" />
+              )}
               <span className="hidden sm:inline">加载</span>
             </button>
 
@@ -178,6 +234,24 @@ export const Toolbar = ({ gl }: ToolbarProps) => {
         {showReplaceHint && (
           <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 px-5 py-3 bg-gradient-to-r from-purple-500/90 to-cyan-500/90 backdrop-blur-xl rounded-xl text-white text-sm font-medium shadow-2xl animate-pulse">
             请先点击一个梦境碎片，再上传图片替换
+          </div>
+        )}
+
+        {loadingMessage && (
+          <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 px-5 py-3 backdrop-blur-xl rounded-xl text-sm font-medium shadow-2xl transition-all duration-300 ${
+            loadingMessage.includes('❌') 
+              ? 'bg-gradient-to-r from-red-500/90 to-orange-500/90 text-white'
+              : loadingMessage.includes('✅')
+              ? 'bg-gradient-to-r from-green-500/90 to-emerald-500/90 text-white'
+              : 'bg-gradient-to-r from-purple-500/90 to-cyan-500/90 text-white'
+          }`}>
+            <div className="flex items-center gap-2">
+              {loadingMessage.includes('正在') && !loadingMessage.includes('❌') && !loadingMessage.includes('✅') && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              )}
+              {loadingMessage.includes('❌') && <AlertTriangle className="w-4 h-4" />}
+              <span>{loadingMessage.replace(/^[❌✅]\s*/, '')}</span>
+            </div>
           </div>
         )}
       </div>

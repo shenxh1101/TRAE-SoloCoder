@@ -1,34 +1,44 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './useLocalStorage';
-import { VoteData } from '../types';
+import { VoteData, VariantType } from '../types';
 
 interface UseVotingReturn {
   getVoteData: (variantId: string) => VoteData;
-  vote: (variantId: string, direction: 'up' | 'down') => void;
-  getAllVotes: () => Record<string, VoteData>;
+  vote: (variantId: string, direction: 'up' | 'down', variantType?: VariantType) => void;
+  getAllVotes: () => Record<string, VoteData & { type?: VariantType }>;
 }
 
 export function useVoting(): UseVotingReturn {
-  const [votes, setVotes] = useLocalStorage<Record<string, VoteData>>('recipe_votes', {});
+  const [votes, setVotes] = useLocalStorage<Record<string, VoteData & { type?: VariantType }>>('recipe_votes', {});
   const [voteHistory, setVoteHistory] = useLocalStorage<Record<string, 'up' | 'down'>>('vote_history', {});
 
   const getVoteData = useCallback((variantId: string): VoteData => {
-    return votes[variantId] || {
+    const stored = votes[variantId];
+    if (stored) {
+      return {
+        variantId: stored.variantId,
+        upvotes: stored.upvotes,
+        downvotes: stored.downvotes,
+        userVote: stored.userVote
+      };
+    }
+    return {
       variantId,
-      upvotes: Math.floor(Math.random() * 50) + 5,
-      downvotes: Math.floor(Math.random() * 10),
+      upvotes: 0,
+      downvotes: 0,
       userVote: voteHistory[variantId] || null
     };
   }, [votes, voteHistory]);
 
-  const vote = useCallback((variantId: string, direction: 'up' | 'down') => {
+  const vote = useCallback((variantId: string, direction: 'up' | 'down', variantType?: VariantType) => {
     const currentVote = voteHistory[variantId];
 
     setVotes(prev => {
       const current = prev[variantId] || {
         variantId,
-        upvotes: Math.floor(Math.random() * 50) + 5,
-        downvotes: Math.floor(Math.random() * 10),
+        type: variantType,
+        upvotes: 0,
+        downvotes: 0,
         userVote: null
       };
 
@@ -45,13 +55,16 @@ export function useVoting(): UseVotingReturn {
         if (direction === 'down') newDownvotes++;
       }
 
+      const newUserVote = currentVote === direction ? null : direction;
+
       return {
         ...prev,
         [variantId]: {
           ...current,
+          type: variantType || current.type,
           upvotes: newUpvotes,
           downvotes: newDownvotes,
-          userVote: currentVote === direction ? null : direction
+          userVote: newUserVote
         }
       };
     });

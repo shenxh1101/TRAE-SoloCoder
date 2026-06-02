@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI胡编乱造博物馆</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(233, 69, 96, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        .museum-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .artifact-name {
+            font-size: 1.8em;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255,215,0,0.3);
+        }
+
+        .artifact-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            background: rgba(233, 69, 96, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 3px solid #e94560;
+        }
+
+        .info-label {
+            color: #e94560;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+            font-size: 1em;
+        }
+
+        .effect-box {
+            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,107,107,0.1));
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+
+        .effect-label {
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .story-box {
+            background: rgba(255,255,255,0.03);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-style: italic;
+            line-height: 1.8;
+            color: #b8b8b8;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #e94560, #ff6b6b);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-like {
+            background: transparent;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+        }
+
+        .btn-like:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-like.liked {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .form-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #e94560;
+            border-color: #e94560;
+            color: white;
+        }
+
+        .curate-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .curate-item {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .curate-item-info {
+            flex: 1;
+        }
+
+        .curate-item-name {
+            color: #ffd700;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .curate-item-meta {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: #ff3838;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .likes-count {
+            display: inline-block;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .new-artifact {
+            animation: glow 2s ease-in-out;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 8px 32px rgba(255,215,0,0.4); }
+        }
+
+        .success-message {
+            background: rgba(46, 213, 115, 0.2);
+            color: #2ed573;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ AI胡编乱造博物馆</h1>
+            <p class="subtitle">探索历史上从未存在过的神奇文物</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('museum')">参观博物馆</button>
+            <button class="tab-btn" onclick="switchTab('curate')">策展人模式</button>
+        </div>
+
+        <div id="museum-tab">
+            <div class="museum-card" id="artifact-card">
+                <div class="loading" id="loading">正在抽取文物...</div>
+                <div id="artifact-content" style="display: none;">
+                    <div class="artifact-name" id="artifact-name"></div>
+                    <div class="artifact-info">
+                        <div class="info-item">
+                            <div class="info-label">📅 年代</div>
+                            <div class="info-value" id="artifact-era"></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">📍 发现地点</div>
+                            <div class="info-value" id="artifact-location"></div>
+                        </div>
+                    </div>
+                    <div class="effect-box">
+                        <div class="effect-label">✨ 神秘功效</div>
+                        <div id="artifact-effect"></div>
+                    </div>
+                    <div class="story-box" id="artifact-story"></div>
+                    <div class="button-group">
+                        <button class="btn btn-like" id="like-btn" onclick="likeArtifact()">
+                            ❤️ 点赞 <span class="likes-count" id="likes-count">0</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="showStoryForm()">📝 补充假故事</button>
+                        <button class="btn btn-primary" onclick="getNewArtifact()">🎲 抽取下一件</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="museum-card form-section" id="story-form">
+                <h3 style="margin-bottom: 15px; color: #ffd700;">补充一个假故事</h3>
+                <p style="margin-bottom: 15px; color: #888;">为这件文物添加你的虚构故事，AI会改写文物描述，你的版本将加入展品库！</p>
+                <textarea id="user-story" placeholder="写下你编造的离奇故事..."></textarea>
+                <div class="success-message" id="success-message">✨ 新文物已诞生！它将被未来的参观者抽到。</div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="hideStoryForm()">取消</button>
+                    <button class="btn btn-primary" onclick="submitStory()">🚀 提交并生成</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="curate-tab" style="display: none;">
+            <div class="museum-card">
+                <h2 style="margin-bottom: 20px; color: #ffd700;">📋 展品库管理</h2>
+                <p style="margin-bottom: 20px; color: #888;">浏览所有文物，删除不当内容</p>
+                <div class="curate-list" id="curate-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentArtifact = null;
+        let hasLiked = false;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'museum') {
+                document.getElementById('museum-tab').style.display = 'block';
+                document.getElementById('curate-tab').style.display = 'none';
+            } else {
+                document.getElementById('museum-tab').style.display = 'none';
+                document.getElementById('curate-tab').style.display = 'block';
+                loadCurateList();
+            }
+        }
+
+        async function getNewArtifact() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('artifact-content').style.display = 'none';
+            document.getElementById('artifact-card').classList.remove('new-artifact');
+            hideStoryForm();
+            hasLiked = false;
+            
+            try {
+                const response = await fetch('/api/random');
+                currentArtifact = await response.json();
+                displayArtifact(currentArtifact);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayArtifact(artifact) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('artifact-content').style.display = 'block';
+            
+            document.getElementById('artifact-name').textContent = artifact.name;
+            document.getElementById('artifact-era').textContent = artifact.era;
+            document.getElementById('artifact-location').textContent = artifact.location;
+            document.getElementById('artifact-effect').textContent = artifact.effect;
+            document.getElementById('artifact-story').textContent = artifact.story;
+            document.getElementById('likes-count').textContent = artifact.likes || 0;
+            
+            const likeBtn = document.getElementById('like-btn');
+            likeBtn.classList.remove('liked');
+        }
+
+        async function likeArtifact() {
+            if (!currentArtifact || hasLiked) return;
+            
+            try {
+                const response = await fetch(`/api/like/${currentArtifact.id}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    hasLiked = true;
+                    document.getElementById('likes-count').textContent = data.likes;
+                    document.getElementById('like-btn').classList.add('liked');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function showStoryForm() {
+            document.getElementById('story-form').classList.add('active');
+            document.getElementById('user-story').focus();
+        }
+
+        function hideStoryForm() {
+            document.getElementById('story-form').classList.remove('active');
+            document.getElementById('user-story').value = '';
+            document.getElementById('success-message').classList.remove('show');
+        }
+
+        async function submitStory() {
+            const story = document.getElementById('user-story').value.trim();
+            
+            if (!story) {
+                alert('请输入故事内容！');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/rewrite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: currentArtifact.id,
+                        story: story
+                    })
+                });
+                
+                const newArtifact = await response.json();
+                
+                document.getElementById('success-message').classList.add('show');
+                document.getElementById('artifact-card').classList.add('new-artifact');
+                
+                setTimeout(() => {
+                    currentArtifact = newArtifact;
+                    displayArtifact(newArtifact);
+                    hideStoryForm();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function loadCurateList() {
+            const listContainer = document.getElementById('curate-list');
+            
+            try {
+                const response = await fetch('/api/curate');
+                const artifacts = await response.json();
+                
+                if (artifacts.length === 0) {
+                    listContainer.innerHTML = '<p style="text-align: center; color: #888;">展品库为空</p>';
+                    return;
+                }
+                
+                listContainer.innerHTML = artifacts.map(artifact => `
+                    <div class="curate-item">
+                        <div class="curate-item-info">
+                            <div class="curate-item-name">${artifact.name}</div>
+                            <div class="curate-item-meta">
+                                ${artifact.era} | ${artifact.location} | ❤️ ${artifact.likes || 0}
+                                ${artifact.is_original ? '| 🏛️ 原始藏品' : '| ✨ 用户创作'}
+                            </div>
+                            <div class="curate-item-effect" style="margin-top: 8px; color: #ffd700; font-size: 0.9em;">
+                                ✨ ${artifact.effect}
+                            </div>
+                            <div class="curate-item-story" style="margin-top: 5px; color: #888; font-size: 0.85em; line-height: 1.5;">
+                                📖 ${artifact.story}
+                            </div>
+                            ${artifact.user_story ? `
+                            <div class="curate-item-user-story" style="margin-top: 5px; color: #e94560; font-size: 0.85em; font-style: italic;">
+                                💭 用户故事：${artifact.user_story}
+                            </div>
+                            ` : ''}
+                        </div>
+                        <button class="btn-delete" onclick="deleteArtifact(${artifact.id})">🗑️ 删除</button>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                listContainer.innerHTML = '<p style="text-align: center; color: #ff4757;">加载失败</p>';
+            }
+        }
+
+        async function deleteArtifact(id) {
+            if (!confirm('确定要删除这件文物吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadCurateList();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        window.onload = function() {
+            getNewArtifact();
+        };
+    </script>
+</body>
+</html>

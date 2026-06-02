@@ -5,23 +5,38 @@ import type { Fragment as FragmentType } from '../types';
 import { getGeometry, getOrbitPosition } from '../utils/geometry';
 import { useSceneStore } from '../store/useSceneStore';
 import { useWaterDropSound } from '../hooks/useAudio';
+import { createPlaceholderGradient } from '../utils/config';
 
-const blurImage = (imageSrc: string, blurAmount: number = 12): Promise<string> => {
-  return new Promise((resolve) => {
+const BLUR_TIMEOUT_MS = 10000;
+
+const blurImage = (imageSrc: string, blurAmount: number = 10): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('图片模糊处理超时'));
+    }, BLUR_TIMEOUT_MS);
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const scale = 0.25;
-      canvas.width = Math.max(1, Math.floor(img.width * scale));
-      canvas.height = Math.max(1, Math.floor(img.height * scale));
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { resolve(imageSrc); return; }
-      ctx.filter = `blur(${blurAmount}px)`;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/png'));
+      clearTimeout(timeout);
+      try {
+        const canvas = document.createElement('canvas');
+        const scale = 0.25;
+        canvas.width = Math.max(1, Math.floor(img.width * scale));
+        canvas.height = Math.max(1, Math.floor(img.height * scale));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(imageSrc); return; }
+        ctx.filter = `blur(${blurAmount}px)`;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (err) {
+        reject(err);
+      }
     };
-    img.onerror = () => resolve(imageSrc);
+    img.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error('图片加载失败'));
+    };
     img.src = imageSrc;
   });
 };
@@ -36,39 +51,127 @@ export const Fragment = ({ fragment, index }: FragmentProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const [blurredSrc, setBlurredSrc] = useState<string>('');
+  const [textureError, setTextureError] = useState(false);
 
   const selectedId = useSceneStore((state) => state.selectedFragmentId);
   const isSelected = selectedId === fragment.id;
   const isViewerOpen = useSceneStore((state) => state.isViewerOpen);
   const lucidity = useSceneStore((state) => state.config.lucidity);
+  const storeVersion = useSceneStore((state) => state.version);
   const openViewer = useSceneStore((state) => state.openViewer);
   const selectFragment = useSceneStore((state) => state.selectFragment);
+  const setLoadingProgress = useSceneStore((state) => state.setLoadingProgress);
   const playSound = useWaterDropSound();
 
   const geometry = useMemo(
     () => getGeometry(fragment.geometryType, fragment.size),
-    [fragment.geometryType, fragment.size]
+    [fragment.geometryType, fragment.size, storeVersion]
   );
 
   useEffect(() => {
     let cancelled = false;
-    blurImage(fragment.imageData, 10).then((blurred) => {
-      if (!cancelled) setBlurredSrc(blurred);
-    });
+    setTextureError(false);
+    setBlurredSrc('');
+    setLoadingProgress(fragment.id, 0);
+
+    const sizeMB = (fragment.imageData.length * 0.75) / (1024 * 1024);
+    if (sizeMB > 5) {
+      console.warn(`图片较大 (${sizeMB.toFixed(1)}MB)，正在处理中...`);
+    }
+
+    blurImage(fragment.imageData, 10)
+      .then((blurred) => {
+        if (!cancelled) {
+          setBlurredSrc(blurred);
+          setLoadingProgress(fragment.id, 100);
+        }
+      })
+      .catch((err) => {
+        console.error('模糊处理失败，使用原图:', err);
+        if (!cancelled) {
+          setBlurredSrc(fragment.imageData);
+          setLoadingProgress(fragment.id, 100);
+        }
+      });
+
     return () => { cancelled = true; };
-  }, [fragment.imageData]);
+  }, [fragment.imageData, fragment.id, setLoadingProgress, storeVersion]);
 
   const texture = useMemo(() => {
     const src = blurredSrc || fragment.imageData;
-    const tex = new THREE.TextureLoader().load(src);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.minFilter = THREE.LinearMipmapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.anisotropy = 1;
-    return tex;
-  }, [blurredSrc, fragment.imageData]);
+    const placeholderColors = ['#6366f1', '#1e1b4b'];
+    const placeholder = createPlaceholderGradient(placeholderColors[0], placeholderColors[1]);
+    
+    let loadAttempts = 0;
+    const maxAttempts = 2;
+    
+    const loadTexture = (imageSrc: string): THREE.Texture => {
+      loadAttempts++;
+      const tex = new THREE.TextureLoader().load(
+        imageSrc,
+        undefined,
+        undefined,
+        () => {
+          console.error(`[纹理] 加载失败 (${fragment.imageName})，尝试${loadAttempts}/${maxAttempts}`);
+          setTextureError(true);
+          
+          if (loadAttempts < maxAttempts) {
+            const placeholderTex = new THREE.TextureLoader().load(
+              placeholder,
+              () => {
+                console.log(`[纹理] 已替换为占位图 (${fragment.imageName})`);
+                if (meshRef.current && meshRef.current.material) {
+                  const materials = Array.isArray(meshRef.current.material)
+                    ? meshRef.current.material
+                    : [meshRef.current.material];
+                  materials.forEach((mat) => {
+                    if ('map' in mat) {
+                      (mat as any).map = placeholderTex;
+                      (mat as any).needsUpdate = true;
+                    }
+                  });
+                }
+              },
+              undefined,
+              (err) => {
+                console.error(`[纹理] 占位图也加载失败:`, err);
+              }
+            );
+            placeholderTex.colorSpace = THREE.SRGBColorSpace;
+            placeholderTex.needsUpdate = true;
+          }
+        }
+      );
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.anisotropy = 1;
+      tex.needsUpdate = true;
+      tex.flipY = false;
+      return tex;
+    };
+    
+    return loadTexture(src);
+  }, [blurredSrc, fragment.imageData, fragment.imageName, storeVersion]);
+
+  useEffect(() => {
+    texture.needsUpdate = true;
+    if (meshRef.current && meshRef.current.material) {
+      const materials = Array.isArray(meshRef.current.material)
+        ? meshRef.current.material
+        : [meshRef.current.material];
+      materials.forEach((mat) => {
+        if ('needsUpdate' in mat) {
+          (mat as THREE.Material).needsUpdate = true;
+        }
+        if ('map' in mat && (mat as any).map) {
+          (mat as any).map.needsUpdate = true;
+        }
+      });
+    }
+  }, [texture, storeVersion]);
 
   useEffect(() => {
     return () => {

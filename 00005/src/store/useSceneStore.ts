@@ -6,6 +6,8 @@ interface SceneState {
   config: SceneConfig;
   selectedFragmentId: string | null;
   isViewerOpen: boolean;
+  version: number;
+  loadingProgress: Record<string, number>;
   setLucidity: (lucidity: number) => void;
   updateFragmentImage: (id: string, imageData: string, imageName: string) => void;
   selectFragment: (id: string | null) => void;
@@ -13,16 +15,24 @@ interface SceneState {
   closeViewer: () => void;
   loadConfig: (config: SceneConfig) => void;
   resetToDefault: () => void;
+  incrementVersion: () => void;
+  setLoadingProgress: (id: string, progress: number) => void;
 }
 
 const STORAGE_KEY = 'dream-fragments-config';
 
-const loadInitialConfig = (): SceneConfig => {
+const loadInitialConfigSync = (): SceneConfig => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const parsed = deserializeConfig(stored);
-      if (parsed) return parsed;
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.fragments && Array.isArray(parsed.fragments) && typeof parsed.lucidity === 'number') {
+          return parsed as SceneConfig;
+        }
+      } catch {
+        // ignore
+      }
     }
   } catch {
     // ignore
@@ -31,7 +41,7 @@ const loadInitialConfig = (): SceneConfig => {
 };
 
 export const useSceneStore = create<SceneState>((set, get) => {
-  const initialConfig = loadInitialConfig();
+  const initialConfig = loadInitialConfigSync();
 
   const persistConfig = (config: SceneConfig) => {
     try {
@@ -45,12 +55,14 @@ export const useSceneStore = create<SceneState>((set, get) => {
     config: initialConfig,
     selectedFragmentId: null,
     isViewerOpen: false,
+    version: 0,
+    loadingProgress: {},
 
     setLucidity: (lucidity: number) => {
       set((state) => {
         const newConfig = { ...state.config, lucidity };
         persistConfig(newConfig);
-        return { config: newConfig };
+        return { config: newConfig, version: state.version + 1 };
       });
     },
 
@@ -61,7 +73,7 @@ export const useSceneStore = create<SceneState>((set, get) => {
         );
         const newConfig = { ...state.config, fragments };
         persistConfig(newConfig);
-        return { config: newConfig };
+        return { config: newConfig, version: state.version + 1 };
       });
     },
 
@@ -79,13 +91,23 @@ export const useSceneStore = create<SceneState>((set, get) => {
 
     loadConfig: (config: SceneConfig) => {
       persistConfig(config);
-      set({ config, selectedFragmentId: null, isViewerOpen: false });
+      set((state) => ({ config, selectedFragmentId: null, isViewerOpen: false, version: state.version + 1, loadingProgress: {} }));
     },
 
     resetToDefault: () => {
       const newConfig = generateDefaultConfig();
       persistConfig(newConfig);
-      set({ config: newConfig, selectedFragmentId: null, isViewerOpen: false });
+      set((state) => ({ config: newConfig, selectedFragmentId: null, isViewerOpen: false, version: state.version + 1, loadingProgress: {} }));
+    },
+
+    incrementVersion: () => {
+      set((state) => ({ version: state.version + 1 }));
+    },
+
+    setLoadingProgress: (id: string, progress: number) => {
+      set((state) => ({
+        loadingProgress: { ...state.loadingProgress, [id]: progress },
+      }));
     },
   };
 });

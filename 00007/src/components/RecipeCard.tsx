@@ -1,16 +1,16 @@
-import { RecipeVariant, VARIANT_CONFIG } from '../types';
+import { RecipeVariant, VARIANT_CONFIG, VoteData, VariantType } from '../types';
 import { VoteButton } from './VoteButton';
 import { ImageGenerator } from './ImageGenerator';
-import { VoteData } from '../types';
 
 interface RecipeCardProps {
   variant: RecipeVariant;
   index: number;
   voteData: VoteData;
-  onVote: (variantId: string, direction: 'up' | 'down') => void;
+  allergens?: string[];
+  onVote: (variantId: string, direction: 'up' | 'down', variantType?: VariantType) => void;
 }
 
-export function RecipeCard({ variant, index, voteData, onVote }: RecipeCardProps) {
+export function RecipeCard({ variant, index, voteData, allergens = [], onVote }: RecipeCardProps) {
   const config = VARIANT_CONFIG[variant.type];
 
   return (
@@ -89,9 +89,9 @@ export function RecipeCard({ variant, index, voteData, onVote }: RecipeCardProps
             upvotes={voteData.upvotes}
             downvotes={voteData.downvotes}
             userVote={voteData.userVote}
-            onVote={onVote}
+            onVote={(id, dir) => onVote(id, dir, variant.type)}
           />
-          <ImageGenerator variant={variant} />
+          <ImageGenerator variant={variant} allergens={allergens} />
         </div>
       </div>
     </div>

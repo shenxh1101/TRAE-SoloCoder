@@ -1,0 +1,22 @@
+{
+  "id": "56337522-3118-482d-b043-7be290ff6949",
+  "name": "蜗牛合霓虹灯兽",
+  "scientific_name": "蜗牛霓虹灯us imaginarius",
+  "habitat": "栖息于蜗牛与霓虹灯交汇的神秘领域，如黄昏时分的交界地带",
+  "appearance": "体型融合了蜗牛的优雅形态与霓虹灯的机械质感，体表散发着微弱的荧光",
+  "unique_behavior": "能够利用蜗牛的特性进行伪装，同时以霓虹灯的规律进行迁徙",
+  "keywords": [
+    "蜗牛",
+    "霓虹灯"
+  ],
+  "niche_score": null,
+  "generation_params": {
+    "keyword1": "蜗牛",
+    "keyword2": "霓虹灯",
+    "temperature": 0.9,
+    "max_tokens": 800,
+    "seed": null,
+    "niche_bias": null
+  },
+  "created_at": "2026-06-02T14:01:11.959405"
+}

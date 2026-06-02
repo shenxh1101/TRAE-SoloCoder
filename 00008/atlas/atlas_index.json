@@ -1,0 +1,56 @@
+{
+  "species": [
+    {
+      "id": "692dc517-e89e-49a9-8d51-3a9fb04e17b7",
+      "name": "萤火虫合电梯兽",
+      "scientific_name": "萤火虫电梯us imaginarius",
+      "keywords": [
+        "萤火虫",
+        "电梯"
+      ],
+      "primary_niche": null,
+      "created_at": "2026-06-02T13:59:06.832450",
+      "filename": "萤火虫合电梯兽_692dc517.json"
+    },
+    {
+      "id": "cbc2bf86-28c3-4826-9128-3eacc6c2a8ab",
+      "name": "仙人掌合气球兽",
+      "scientific_name": "仙人掌气球us imaginarius",
+      "keywords": [
+        "仙人掌",
+        "气球"
+      ],
+      "primary_niche": null,
+      "created_at": "2026-06-02T13:59:26.814155",
+      "filename": "仙人掌合气球兽_cbc2bf86.json"
+    },
+    {
+      "id": "c4302d2f-743a-4a01-b817-4b788f2d508c",
+      "name": "钢琴合蝙蝠兽",
+      "scientific_name": "钢琴蝙蝠us imaginarius",
+      "keywords": [
+        "钢琴",
+        "蝙蝠"
+      ],
+      "primary_niche": null,
+      "created_at": "2026-06-02T13:59:26.814543",
+      "filename": "钢琴合蝙蝠兽_c4302d2f.json"
+    },
+    {
+      "id": "4ca1d556-8742-4b9f-bcf7-7d06318dd760",
+      "name": "雪花合发动机兽",
+      "scientific_name": "雪花发动机us imaginarius",
+      "keywords": [
+        "雪花",
+        "发动机"
+      ],
+      "primary_niche": null,
+      "created_at": "2026-06-02T13:59:26.814717",
+      "filename": "雪花合发动机兽_4ca1d556.json"
+    }
+  ],
+  "metadata": {
+    "count": 4,
+    "created_at": "2026-06-02T13:59:06.833485"
+  }
+}

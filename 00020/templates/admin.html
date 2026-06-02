@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员 - AI白日梦交易市场</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><a href="{{ url_for('index') }}" class="home-link">🌙 AI白日梦交易市场</a></h1>
+            <div class="user-info">
+                <span class="admin-badge">🔐 管理员面板</span>
+            </div>
+        </header>
+
+        {% if not is_admin %}
+        <div class="admin-login">
+            <h2>管理员登录</h2>
+            {% if error %}
+            <p class="error-message">{{ error }}</p>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin') }}">
+                <div class="form-group">
+                    <label>管理员密码</label>
+                    <input type="password" name="password" placeholder="输入管理员密码" required>
+                </div>
+                <button type="submit" class="btn-primary">登录</button>
+            </form>
+            <p style="margin-top:15px;color:#999;font-size:13px;">提示：默认密码为 admin123</p>
+        </div>
+        {% else %}
+        <div class="admin-panel">
+            <div class="admin-actions">
+                <button class="btn-secondary" id="logoutBtn">退出登录</button>
+            </div>
+
+            <div class="admin-section">
+                <h2>📋 梦想管理 ({{ dreams|length }})</h2>
+                <div class="admin-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>标题</th>
+                                <th>作者</th>
+                                <th>投资人数</th>
+                                <th>总投资</th>
+                                <th>有无方案</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dream in dreams %}
+                            <tr data-id="{{ dream.id }}">
+                                <td>{{ dream.id }}</td>
+                                <td><a href="{{ url_for('dream_detail', dream_id=dream.id) }}" target="_blank">{{ dream.title }}</a></td>
+                                <td>{{ dream.author_name }}</td>
+                                <td>{{ dream.investors|length }}</td>
+                                <td>{{ dream.total_investment }}</td>
+                                <td>{% if dream.solution %}✅{% else %}❌{% endif %}</td>
+                                <td>{{ dream.created_at[:10] }}</td>
+                                <td>
+                                    <button class="btn-danger btn-small delete-dream" data-id="{{ dream.id }}">删除</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="empty-row">暂无梦想数据</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>💬 评论管理</h2>
+                <div class="admin-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>梦想ID</th>
+                                <th>评论ID</th>
+                                <th>用户</th>
+                                <th>内容</th>
+                                <th>有帮助</th>
+                                <th>扯淡</th>
+                                <th>时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dream_id, dream_comments in comments.items() %}
+                                {% for comment in dream_comments %}
+                                <tr data-dream-id="{{ dream_id }}" data-comment-id="{{ comment.id }}">
+                                    <td>{{ dream_id }}</td>
+                                    <td>{{ comment.id }}</td>
+                                    <td>{{ comment.user_name }}</td>
+                                    <td class="comment-content">{{ comment.content[:50] }}{% if comment.content|length > 50 %}...{% endif %}</td>
+                                    <td>{{ comment.helpful }}</td>
+                                    <td>{{ comment.bullshit }}</td>
+                                    <td>{{ comment.created_at[:10] }}</td>
+                                    <td>
+                                        <button class="btn-danger btn-small delete-comment" data-dream-id="{{ dream_id }}" data-comment-id="{{ comment.id }}">删除</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="empty-row">暂无评论数据</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>👥 用户统计 ({{ users|length }})</h2>
+                <div class="stats-summary">
+                    <div class="stat-card">
+                        <span class="stat-value">{{ users|length }}</span>
+                        <span class="stat-label">总用户数</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value">{{ total_coins }}</span>
+                        <span class="stat-label">总虚拟币</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    fetch('/api/admin/logout', { method: 'POST' })
+                        .then(function() { location.reload(); });
+                });
+            }
+
+            document.querySelectorAll('.delete-dream').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var dreamId = this.dataset.id;
+                    if (confirm('确定要删除这个梦想吗？此操作不可恢复。')) {
+                        fetch('/api/admin/dream/' + dreamId + '/delete', { method: 'POST' })
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                if (data.success) {
+                                    var row = document.querySelector('tr[data-id="' + dreamId + '"]');
+                                    if (row) row.remove();
+                                } else {
+                                    alert('删除失败：' + (data.error || '未知错误'));
+                                }
+                            });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.delete-comment').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var dreamId = this.dataset.dreamId;
+                    var commentId = this.dataset.commentId;
+                    if (confirm('确定要删除这条评论吗？')) {
+                        fetch('/api/admin/comment/' + dreamId + '/' + commentId + '/delete', { method: 'POST' })
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                if (data.success) {
+                                    var row = btn.closest('tr');
+                                    if (row) row.remove();
+                                } else {
+                                    alert('删除失败：' + (data.error || '未知错误'));
+                                }
+                            });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
