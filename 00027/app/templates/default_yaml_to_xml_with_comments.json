@@ -1,0 +1,16 @@
+{
+  "id": "default_yaml_to_xml_with_comments",
+  "name": "YAML转XML保留注释",
+  "description": "将YAML格式转换为XML格式，保留原有的注释信息",
+  "source_format": "yaml",
+  "target_format": "xml",
+  "options": {
+    "preserve_comments": true,
+    "pretty_print": true,
+    "indent": 2,
+    "root_name": "config"
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

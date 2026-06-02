@@ -1,0 +1,17 @@
+{
+  "id": "default_yaml_to_json_strict",
+  "name": "YAML转JSON严格模式",
+  "description": "将YAML格式转换为JSON格式，使用严格的JSON语法",
+  "source_format": "yaml",
+  "target_format": "json",
+  "options": {
+    "preserve_comments": false,
+    "pretty_print": true,
+    "indent": 2,
+    "ensure_ascii": true,
+    "sort_keys": true
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

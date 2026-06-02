@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车间生产模拟游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="top-bar">
+            <div class="logo">
+                <i class="fas fa-industry"></i>
+                <span>工厂模拟器</span>
+            </div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <i class="fas fa-coins"></i>
+                    <span class="stat-label">资金:</span>
+                    <span id="money" class="stat-value">¥10,000</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="stat-label">总收入:</span>
+                    <span id="total-income" class="stat-value">¥0</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span class="stat-label">游戏时间:</span>
+                    <span id="game-time" class="stat-value">00:00:00</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="btn-pause" class="control-btn" title="暂停/继续">
+                    <i class="fas fa-pause"></i>
+                </button>
+                <div class="speed-control">
+                    <span>速度:</span>
+                    <button class="speed-btn active" data-speed="1">1x</button>
+                    <button class="speed-btn" data-speed="2">2x</button>
+                    <button class="speed-btn" data-speed="4">4x</button>
+                    <button class="speed-btn" data-speed="8">8x</button>
+                </div>
+                <button id="btn-save" class="control-btn" title="保存游戏">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button id="btn-load" class="control-btn" title="加载游戏">
+                    <i class="fas fa-folder-open"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <aside class="left-panel">
+                <div class="panel production-line">
+                    <h3><i class="fas fa-conveyor-belt"></i> 生产流水线</h3>
+                    <div class="conveyor-container">
+                        <div class="conveyor-belt" id="conveyor-belt">
+                            <div class="belt-animation"></div>
+                        </div>
+                        <div class="stations-row" id="stations-container">
+                        </div>
+                        <div class="inventory-area">
+                            <div class="raw-materials">
+                                <h4>原材料</h4>
+                                <div class="material-item">
+                                    <i class="fas fa-cube"></i>
+                                    <span>金属块: <span id="raw-metal">100</span></span>
+                                </div>
+                                <button class="btn-primary" style="width: 100%; margin-top: 10px; padding: 8px;" onclick="Game.buyMetal()">
+                                    <i class="fas fa-shopping-cart"></i> 购买50金属 (¥50)
+                                </button>
+                            </div>
+                            <div class="finished-goods">
+                                <h4>成品库存</h4>
+                                <div id="inventory-list" class="inventory-list">
+                                </div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                                    <i class="fas fa-info-circle"></i> 点击右侧按钮直接销售产品
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel stats-panel">
+                    <h3><i class="fas fa-chart-area"></i> 生产效率统计</h3>
+                    <div class="chart-container">
+                        <canvas id="efficiency-chart" width="500" height="200"></canvas>
+                    </div>
+                    <div class="stats-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">每小时产量:</span>
+                            <span id="hourly-output" class="summary-value">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">工位利用率:</span>
+                            <span id="station-utilization" class="summary-value">0%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">故障次数:</span>
+                            <span id="failure-count" class="summary-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <aside class="right-panel">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="stations">
+                        <i class="fas fa-cogs"></i> 工位
+                    </button>
+                    <button class="tab-btn" data-tab="orders">
+                        <i class="fas fa-clipboard-list"></i> 订单
+                    </button>
+                    <button class="tab-btn" data-tab="employees">
+                        <i class="fas fa-users"></i> 员工
+                    </button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="tab-stations" class="tab-pane active">
+                        <div class="panel">
+                            <h3><i class="fas fa-cogs"></i> 工位管理</h3>
+                            <div id="stations-list" class="stations-list">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-orders" class="tab-pane">
+                        <div class="panel">
+                            <h3><i class="fas fa-clipboard-list"></i> 当前订单</h3>
+                            <button id="btn-new-order" class="btn-primary">
+                                <i class="fas fa-plus"></i> 生成新订单
+                            </button>
+                            <div id="orders-list" class="orders-list">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-employees" class="tab-pane">
+                        <div class="panel">
+                            <h3><i class="fas fa-users"></i> 我的员工</h3>
+                            <div id="my-employees" class="employees-list">
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3><i class="fas fa-user-plus"></i> 雇佣市场</h3>
+                            <button id="btn-refresh-market" class="btn-secondary">
+                                <i class="fas fa-sync"></i> 刷新 (¥500)
+                            </button>
+                            <div id="employee-market" class="employees-list">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>存档管理</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="save-actions">
+                    <button id="btn-new-save" class="btn-primary">
+                        <i class="fas fa-plus"></i> 新建存档
+                    </button>
+                </div>
+                <div id="saves-list" class="saves-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-save-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新建存档</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>工厂名称:</label>
+                    <input type="text" id="save-name-input" placeholder="请输入工厂名称">
+                </div>
+                <button id="btn-create-save" class="btn-primary">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="js/save.js"></script>
+    <script src="js/stations.js"></script>
+    <script src="js/employees.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        window.onload = function() {
+            UI.init();
+            Game.init();
+        };
+    </script>
+</body>
+</html>

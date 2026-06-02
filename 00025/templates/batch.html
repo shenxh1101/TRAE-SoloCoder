@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}批量归档 - 网页归档工具{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>📚 批量归档</h2>
+    <p style="margin-bottom:1rem;color:#666;font-size:.9rem;">上传包含URL列表的TXT文件（每行一个URL），将依次归档并打包为一个ZIP</p>
+    <form action="{{ url_for('batch') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>URL列表文件（TXT）</label>
+            <div class="file-upload-area" onclick="document.getElementById('file').click()">
+                <p id="file-label">📎 点击选择TXT文件，或将文件拖拽到此处</p>
+                <input type="file" id="file" name="file" accept=".txt" onchange="document.getElementById('file-label').textContent='✅ 已选择: ' + this.files[0].name">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="max_depth">递归深度</label>
+                <input type="number" id="max_depth" name="max_depth" value="1" min="1" max="5">
+            </div>
+            <div class="form-group">
+                <label for="timeout">下载超时（秒）</label>
+                <input type="number" id="timeout" name="timeout" value="30" min="5" max="300">
+            </div>
+            <div class="form-group">
+                <label for="max_file_size">最大文件大小（MB）</label>
+                <input type="number" id="max_file_size" name="max_file_size" value="10" min="1" max="100">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="user_agent">自定义 User-Agent</label>
+            <input type="text" id="user_agent" name="user_agent" value="WebArchiver/1.0">
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="no_js" name="no_js">
+            <label for="no_js">禁用 JavaScript 下载（仅保留 HTML 结构）</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">开始批量归档</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{
+  "id": "default_ini_to_json_typed",
+  "name": "INI转JSON类型转换",
+  "description": "将INI格式转换为JSON格式，自动识别数值和布尔类型",
+  "source_format": "ini",
+  "target_format": "json",
+  "options": {
+    "preserve_comments": false,
+    "pretty_print": true,
+    "indent": 2
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "default_all_remove_empty",
+  "name": "通用清理空值模板",
+  "description": "任意格式转换时移除所有空值",
+  "source_format": null,
+  "target_format": null,
+  "options": {
+    "remove_empty": true,
+    "pretty_print": true,
+    "indent": 2
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

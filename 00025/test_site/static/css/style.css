@@ -1,0 +1,26 @@
+/* Test stylesheet */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+.test-box {
+    border: 2px solid #4caf50;
+    padding: 15px;
+    margin: 10px 0;
+    background: white;
+    border-radius: 5px;
+}
+h1 {
+    color: #2196f3;
+}
+.relative-path {
+    color: #e91e63;
+}
+.absolute-path {
+    color: #9c27b0;
+}
+.protocol-relative {
+    color: #ff9800;
+}

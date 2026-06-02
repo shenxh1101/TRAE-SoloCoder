@@ -1,0 +1,44 @@
+{
+  "vulnerabilities": [
+    {
+      "package": "lodash",
+      "cve": "CVE-2021-23337",
+      "severity": "high",
+      "description": "Prototype pollution in lodash",
+      "affected_versions": "<4.17.21",
+      "fixed_version": "4.17.21"
+    },
+    {
+      "package": "axios",
+      "cve": "CVE-2021-3749",
+      "severity": "high",
+      "description": "Server-Side Request Forgery in axios",
+      "affected_versions": "<0.21.2",
+      "fixed_version": "0.21.2"
+    },
+    {
+      "package": "django",
+      "cve": "CVE-2023-36053",
+      "severity": "high",
+      "description": "Potential regular expression denial-of-service in Django",
+      "affected_versions": "<3.2.19",
+      "fixed_version": "3.2.19"
+    },
+    {
+      "package": "flask",
+      "cve": "CVE-2023-30861",
+      "severity": "medium",
+      "description": "Flask vulnerable to possible disclosure of permanent session cookie",
+      "affected_versions": "<2.2.5",
+      "fixed_version": "2.2.5"
+    },
+    {
+      "package": "requests",
+      "cve": "CVE-2023-32681",
+      "severity": "high",
+      "description": "Requests leaks Proxy-Authorization header",
+      "affected_versions": "<2.31.0",
+      "fixed_version": "2.31.0"
+    }
+  ]
+}

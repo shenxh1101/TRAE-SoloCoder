@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Three.js 地形粒子系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; background: #0a0a0f; }
+#canvas-container { width: 100vw; height: 100vh; position: relative; }
+#ui-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(15, 15, 25, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px;
+    color: #e0e6ff;
+    z-index: 100;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+#ui-panel h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #6aa8ff;
+    border-bottom: 1px solid rgba(100, 150, 255, 0.3);
+    padding-bottom: 8px;
+}
+.control-group {
+    margin-bottom: 15px;
+}
+.control-group label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #a8b4d0;
+}
+.control-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: rgba(100, 150, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+}
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #6aa8ff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    background: #8cc0ff;
+}
+.value-display {
+    display: inline-block;
+    float: right;
+    color: #6aa8ff;
+    font-weight: bold;
+}
+.btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+.btn {
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #4a7fff 0%, #6aa8ff 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(106, 168, 255, 0.4);
+}
+.btn:active {
+    transform: translateY(0);
+}
+.btn.secondary {
+    background: linear-gradient(135deg, #2d3a5a 0%, #3d4a70 100%);
+}
+.btn.secondary:hover {
+    box-shadow: 0 4px 15px rgba(61, 74, 112, 0.4);
+}
+.btn.active {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+}
+.btn.recording {
+    background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.radio-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+.radio-group label {
+    flex: 1;
+    padding: 8px;
+    background: rgba(100, 150, 255, 0.1);
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    margin: 0;
+}
+.radio-group input {
+    display: none;
+}
+.radio-group input:checked + span {
+    color: #6aa8ff;
+    font-weight: bold;
+}
+.radio-group label.active {
+    background: rgba(106, 168, 255, 0.2);
+    border-color: #6aa8ff;
+}
+#info-panel {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(15, 15, 25, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    border-radius: 12px;
+    padding: 15px 20px;
+    color: #a8b4d0;
+    font-size: 12px;
+    z-index: 100;
+}
+#info-panel span {
+    color: #6aa8ff;
+    font-weight: bold;
+}
+#rec-indicator {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 71, 87, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    z-index: 200;
+    animation: pulse 1s infinite;
+}
+#rec-indicator::before {
+    content: '●';
+    margin-right: 8px;
+}
+#toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+.toast {
+    background: rgba(15, 15, 25, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    border-radius: 10px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+}
+.toast.success {
+    border-color: rgba(100, 200, 100, 0.5);
+    background: linear-gradient(135deg, rgba(30, 60, 40, 0.95), rgba(20, 40, 30, 0.95));
+}
+.toast.error {
+    border-color: rgba(255, 100, 100, 0.5);
+    background: linear-gradient(135deg, rgba(60, 30, 30, 0.95), rgba(40, 20, 20, 0.95));
+}
+.toast.info {
+    border-color: rgba(100, 150, 255, 0.5);
+}
+.toast-icon {
+    font-size: 18px;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+
+<div id="ui-panel">
+    <h2>🌄 地形粒子控制台</h2>
+    
+    <div class="control-group">
+        <label>地形高度 <span id="height-value" class="value-display">30</span></label>
+        <input type="range" id="height-slider" min="5" max="80" value="30">
+    </div>
+    
+    <div class="control-group">
+        <label>粒子数量 <span id="particle-value" class="value-display">2000</span></label>
+        <input type="range" id="particle-slider" min="500" max="10000" step="100" value="2000">
+    </div>
+    
+    <div class="control-group">
+        <label>粒子运动模式</label>
+        <div class="radio-group">
+            <label><input type="radio" name="motion-mode" value="wander" checked><span>随机漫游</span></label>
+            <label><input type="radio" name="motion-mode" value="contour"><span>等高线流动</span></label>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <label>天气系统</label>
+        <div class="radio-group">
+            <label><input type="radio" name="weather" value="sunny" checked><span>☀️ 晴天</span></label>
+            <label><input type="radio" name="weather" value="rain"><span>🌧️ 雨雪</span></label>
+            <label><input type="radio" name="weather" value="fog"><span>🌫️ 雾天</span></label>
+        </div>
+    </div>
+    
+    <div class="control-group">
+        <label>粒子高度 <span id="elevation-value" class="value-display">3</span></label>
+        <input type="range" id="elevation-slider" min="0.5" max="10" step="0.5" value="3">
+    </div>
+    
+    <div class="btn-group">
+        <button class="btn" id="regenerate-btn">🔄 重新生成地形</button>
+        <button class="btn secondary" id="export-heightmap">📊 导出高度图</button>
+        <button class="btn secondary" id="record-btn">🎬 录制视频</button>
+        <button class="btn secondary" id="export-stl">📦 导出STL</button>
+    </div>
+</div>
+
+<div id="info-panel">
+    <div>FPS: <span id="fps">60</span></div>
+    <div>地形尺寸: <span id="terrain-size">200x200</span></div>
+    <div>活动粒子: <span id="active-particles">2000</span></div>
+</div>
+
+<div id="rec-indicator">录制中</div>
+<div id="toast-container"></div>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+class PerlinNoise {
+    constructor(seed = Math.random()) {
+        this.p = [];
+        const permutation = [];
+        for (let i = 0; i < 256; i++) permutation[i] = i;
+        
+        let n = seed * 1000000;
+        for (let i = 255; i > 0; i--) {
+            n = (n * 16807) % 2147483647;
+            const j = n % (i + 1);
+            [permutation[i], permutation[j]] = [permutation[j], permutation[i]];
+        }
+        
+        for (let i = 0; i < 512; i++) this.p[i] = permutation[i & 255];
+    }
+    
+    fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+    lerp(a, b, t) { return a + t * (b - a); }
+    grad(hash, x, y) {
+        const h = hash & 7;
+        const u = h < 4 ? x : y;
+        const v = h < 4 ? y : x;
+        return ((h & 1) ? -u : u) + ((h & 2) ? -2 * v : 2 * v);
+    }
+    
+    noise(x, y) {
+        const X = Math.floor(x) & 255;
+        const Y = Math.floor(y) & 255;
+        x -= Math.floor(x);
+        y -= Math.floor(y);
+        const u = this.fade(x);
+        const v = this.fade(y);
+        const A = this.p[X] + Y, AA = this.p[A], AB = this.p[A + 1];
+        const B = this.p[X + 1] + Y, BA = this.p[B], BB = this.p[B + 1];
+        return this.lerp(
+            this.lerp(this.grad(this.p[AA], x, y), this.grad(this.p[BA], x - 1, y), u),
+            this.lerp(this.grad(this.p[AB], x, y - 1), this.grad(this.p[BB], x - 1, y - 1), u),
+            v
+        );
+    }
+    
+    octaveNoise(x, y, octaves, persistence) {
+        let total = 0, frequency = 1, amplitude = 1, maxValue = 0;
+        for (let i = 0; i < octaves; i++) {
+            total += this.noise(x * frequency, y * frequency) * amplitude;
+            maxValue += amplitude;
+            amplitude *= persistence;
+            frequency *= 2;
+        }
+        return total / maxValue;
+    }
+}
+
+const TERRAIN_SIZE = 200;
+const TERRAIN_SEGMENTS = 128;
+
+let scene, camera, renderer, controls;
+let terrain, terrainGeometry, terrainMaterial;
+let particles, particleGeometry, particleMaterial;
+let weatherParticles, weatherParticleGeometry, weatherParticleMaterial;
+let noise = new PerlinNoise();
+let heights = [];
+
+let heightScale = 30;
+let particleCount = 2000;
+let particleElevation = 3;
+let motionMode = 'wander';
+let currentWeather = 'sunny';
+
+let particlePositions, particleVelocities;
+let weatherParticlePositions, weatherParticleVelocities;
+
+let isRecording = false;
+let mediaRecorder;
+let recordedChunks = [];
+
+let fog;
+let ambientLight, directionalLight;
+
+const clock = new THREE.Clock();
+let frameCount = 0;
+let lastFpsUpdate = 0;
+
+let particleRotations = [];
+let weatherParticlePhases = [];
+
+function showToast(message, type = 'info', icon = 'ℹ️') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+function init() {
+    const container = document.getElementById('canvas-container');
+    
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a1628);
+    
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(80, 60, 80);
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+    
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 20;
+    controls.maxDistance = 300;
+    controls.maxPolarAngle = Math.PI / 2.1;
+    
+    ambientLight = new THREE.AmbientLight(0x404060, 0.5);
+    scene.add(ambientLight);
+    
+    directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(50, 100, 50);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 500;
+    directionalLight.shadow.camera.left = -150;
+    directionalLight.shadow.camera.right = 150;
+    directionalLight.shadow.camera.top = 150;
+    directionalLight.shadow.camera.bottom = -150;
+    scene.add(directionalLight);
+    
+    const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x3d5c35, 0.3);
+    scene.add(hemiLight);
+    
+    fog = new THREE.Fog(0x0a1628, 100, 300);
+    scene.fog = null;
+    
+    createTerrain();
+    createParticles();
+    createWeatherParticles();
+    
+    const gridHelper = new THREE.GridHelper(TERRAIN_SIZE, 50, 0x333355, 0x222244);
+    gridHelper.position.y = -0.5;
+    scene.add(gridHelper);
+    
+    setupUI();
+    window.addEventListener('resize', onWindowResize);
+    
+    animate();
+}
+
+function getTerrainHeight(x, z) {
+    const nx = (x / TERRAIN_SIZE) * 4 + 0.5;
+    const nz = (z / TERRAIN_SIZE) * 4 + 0.5;
+    return noise.octaveNoise(nx, nz, 6, 0.5) * heightScale;
+}
+
+function getTerrainNormal(x, z) {
+    const eps = 0.5;
+    const hL = getTerrainHeight(x - eps, z);
+    const hR = getTerrainHeight(x + eps, z);
+    const hD = getTerrainHeight(x, z - eps);
+    const hU = getTerrainHeight(x, z + eps);
+    const normal = new THREE.Vector3(hL - hR, 2 * eps, hD - hU);
+    normal.normalize();
+    return normal;
+}
+
+function getContourDirection(x, z) {
+    const normal = getTerrainNormal(x, z);
+    const up = new THREE.Vector3(0, 1, 0);
+    const tangent = new THREE.Vector3().crossVectors(normal, up);
+    if (tangent.lengthSq() < 0.01) {
+        tangent.set(1, 0, 0);
+    }
+    tangent.normalize();
+    return tangent;
+}
+
+function createTerrain() {
+    if (terrain) scene.remove(terrain);
+    
+    terrainGeometry = new THREE.PlaneGeometry(TERRAIN_SIZE, TERRAIN_SIZE, TERRAIN_SEGMENTS, TERRAIN_SEGMENTS);
+    terrainGeometry.rotateX(-Math.PI / 2);
+    
+    const positions = terrainGeometry.attributes.position;
+    heights = new Float32Array((TERRAIN_SEGMENTS + 1) * (TERRAIN_SEGMENTS + 1));
+    const colors = new Float32Array(positions.count * 3);
+    
+    for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i);
+        const z = positions.getZ(i);
+        const h = getTerrainHeight(x, z);
+        positions.setY(i, h);
+        heights[i] = h;
+        
+        const normalizedHeight = (h + heightScale) / (2 * heightScale);
+        let color;
+        if (normalizedHeight < 0.3) {
+            color = new THREE.Color(0x1a3d1a);
+        } else if (normalizedHeight < 0.5) {
+            color = new THREE.Color(0x2d5a2d);
+        } else if (normalizedHeight < 0.7) {
+            color = new THREE.Color(0x6b7a3a);
+        } else if (normalizedHeight < 0.85) {
+            color = new THREE.Color(0x8b7355);
+        } else {
+            color = new THREE.Color(0xe8e8e8);
+        }
+        
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+    }
+    
+    terrainGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    terrainGeometry.computeVertexNormals();
+    
+    terrainMaterial = new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        roughness: 0.8,
+        metalness: 0.1,
+        flatShading: false
+    });
+    
+    terrain = new THREE.Mesh(terrainGeometry, terrainMaterial);
+    terrain.receiveShadow = true;
+    terrain.castShadow = true;
+    scene.add(terrain);
+}
+
+function createParticles() {
+    if (particles) scene.remove(particles);
+    
+    const maxParticles = 15000;
+    particleGeometry = new THREE.BufferGeometry();
+    particlePositions = new Float32Array(maxParticles * 3);
+    particleVelocities = [];
+    particleRotations = [];
+    
+    for (let i = 0; i < maxParticles; i++) {
+        const x = (Math.random() - 0.5) * TERRAIN_SIZE * 0.9;
+        const z = (Math.random() - 0.5) * TERRAIN_SIZE * 0.9;
+        const y = getTerrainHeight(x, z) + particleElevation;
+        
+        particlePositions[i * 3] = x;
+        particlePositions[i * 3 + 1] = y;
+        particlePositions[i * 3 + 2] = z;
+        
+        particleVelocities.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 0.5,
+            0,
+            (Math.random() - 0.5) * 0.5
+        ));
+        
+        particleRotations.push({
+            angle: Math.random() * Math.PI * 2,
+            radius: 0.5 + Math.random() * 1,
+            speed: 1 + Math.random() * 2
+        });
+    }
+    
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setDrawRange(0, particleCount);
+    
+    const particleColors = new Float32Array(maxParticles * 3);
+    for (let i = 0; i < maxParticles; i++) {
+        const t = Math.random();
+        const color = new THREE.Color().setHSL(0.55 + t * 0.15, 0.8, 0.6 + t * 0.2);
+        particleColors[i * 3] = color.r;
+        particleColors[i * 3 + 1] = color.g;
+        particleColors[i * 3 + 2] = color.b;
+    }
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+    
+    particleMaterial = new THREE.PointsMaterial({
+        size: 0.8,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+    });
+    
+    particles = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particles);
+}
+
+function createWeatherParticles() {
+    if (weatherParticles) scene.remove(weatherParticles);
+    
+    const weatherCount = 12000;
+    weatherParticleGeometry = new THREE.BufferGeometry();
+    weatherParticlePositions = new Float32Array(weatherCount * 3);
+    weatherParticleVelocities = new Float32Array(weatherCount * 3);
+    weatherParticlePhases = new Float32Array(weatherCount);
+    
+    for (let i = 0; i < weatherCount; i++) {
+        weatherParticlePositions[i * 3] = (Math.random() - 0.5) * TERRAIN_SIZE * 1.2;
+        weatherParticlePositions[i * 3 + 1] = Math.random() * 100;
+        weatherParticlePositions[i * 3 + 2] = (Math.random() - 0.5) * TERRAIN_SIZE * 1.2;
+        
+        weatherParticleVelocities[i * 3] = (Math.random() - 0.5) * 2;
+        weatherParticleVelocities[i * 3 + 1] = -(5 + Math.random() * 10);
+        weatherParticleVelocities[i * 3 + 2] = (Math.random() - 0.5) * 2;
+        
+        weatherParticlePhases[i] = Math.random() * Math.PI * 2;
+    }
+    
+    weatherParticleGeometry.setAttribute('position', new THREE.BufferAttribute(weatherParticlePositions, 3));
+    weatherParticleGeometry.setDrawRange(0, 0);
+    
+    weatherParticleMaterial = new THREE.PointsMaterial({
+        size: 0.4,
+        color: 0xaaccff,
+        transparent: true,
+        opacity: 0.7,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending
+    });
+    
+    weatherParticles = new THREE.Points(weatherParticleGeometry, weatherParticleMaterial);
+    weatherParticles.visible = currentWeather === 'rain';
+    scene.add(weatherParticles);
+}
+
+function updateWeatherParticleCount() {
+    if (!weatherParticleGeometry) return;
+    
+    if (currentWeather === 'rain') {
+        weatherParticleGeometry.setDrawRange(0, 12000);
+        weatherParticles.visible = true;
+    } else {
+        weatherParticleGeometry.setDrawRange(0, 0);
+        weatherParticles.visible = false;
+    }
+}
+
+function updateParticles(delta) {
+    if (!particles) return;
+    
+    const effectiveCount = currentWeather === 'rain' ? Math.min(particleCount * 2, 15000) : particleCount;
+    particleGeometry.setDrawRange(0, effectiveCount);
+    
+    for (let i = 0; i < effectiveCount; i++) {
+        const i3 = i * 3;
+        let x = particlePositions[i3];
+        let y = particlePositions[i3 + 1];
+        let z = particlePositions[i3 + 2];
+        
+        const terrainY = getTerrainHeight(x, z);
+        const targetY = terrainY + particleElevation;
+        
+        if (currentWeather === 'rain') {
+            const rot = particleRotations[i];
+            rot.angle += rot.speed * delta * 3;
+            
+            const spiralX = Math.cos(rot.angle) * rot.radius;
+            const spiralZ = Math.sin(rot.angle) * rot.radius;
+            
+            y -= delta * (3 + Math.random() * 2);
+            
+            const windOffset = Math.sin(performance.now() * 0.001 + i * 0.1) * 0.5;
+            
+            x += spiralX * delta * 2 + windOffset * delta * 5;
+            z += spiralZ * delta * 2;
+            
+            if (y < terrainY + 0.5) {
+                y = targetY + particleElevation + Math.random() * 5;
+                x = (Math.random() - 0.5) * TERRAIN_SIZE * 0.9;
+                z = (Math.random() - 0.5) * TERRAIN_SIZE * 0.9;
+            }
+        } else {
+            if (motionMode === 'wander') {
+                const vel = particleVelocities[i % particleVelocities.length];
+                vel.x += (Math.random() - 0.5) * 0.05;
+                vel.z += (Math.random() - 0.5) * 0.05;
+                vel.x = Math.max(-1, Math.min(1, vel.x));
+                vel.z = Math.max(-1, Math.min(1, vel.z));
+                
+                x += vel.x * delta * 15;
+                z += vel.z * delta * 15;
+            } else {
+                const contourDir = getContourDirection(x, z);
+                const flowSpeed = 3 + (terrainY / heightScale) * 5;
+                x += contourDir.x * flowSpeed * delta;
+                z += contourDir.z * flowSpeed * delta;
+                
+                if (Math.random() < 0.02) {
+                    const angle = (Math.random() - 0.5) * Math.PI * 0.5;
+                    const cos = Math.cos(angle), sin = Math.sin(angle);
+                    const nx = contourDir.x * cos - contourDir.z * sin;
+                    const nz = contourDir.x * sin + contourDir.z * cos;
+                    contourDir.set(nx, 0, nz);
+                }
+            }
+            
+            y += (targetY - y) * delta * 3;
+        }
+        
+        const halfSize = TERRAIN_SIZE * 0.45;
+        if (x > halfSize) x = -halfSize;
+        if (x < -halfSize) x = halfSize;
+        if (z > halfSize) z = -halfSize;
+        if (z < -halfSize) z = halfSize;
+        
+        particlePositions[i3] = x;
+        particlePositions[i3 + 1] = y;
+        particlePositions[i3 + 2] = z;
+    }
+    
+    particleGeometry.attributes.position.needsUpdate = true;
+}
+
+function updateWeatherParticles(delta) {
+    if (!weatherParticles || !weatherParticles.visible) return;
+    
+    const count = 12000;
+    const time = performance.now() * 0.001;
+    
+    for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        const phase = weatherParticlePhases[i];
+        
+        const swayX = Math.sin(time * 2 + phase) * 0.5;
+        const swayZ = Math.cos(time * 1.5 + phase * 0.7) * 0.3;
+        
+        weatherParticlePositions[i3] += (weatherParticleVelocities[i3] + swayX) * delta * 15;
+        weatherParticlePositions[i3 + 1] += weatherParticleVelocities[i3 + 1] * delta * 15;
+        weatherParticlePositions[i3 + 2] += (weatherParticleVelocities[i3 + 2] + swayZ) * delta * 15;
+        
+        const terrainY = getTerrainHeight(weatherParticlePositions[i3], weatherParticlePositions[i3 + 2]);
+        if (weatherParticlePositions[i3 + 1] < terrainY - 2) {
+            weatherParticlePositions[i3] = (Math.random() - 0.5) * TERRAIN_SIZE * 1.2;
+            weatherParticlePositions[i3 + 1] = 80 + Math.random() * 40;
+            weatherParticlePositions[i3 + 2] = (Math.random() - 0.5) * TERRAIN_SIZE * 1.2;
+        }
+        
+        const halfSize = TERRAIN_SIZE * 0.6;
+        if (weatherParticlePositions[i3] > halfSize) weatherParticlePositions[i3] = -halfSize;
+        if (weatherParticlePositions[i3] < -halfSize) weatherParticlePositions[i3] = halfSize;
+        if (weatherParticlePositions[i3 + 2] > halfSize) weatherParticlePositions[i3 + 2] = -halfSize;
+        if (weatherParticlePositions[i3 + 2] < -halfSize) weatherParticlePositions[i3 + 2] = halfSize;
+    }
+    
+    weatherParticleGeometry.attributes.position.needsUpdate = true;
+}
+
+function updateWeather() {
+    if (currentWeather === 'sunny') {
+        scene.background = new THREE.Color(0x0a1628);
+        scene.fog = null;
+        ambientLight.intensity = 0.5;
+        ambientLight.color.setHex(0x404060);
+        directionalLight.intensity = 1.2;
+        directionalLight.color.setHex(0xffffff);
+        updateWeatherParticleCount();
+    } else if (currentWeather === 'rain') {
+        scene.background = new THREE.Color(0x1a1a2e);
+        scene.fog = new THREE.Fog(0x1a1a2e, 50, 200);
+        ambientLight.intensity = 0.3;
+        ambientLight.color.setHex(0x303050);
+        directionalLight.intensity = 0.5;
+        directionalLight.color.setHex(0x8899bb);
+        updateWeatherParticleCount();
+    } else if (currentWeather === 'fog') {
+        scene.background = new THREE.Color(0x8899aa);
+        scene.fog = new THREE.Fog(0x8899aa, 10, 80);
+        ambientLight.intensity = 0.8;
+        ambientLight.color.setHex(0xaaaaaa);
+        directionalLight.intensity = 0.3;
+        directionalLight.color.setHex(0xcccccc);
+        updateWeatherParticleCount();
+    }
+    
+    if (particleGeometry) {
+        const effectiveCount = currentWeather === 'rain' ? Math.min(particleCount * 2, 15000) : particleCount;
+        particleGeometry.setDrawRange(0, effectiveCount);
+        document.getElementById('active-particles').textContent = effectiveCount;
+    }
+}
+
+function updateRadioActiveStates() {
+    document.querySelectorAll('.radio-group').forEach(group => {
+        group.querySelectorAll('label').forEach(label => {
+            const input = label.querySelector('input');
+            if (input && input.checked) {
+                label.classList.add('active');
+            } else {
+                label.classList.remove('active');
+            }
+        });
+    });
+}
+
+function setupUI() {
+    updateRadioActiveStates();
+    
+    const heightSlider = document.getElementById('height-slider');
+    const heightValue = document.getElementById('height-value');
+    heightSlider.addEventListener('input', (e) => {
+        heightScale = parseFloat(e.target.value);
+        heightValue.textContent = heightScale;
+        createTerrain();
+    });
+    
+    const particleSlider = document.getElementById('particle-slider');
+    const particleValue = document.getElementById('particle-value');
+    particleSlider.addEventListener('input', (e) => {
+        particleCount = parseInt(e.target.value);
+        particleValue.textContent = particleCount;
+        const effectiveCount = currentWeather === 'rain' ? Math.min(particleCount * 2, 15000) : particleCount;
+        document.getElementById('active-particles').textContent = effectiveCount;
+        if (particleGeometry) {
+            particleGeometry.setDrawRange(0, effectiveCount);
+        }
+    });
+    
+    const elevationSlider = document.getElementById('elevation-slider');
+    const elevationValue = document.getElementById('elevation-value');
+    elevationSlider.addEventListener('input', (e) => {
+        particleElevation = parseFloat(e.target.value);
+        elevationValue.textContent = particleElevation;
+    });
+    
+    document.querySelectorAll('input[name="motion-mode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            motionMode = e.target.value;
+            updateRadioActiveStates();
+        });
+    });
+    
+    document.querySelectorAll('input[name="weather"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentWeather = e.target.value;
+            updateWeather();
+            updateRadioActiveStates();
+        });
+    });
+    
+    document.getElementById('regenerate-btn').addEventListener('click', () => {
+        noise = new PerlinNoise();
+        createTerrain();
+        showToast('地形已重新生成', 'success', '🔄');
+    });
+    
+    document.getElementById('export-heightmap').addEventListener('click', exportHeightmap);
+    document.getElementById('record-btn').addEventListener('click', toggleRecording);
+    document.getElementById('export-stl').addEventListener('click', exportSTL);
+}
+
+function exportHeightmap() {
+    const btn = document.getElementById('export-heightmap');
+    btn.disabled = true;
+    showToast('正在生成高度图...', 'info', '⏳');
+    
+    try {
+        setTimeout(() => {
+            const size = 512;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(size, size);
+            
+            let minH = Infinity, maxH = -Infinity;
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const wx = (x / size - 0.5) * TERRAIN_SIZE;
+                    const wz = (y / size - 0.5) * TERRAIN_SIZE;
+                    const h = getTerrainHeight(wx, wz);
+                    minH = Math.min(minH, h);
+                    maxH = Math.max(maxH, h);
+                }
+            }
+            const heightRange = maxH - minH || 1;
+            
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const wx = (x / size - 0.5) * TERRAIN_SIZE;
+                    const wz = (y / size - 0.5) * TERRAIN_SIZE;
+                    const h = getTerrainHeight(wx, wz);
+                    const gray = Math.floor(((h - minH) / heightRange) * 255);
+                    const idx = (y * size + x) * 4;
+                    imageData.data[idx] = gray;
+                    imageData.data[idx + 1] = gray;
+                    imageData.data[idx + 2] = gray;
+                    imageData.data[idx + 3] = 255;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = `heightmap_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            showToast(`高度图导出成功！(512×512)`, 'success', '✅');
+            btn.disabled = false;
+        }, 100);
+    } catch (e) {
+        console.error('高度图导出失败:', e);
+        showToast('高度图导出失败: ' + e.message, 'error', '❌');
+        btn.disabled = false;
+    }
+}
+
+function toggleRecording() {
+    const btn = document.getElementById('record-btn');
+    const indicator = document.getElementById('rec-indicator');
+    
+    if (!isRecording) {
+        try {
+            const stream = renderer.domElement.captureStream(60);
+            const options = [
+                { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 },
+                { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 },
+                { mimeType: 'video/webm' }
+            ];
+            
+            let selectedOption = null;
+            for (const opt of options) {
+                if (MediaRecorder.isTypeSupported(opt.mimeType)) {
+                    selectedOption = opt;
+                    break;
+                }
+            }
+            
+            if (!selectedOption) {
+                throw new Error('您的浏览器不支持WebM录制');
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, selectedOption);
+            recordedChunks = [];
+            let recordedSize = 0;
+            
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) {
+                    recordedChunks.push(e.data);
+                    recordedSize += e.data.size;
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                try {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `terrain_record_${Date.now()}.webm`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    showToast(`视频录制成功！(${sizeMB} MB)`, 'success', '✅');
+                } catch (e) {
+                    console.error('视频保存失败:', e);
+                    showToast('视频保存失败: ' + e.message, 'error', '❌');
+                }
+            };
+            
+            mediaRecorder.onerror = (e) => {
+                console.error('录制错误:', e);
+                showToast('录制过程中发生错误', 'error', '❌');
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.textContent = '🎬 录制视频';
+                indicator.style.display = 'none';
+            };
+            
+            mediaRecorder.start(1000);
+            isRecording = true;
+            btn.classList.add('recording');
+            btn.textContent = '⏹️ 停止录制';
+            indicator.style.display = 'block';
+            showToast('开始录制视频...', 'info', '🎬');
+        } catch (e) {
+            console.error('启动录制失败:', e);
+            showToast('启动录制失败: ' + e.message, 'error', '❌');
+        }
+    } else {
+        try {
+            mediaRecorder.stop();
+            isRecording = false;
+            btn.classList.remove('recording');
+            btn.textContent = '🎬 录制视频';
+            indicator.style.display = 'none';
+            showToast('正在处理视频...', 'info', '⏳');
+        } catch (e) {
+            console.error('停止录制失败:', e);
+            showToast('停止录制失败: ' + e.message, 'error', '❌');
+        }
+    }
+}
+
+function exportSTL() {
+    const btn = document.getElementById('export-stl');
+    btn.disabled = true;
+    showToast('正在生成STL模型...', 'info', '⏳');
+    
+    try {
+        setTimeout(() => {
+            try {
+                const geometry = terrainGeometry.clone();
+                geometry.rotateX(Math.PI / 2);
+                const nonIndexedGeometry = geometry.toNonIndexed();
+                nonIndexedGeometry.computeVertexNormals();
+                
+                let stl = 'solid terrain_generated\n';
+                const positions = nonIndexedGeometry.attributes.position;
+                const normals = nonIndexedGeometry.attributes.normal;
+                const vertexCount = positions.count;
+                
+                for (let i = 0; i < vertexCount; i += 3) {
+                    const nx = (normals.getX(i) + normals.getX(i + 1) + normals.getX(i + 2)) / 3;
+                    const ny = (normals.getY(i) + normals.getY(i + 1) + normals.getY(i + 2)) / 3;
+                    const nz = (normals.getZ(i) + normals.getZ(i + 1) + normals.getZ(i + 2)) / 3;
+                    const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+                    
+                    stl += `facet normal ${nx / len} ${ny / len} ${nz / len}\n`;
+                    stl += '  outer loop\n';
+                    stl += `    vertex ${positions.getX(i)} ${positions.getY(i)} ${positions.getZ(i)}\n`;
+                    stl += `    vertex ${positions.getX(i + 1)} ${positions.getY(i + 1)} ${positions.getZ(i + 1)}\n`;
+                    stl += `    vertex ${positions.getX(i + 2)} ${positions.getY(i + 2)} ${positions.getZ(i + 2)}\n`;
+                    stl += '  endloop\n';
+                    stl += 'endfacet\n';
+                }
+                
+                stl += 'endsolid terrain_generated\n';
+                
+                const blob = new Blob([stl], { type: 'model/stl' });
+                const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `terrain_${Date.now()}.stl`;
+                link.click();
+                URL.revokeObjectURL(url);
+                
+                showToast(`STL导出成功！(${vertexCount / 3} 个面, ${sizeMB} MB)`, 'success', '✅');
+                btn.disabled = false;
+            } catch (e) {
+                console.error('STL生成失败:', e);
+                showToast('STL生成失败: ' + e.message, 'error', '❌');
+                btn.disabled = false;
+            }
+        }, 100);
+    } catch (e) {
+        console.error('STL导出失败:', e);
+        showToast('STL导出失败: ' + e.message, 'error', '❌');
+        btn.disabled = false;
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const delta = clock.getDelta();
+    frameCount++;
+    const now = performance.now();
+    if (now - lastFpsUpdate >= 1000) {
+        document.getElementById('fps').textContent = frameCount;
+        frameCount = 0;
+        lastFpsUpdate = now;
+    }
+    
+    controls.update();
+    updateParticles(delta);
+    updateWeatherParticles(delta);
+    
+    renderer.render(scene, camera);
+}
+
+init();
+</script>
+</body>
+</html>

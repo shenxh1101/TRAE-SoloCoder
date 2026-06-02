@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 分子搭建实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="top-bar">
+            <div class="title-section">
+                <h1 class="game-title">🔬 分子搭建实验室</h1>
+            </div>
+            <div class="formula-section">
+                <span class="label">分子式:</span>
+                <span id="formula-display" class="formula">-</span>
+                <span id="molecule-name" class="molecule-name">-</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar left-sidebar">
+                <h2 class="sidebar-title">🧪 元素库</h2>
+                <div class="element-library" id="element-library">
+                </div>
+                <div class="instructions">
+                    <h3>📖 操作指南</h3>
+                    <ul>
+                        <li>拖拽原子到画布</li>
+                        <li>选择键类型后点击两个原子</li>
+                        <li>右键删除原子/键</li>
+                        <li>拖拽画布上的原子移动位置</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <main class="canvas-container">
+                <canvas id="molecule-canvas"></canvas>
+                <div id="error-message" class="error-message"></div>
+            </main>
+
+            <aside class="sidebar right-sidebar">
+                <h2 class="sidebar-title">🔧 工具栏</h2>
+                
+                <div class="tool-section">
+                    <h3>🔗 化学键类型</h3>
+                    <div class="bond-type-selector">
+                        <button class="bond-btn active" data-bond="1">
+                            <span class="bond-icon single"></span>
+                            <span>单键</span>
+                        </button>
+                        <button class="bond-btn" data-bond="2">
+                            <span class="bond-icon double"></span>
+                            <span>双键</span>
+                        </button>
+                        <button class="bond-btn" data-bond="3">
+                            <span class="bond-icon triple"></span>
+                            <span>三键</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>⚡ 操作</h3>
+                    <div class="action-buttons">
+                        <button id="reset-btn" class="action-btn">🔄 重置画布</button>
+                        <button id="save-json-btn" class="action-btn">💾 保存JSON</button>
+                        <button id="load-json-btn" class="action-btn">📂 加载JSON</button>
+                        <button id="export-png-btn" class="action-btn">🖼️ 导出PNG</button>
+                    </div>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                </div>
+
+                <div class="tool-section">
+                    <h3>📊 统计信息</h3>
+                    <div class="stats-panel">
+                        <div class="stat-item">
+                            <span class="stat-label">原子数量:</span>
+                            <span id="atom-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">化学键数量:</span>
+                            <span id="bond-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">单键:</span>
+                            <span id="single-bond-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">双键:</span>
+                            <span id="double-bond-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">三键:</span>
+                            <span id="triple-bond-count" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>✅ 化合价状态</h3>
+                    <div id="valence-status" class="valence-status">
+                        <span class="status-ok">所有原子化合价正常</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <footer class="bottom-bar">
+            <div class="challenge-section">
+                <span class="challenge-icon">🎯</span>
+                <span class="challenge-label">当前挑战:</span>
+                <span id="challenge-text" class="challenge-text">搭建水分子 (H₂O)</span>
+                <button id="skip-challenge" class="skip-btn">跳过 →</button>
+                <button id="prev-challenge" class="skip-btn">← 上一个</button>
+            </div>
+            <div class="challenge-progress">
+                <span id="challenge-progress">挑战 1/6</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

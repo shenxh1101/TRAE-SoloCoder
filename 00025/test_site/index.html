@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>路径测试页面 - Web Archiver Test</title>
+    
+    <!-- 相对路径 CSS -->
+    <link rel="stylesheet" href="static/css/style.css">
+    
+    <!-- 绝对路径 CSS (使用 http://127.0.0.1:5002) -->
+    <link rel="stylesheet" href="http://127.0.0.1:5002/static/css/style.css">
+    
+    <!-- 协议相对路径 CSS -->
+    <link rel="stylesheet" href="//127.0.0.1:5002/static/css/style.css">
+</head>
+<body>
+    <h1>🔍 路径重写测试页面</h1>
+    
+    <div class="test-box">
+        <h3>📌 相对路径资源测试</h3>
+        <p class="relative-path">这段文字使用相对路径引入的CSS样式</p>
+        <img src="static/images/relative.png" alt="相对路径图片">
+        <p>图片路径：<code>static/images/relative.png</code></p>
+    </div>
+    
+    <div class="test-box">
+        <h3>📌 绝对路径资源测试</h3>
+        <p class="absolute-path">这段文字使用绝对路径引入的CSS样式</p>
+        <img src="http://127.0.0.1:5002/static/images/absolute.png" alt="绝对路径图片">
+        <p>图片路径：<code>http://127.0.0.1:5002/static/images/absolute.png</code></p>
+    </div>
+    
+    <div class="test-box">
+        <h3>📌 协议相对路径资源测试</h3>
+        <p class="protocol-relative">这段文字使用协议相对路径引入的CSS样式</p>
+        <img src="//127.0.0.1:5002/static/images/protocol.png" alt="协议相对路径图片">
+        <p>图片路径：<code>//127.0.0.1:5002/static/images/protocol.png</code></p>
+    </div>
+    
+    <div class="test-box" id="js-box">
+        <h3>📌 JavaScript 测试</h3>
+        <p>JS加载后会更新这里的内容...</p>
+    </div>
+    
+    <!-- 相对路径 JS -->
+    <script src="static/js/main.js"></script>
+    
+    <!-- 绝对路径 JS -->
+    <script src="http://127.0.0.1:5002/static/js/main.js"></script>
+    
+    <!-- 跨域名资源（同IP但不同端口，模拟不同域名） -->
+    <div class="test-box">
+        <h3>📌 跨域资源（不同端口）</h3>
+        <p>此图片来自不同端口（模拟跨域名），应该不会被下载：</p>
+        <img src="http://127.0.0.1:5003/static/images/small.png" alt="跨域图片">
+        <p>图片路径：<code>http://127.0.0.1:5003/static/images/small.png</code></p>
+    </div>
+    
+    <!-- 嵌套页面链接 -->
+    <div class="test-box">
+        <h3>📌 嵌套页面测试</h3>
+        <p>此页面链接到更深层的页面（用于递归深度测试）：</p>
+        <a href="nested/page1.html">跳转到第一层嵌套页面</a>
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "id": "default_json_to_yaml_remove_null",
+  "name": "JSON转YAML且移除空字段",
+  "description": "将JSON格式转换为YAML格式，同时移除所有值为null的字段",
+  "source_format": "json",
+  "target_format": "yaml",
+  "options": {
+    "remove_null": true,
+    "preserve_comments": false,
+    "pretty_print": true,
+    "indent": 2
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

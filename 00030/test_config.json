@@ -1,0 +1,12 @@
+{
+  "allowed_missing_keys": [
+    "buttons.save",
+    "messages.loading",
+    "deprecated.*"
+  ],
+  "regex_rules": {
+    ".*url": "^https?://.*",
+    "email": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+    ".*_html$": "^(<[^>]+>[^<]*</[^>]+>)+$"
+  }
+}

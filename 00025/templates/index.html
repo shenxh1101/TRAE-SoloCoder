@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}单页归档 - 网页归档工具{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>🔍 单页归档</h2>
+    <p style="margin-bottom:1rem;color:#666;font-size:.9rem;">输入URL，将网页及其资源下载为可离线浏览的归档包</p>
+    <form action="{{ url_for('archive') }}" method="POST">
+        <div class="form-group">
+            <label for="url">网页地址</label>
+            <input type="text" id="url" name="url" placeholder="https://example.com" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="max_depth">递归深度</label>
+                <input type="number" id="max_depth" name="max_depth" value="1" min="1" max="5">
+            </div>
+            <div class="form-group">
+                <label for="timeout">下载超时（秒）</label>
+                <input type="number" id="timeout" name="timeout" value="30" min="5" max="300">
+            </div>
+            <div class="form-group">
+                <label for="max_file_size">最大文件大小（MB）</label>
+                <input type="number" id="max_file_size" name="max_file_size" value="10" min="1" max="100">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="user_agent">自定义 User-Agent</label>
+            <input type="text" id="user_agent" name="user_agent" value="WebArchiver/1.0">
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="no_js" name="no_js">
+            <label for="no_js">禁用 JavaScript 下载（仅保留 HTML 结构）</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">开始归档</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>📡 API 接口</h2>
+    <p style="color:#666;font-size:.88rem;margin-bottom:.5rem;">支持通过 JSON API 调用归档功能：</p>
+    <pre style="background:#1a1a2e;color:#e0e0e0;padding:1rem;border-radius:6px;font-size:.82rem;overflow-x:auto;">POST /api/archive
+Content-Type: application/json
+
+{
+  "url": "https://example.com",
+  "max_depth": 1,
+  "timeout": 30,
+  "max_file_size": 10,
+  "no_js": false,
+  "user_agent": "WebArchiver/1.0"
+}</pre>
+</div>
+{% endblock %}

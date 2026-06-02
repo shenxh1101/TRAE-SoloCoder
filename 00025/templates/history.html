@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}归档记录 - 网页归档工具{% endblock %}
+{% block content %}
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h2 style="margin-bottom:0;">📋 归档记录</h2>
+        {% if logs %}
+        <form action="{{ url_for('clear_logs') }}" method="POST" onsubmit="return confirm('确定清除所有记录？此操作不可恢复。')">
+            <button type="submit" class="btn btn-danger btn-sm">清除全部</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if logs %}
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>URL</th>
+                    <th>时间</th>
+                    <th>状态</th>
+                    <th>大小</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ log.url }}">{{ log.url }}</td>
+                    <td style="white-space:nowrap;">{{ log.timestamp[:19] }}</td>
+                    <td>
+                        {% if log.status == 'success' %}
+                        <span class="status-success">✅ 成功</span>
+                        {% else %}
+                        <span class="status-failed" title="{{ log.error_msg }}">❌ 失败</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.archive_size > 0 %}
+                            {% if log.archive_size > 1048576 %}
+                                {{ "%.1f"|format(log.archive_size / 1048576) }} MB
+                            {% else %}
+                                {{ "%.1f"|format(log.archive_size / 1024) }} KB
+                            {% endif %}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            {% if log.status == 'success' and log.zip_path %}
+                            <a href="{{ url_for('download', filename=log.zip_path|basename) }}" class="btn btn-primary btn-sm">下载</a>
+                            {% endif %}
+                            <form action="{{ url_for('delete_log', entry_id=log.id) }}" method="POST" onsubmit="return confirm('确定删除此记录？')">
+                                <button type="submit" class="btn btn-danger btn-sm">删除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>📭 暂无归档记录</p>
+        <p style="font-size:.85rem;margin-top:.5rem;">前往<a href="{{ url_for('index') }}" style="color:#4fc3f7;">单页归档</a>或<a href="{{ url_for('batch') }}" style="color:#4fc3f7;">批量归档</a>开始使用</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

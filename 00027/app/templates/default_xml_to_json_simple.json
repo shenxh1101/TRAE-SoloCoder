@@ -1,0 +1,15 @@
+{
+  "id": "default_xml_to_json_simple",
+  "name": "XML转JSON简化模式",
+  "description": "将XML格式转换为JSON格式，简化属性前缀",
+  "source_format": "xml",
+  "target_format": "json",
+  "options": {
+    "preserve_comments": false,
+    "pretty_print": true,
+    "indent": 2
+  },
+  "mapping_script": null,
+  "field_mappings": null,
+  "is_default": true
+}

@@ -1,0 +1,4 @@
+name: TestApp
+config:
+  a: 1
+  c: []

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i18n 多语言本地化文件校验工具</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🌍 i18n 多语言本地化文件校验工具</h1>
+            <p class="subtitle">检查多语言翻译文件的键一致性、格式正确性和自定义规则</p>
+        </header>
+
+        <main>
+            <section class="upload-section">
+                <div class="card">
+                    <h2>📁 上传文件</h2>
+                    <div class="upload-area" id="dropZone">
+                        <input type="file" id="fileInput" multiple accept=".json,.zip" hidden>
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text">点击或拖拽文件到此处上传</p>
+                        <p class="upload-hint">支持 .json 单语言文件或 .zip 批量文件包</p>
+                    </div>
+                    <div id="fileList" class="file-list"></div>
+                </div>
+
+                <div class="card">
+                    <h2>⚙️ 配置设置</h2>
+                    <div class="form-group">
+                        <label for="baseLanguage">基准语言代码:</label>
+                        <input type="text" id="baseLanguage" value="en" placeholder="例如: en, zh-CN, ja">
+                        <small>作为对比基准的语言，默认为英文 (en)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="customConfig">自定义校验规则 (JSON):</label>
+                        <textarea id="customConfig" rows="6" placeholder='{
+  "allowed_missing_keys": ["optional.key", "deprecated.*"],
+  "regex_rules": {
+    ".*url": "^https?://.*",
+    "email.*": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+  }
+}'></textarea>
+                        <small>配置允许缺失的键和值的正则表达式规则</small>
+                    </div>
+                </div>
+
+                <button id="validateBtn" class="btn btn-primary" disabled>开始校验</button>
+            </section>
+
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <div class="results-header">
+                    <h2>📊 校验结果</h2>
+                    <div class="action-buttons">
+                        <button id="downloadMarkdown" class="btn btn-secondary">下载 Markdown 报告</button>
+                        <button id="downloadHtml" class="btn btn-secondary">下载 HTML 报告</button>
+                        <button id="downloadFixed" class="btn btn-success">下载修复后的文件</button>
+                    </div>
+                </div>
+
+                <div id="resultsContent"></div>
+
+                <div id="fixSection" class="fix-section" style="display: none;">
+                    <h3>🔧 自动修复</h3>
+                    <div id="fixSuggestions"></div>
+                    <button id="applyFixes" class="btn btn-success">应用选中的修复</button>
+                </div>
+            </section>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>正在校验中...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </main>
+
+        <footer class="footer">
+            <p>i18n 多语言本地化文件校验工具 | 支持 JSON 格式、批量校验、自动修复</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

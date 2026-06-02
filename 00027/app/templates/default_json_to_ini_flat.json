@@ -1,0 +1,15 @@
+{
+  "id": "default_json_to_ini_flat",
+  "name": "JSON转INI扁平化",
+  "description": "将嵌套的JSON结构扁平化为INI格式",
+  "source_format": "json",
+  "target_format": "ini",
+  "options": {
+    "preserve_comments": false,
+    "pretty_print": true,
+    "indent": 2
+  },
+  "mapping_script": "result = flatten_keys(data, \".\")",
+  "field_mappings": null,
+  "is_default": true
+}

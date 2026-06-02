@@ -1,0 +1,40 @@
+digraph dependencies {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor="#e8f4fd"];
+  edge [color="#666"];
+
+  npm_root [label="NPM", shape=ellipse, fillcolor="#ffd700"];
+  "react" [label="react\n18.2.0"];
+  npm_root -> "react";
+  "react-dom" [label="react-dom\n18.2.0"];
+  npm_root -> "react-dom";
+  "lodash" [label="lodash\n4.17.20"];
+  npm_root -> "lodash";
+  "axios" [label="axios\n0.21.0"];
+  npm_root -> "axios";
+  "express" [label="express\n4.18.0"];
+  npm_root -> "express";
+  "typescript" [label="typescript\n5.0.0"];
+  npm_root -> "typescript";
+  "jest" [label="jest\n29.0.0"];
+  npm_root -> "jest";
+  "eslint" [label="eslint\n8.0.0"];
+  npm_root -> "eslint";
+  pip_root [label="PIP", shape=ellipse, fillcolor="#ffd700"];
+  "django" [label="django\n==3.2.10"];
+  pip_root -> "django";
+  "flask" [label="flask\n==2.0.0"];
+  pip_root -> "flask";
+  "requests" [label="requests\n==2.28.0"];
+  pip_root -> "requests";
+  "pandas" [label="pandas\n>=1.5.0"];
+  pip_root -> "pandas";
+  "numpy" [label="numpy\n"];
+  pip_root -> "numpy";
+  "beautifulsoup4" [label="beautifulsoup4\n==4.11.0"];
+  pip_root -> "beautifulsoup4";
+  "pyyaml" [label="pyyaml\n==6.0"];
+  pip_root -> "pyyaml";
+  "toml" [label="toml\n>=0.10.2"];
+  pip_root -> "toml";
+}

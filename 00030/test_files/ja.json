@@ -1,0 +1,14 @@
+{
+  "greeting": "こんにちは {wrong_var}！",
+  "welcome": "アプリケーションへようこそ",
+  "buttons": {
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "save": "保存"
+  },
+  "messages": {
+    "success": "操作が正常に完了しました",
+    "error": "エラーが発生しました"
+  },
+  "broken_html": "<div>未闭合的标签"
+}
