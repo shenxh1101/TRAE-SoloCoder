@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工培训与考核管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎓 员工培训与考核管理系统</h1>
+            <p class="subtitle">自动化培训管理 · 智能学习监控 · 在线考试认证</p>
+        </header>
+
+        <main class="main-content">
+            <div class="login-section">
+                <div class="login-card">
+                    <h2>系统登录</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="employee_id">员工ID</label>
+                            <select id="employee_id" required>
+                                <option value="">请选择员工</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">登录系统</button>
+                    </form>
+                    <div class="login-tips">
+                        <p>💡 提示：选择员工后即可登录体验系统</p>
+                        <p>👑 经理级员工将获得管理员权限</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2>系统功能</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📚</div>
+                        <h3>智能课件处理</h3>
+                        <p>自动解析课件内容，根据岗位胜任力模型匹配员工</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <h3>报名管理</h3>
+                        <p>自动检测时间冲突，智能推荐替代时段，等待队列自动递补</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>实时学习监控</h3>
+                        <p>每30分钟采集学习数据，连续不达标自动预警</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✍️</div>
+                        <h3>在线考试</h3>
+                        <p>随机抽题，自动评分，智能补考流程</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h3>电子证书</h3>
+                        <p>考试通过自动颁发证书，更新员工技能标签</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <h3>效能报告</h3>
+                        <p>每月自动生成培训报告，多维度数据分析</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 员工培训与考核管理系统 | 全栈Web应用</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

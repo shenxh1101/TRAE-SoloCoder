@@ -1,0 +1,28 @@
+{
+  "repos": [
+    {
+      "name": "project-frontend",
+      "path": "/path/to/project-frontend",
+      "tags": ["frontend", "web"],
+      "enabled": true
+    },
+    {
+      "name": "project-backend",
+      "path": "/path/to/project-backend",
+      "tags": ["backend", "api"],
+      "enabled": true
+    },
+    {
+      "name": "project-mobile",
+      "path": "/path/to/project-mobile",
+      "tags": ["mobile", "app"],
+      "enabled": true
+    },
+    {
+      "name": "legacy-system",
+      "path": "/path/to/legacy-system",
+      "tags": ["legacy", "deprecated"],
+      "enabled": false
+    }
+  ]
+}

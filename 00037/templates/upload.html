@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>财务报表上传 - 信用风险管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .form-group label .required {
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #eef2ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: flex;
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            background: #667eea;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 16px;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .remove-file {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            transition: all 0.3s;
+        }
+
+        .remove-file:hover {
+            background: #c53030;
+            transform: rotate(90deg);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .alert-info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 1px solid #63b3ed;
+        }
+
+        .result-card {
+            background: #f0f4ff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .result-title::before {
+            content: '✓';
+            width: 28px;
+            height: 28px;
+            background: #48bb78;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .metric-value.high {
+            color: #48bb78;
+        }
+
+        .metric-value.medium {
+            color: #ed8936;
+        }
+
+        .metric-value.low {
+            color: #e53e3e;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .records-table th,
+        .records-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .records-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .records-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-pending {
+            background: #fefcbf;
+            color: #744210;
+        }
+
+        .status-failed {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .status-parsing {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+
+        .customer-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            background: #e9d8fd;
+            color: #553c9a;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .credit-level {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .credit-AAA { background: #48bb78; color: white; }
+        .credit-AA { background: #68d391; color: white; }
+        .credit-A { background: #9ae6b4; color: #22543d; }
+        .credit-BBB { background: #ecc94b; color: #744210; }
+        .credit-BB { background: #ed8936; color: white; }
+        .credit-B { background: #f6ad55; color: white; }
+        .credit-C { background: #e53e3e; color: white; }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-section {
+            background: #ebf8ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid #3182ce;
+        }
+
+        .info-section h4 {
+            color: #2c5282;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 6px 0;
+            color: #2c5282;
+            font-size: 14px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .info-section li::before {
+            content: '•';
+            position: absolute;
+            left: 8px;
+            color: #3182ce;
+            font-weight: bold;
+        }
+
+        .customer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .customer-info .label {
+            color: #718096;
+        }
+
+        .customer-info .value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f7fafc;
+            border-color: #667eea;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>信用风险管理系统</h1>
+            <p>财务报表上传与自动解析</p>
+        </div>
+
+        <div class="main-card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('upload')">上传报表</button>
+                <button class="tab-btn" onclick="switchTab('records')">上传记录</button>
+                <button class="tab-btn" onclick="switchTab('api')">API文档</button>
+            </div>
+
+            <div class="tab-content">
+                <div id="tab-upload" class="tab-pane active">
+                    <div class="info-section">
+                        <h4>📋 支持的文件格式</h4>
+                        <ul>
+                            <li><strong>Excel 格式</strong>: .xlsx, .xls (包含标准财务报表模板)</li>
+                            <li><strong>PDF 格式</strong>: .pdf (自动识别表格结构和关键财务指标)</li>
+                            <li>最大文件大小: 50MB</li>
+                        </ul>
+                    </div>
+
+                    <form id="uploadForm">
+                        <div class="form-group">
+                            <label for="customer_id">选择客户 <span class="required">*</span></label>
+                            <select id="customer_id" name="customer_id" class="form-control" required>
+                                <option value="">请选择客户</option>
+                                {% for customer in customers %}
+                                <option value="{{ customer.id }}">
+                                    {{ customer.name }} ({{ customer.customer_code }})
+                                    <span class="credit-level credit-{{ customer.credit_level }}">{{ customer.credit_level }}</span>
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div id="customerInfo" style="display:none; margin-top: 12px;">
+                                <div class="customer-info">
+                                    <span class="label">信用等级:</span>
+                                    <span class="value" id="custLevel">-</span>
+                                </div>
+                                <div class="customer-info">
+                                    <span class="label">信用额度:</span>
+                                    <span class="value" id="custLimit">-</span>
+                                </div>
+                                <div class="customer-info">
+                                    <span class="label">可用额度:</span>
+                                    <span class="value" id="custAvailable">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="report_period">报表周期</label>
+                            <input type="text" id="report_period" name="report_period" class="form-control" 
+                                   placeholder="如: 2024-Q1, 2024-H1, 2024-年度">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uploader">上传人</label>
+                            <input type="text" id="uploader" name="uploader" class="form-control" 
+                                   placeholder="请输入您的姓名">
+                        </div>
+
+                        <div class="form-group">
+                            <label>上传财务报表 <span class="required">*</span></label>
+                            <div class="file-upload-area" id="dropArea">
+                                <div class="upload-icon">📁</div>
+                                <div class="upload-text">点击选择文件或将文件拖拽到此处</div>
+                                <div class="upload-hint">支持 PDF, Excel (.xlsx, .xls) 格式，最大 50MB</div>
+                            </div>
+                            <input type="file" id="fileInput" name="file" accept=".pdf,.xlsx,.xls" style="display: none;" required>
+
+                            <div class="file-info" id="fileInfo">
+                                <div class="file-icon" id="fileIcon">PDF</div>
+                                <div class="file-details">
+                                    <div class="file-name" id="fileName">-</div>
+                                    <div class="file-size" id="fileSize">-</div>
+                                </div>
+                                <button type="button" class="remove-file" onclick="removeFile()">×</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span id="btnText">上传并解析报表</span>
+                        </button>
+
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">准备上传...</div>
+                        </div>
+
+                        <div class="alert alert-success" id="successAlert"></div>
+                        <div class="alert alert-error" id="errorAlert"></div>
+
+                        <div class="result-card" id="resultCard">
+                            <div class="result-title">解析完成</div>
+                            <div class="metrics-grid" id="metricsGrid"></div>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="tab-records" class="tab-pane">
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 14px; font-weight: 600; color: #2d3748;">筛选客户</label>
+                            <select id="filterCustomer" class="form-control" onchange="loadRecords(1)">
+                                <option value="">全部客户</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 14px; font-weight: 600; color: #2d3748;">解析状态</label>
+                            <select id="filterStatus" class="form-control" onchange="loadRecords(1)">
+                                <option value="">全部状态</option>
+                                <option value="success">解析成功</option>
+                                <option value="parsing">解析中</option>
+                                <option value="failed">解析失败</option>
+                                <option value="pending">待解析</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-secondary" onclick="loadRecords(1)">🔄 刷新</button>
+                        </div>
+                    </div>
+
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>客户名称</th>
+                                <th>文件名</th>
+                                <th>大小</th>
+                                <th>上传人</th>
+                                <th>上传时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsBody">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px; color: #718096;">
+                                    加载中...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pagination" id="pagination"></div>
+                </div>
+
+                <div id="tab-api" class="tab-pane">
+                    <div class="info-section">
+                        <h4>🔌 API 接口文档</h4>
+                        <ul>
+                            <li><strong>GET /api/customers</strong> - 获取客户列表</li>
+                            <li><strong>POST /api/upload</strong> - 上传并解析财务报表</li>
+                            <li><strong>GET /api/uploads</strong> - 获取上传记录列表</li>
+                            <li><strong>GET /api/uploads/{id}</strong> - 获取上传记录详情</li>
+                            <li><strong>GET /api/health</strong> - 健康检查</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h4>📝 上传接口说明</h4>
+                        <ul>
+                            <li><strong>请求方式</strong>: POST multipart/form-data</li>
+                            <li><strong>请求参数</strong>: file (文件), customer_id (客户ID), report_period (报表周期), uploader (上传人)</li>
+                            <li><strong>返回格式</strong>: JSON</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h4>📊 自动提取的财务指标</h4>
+                        <ul>
+                            <li>资产负债率 = 总负债 / 总资产</li>
+                            <li>流动比率 = 流动资产 / 流动负债</li>
+                            <li>速动比率 = (流动资产 - 存货) / 流动负债</li>
+                            <li>现金流比率 = 经营活动现金流 / 流动负债</li>
+                            <li>财务健康评分 (0-100分)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let currentPage = 1;
+        let totalPages = 1;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (tabName === 'records') {
+                loadCustomerFilters();
+                loadRecords(1);
+            }
+        }
+
+        document.getElementById('customer_id').addEventListener('change', function() {
+            const customerId = this.value;
+            const customerInfo = document.getElementById('customerInfo');
+            
+            if (customerId) {
+                const customers = {{ customers|tojson }};
+                const customer = customers.find(c => c.id == customerId);
+                if (customer) {
+                    document.getElementById('custLevel').innerHTML = 
+                        `<span class="credit-level credit-${customer.credit_level}">${customer.credit_level}</span>`;
+                    document.getElementById('custLimit').textContent = customer.credit_limit;
+                    document.getElementById('custAvailable').textContent = customer.available_credit;
+                    customerInfo.style.display = 'block';
+                }
+            } else {
+                customerInfo.style.display = 'none';
+            }
+        });
+
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+            const allowedExts = ['.pdf', '.xlsx', '.xls'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExts.includes(fileExt)) {
+                showAlert('error', '不支持的文件格式，请上传 PDF 或 Excel 文件');
+                return;
+            }
+
+            if (file.size > 50 * 1024 * 1024) {
+                showAlert('error', '文件大小超过限制，最大允许 50MB');
+                return;
+            }
+
+            selectedFile = file;
+            document.getElementById('fileIcon').textContent = fileExt.substring(1).toUpperCase();
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').classList.add('show');
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            document.getElementById('fileInfo').classList.remove('show');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const customerId = document.getElementById('customer_id').value;
+            if (!customerId) {
+                showAlert('error', '请选择客户');
+                return;
+            }
+
+            if (!selectedFile) {
+                showAlert('error', '请选择要上传的文件');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading-spinner"></span>上传中...';
+            progressContainer.classList.add('show');
+            document.getElementById('resultCard').classList.remove('show');
+            hideAlerts();
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('customer_id', customerId);
+            formData.append('report_period', document.getElementById('report_period').value);
+            formData.append('uploader', document.getElementById('uploader').value);
+
+            try {
+                progressFill.style.width = '30%';
+                progressText.textContent = '上传文件中...';
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressFill.style.width = '70%';
+                progressText.textContent = '解析财务数据中...';
+
+                const result = await response.json();
+
+                progressFill.style.width = '100%';
+
+                if (result.success) {
+                    showAlert('success', result.message || '上传成功！');
+                    displayMetrics(result.data.financial_indicators);
+                    progressText.textContent = '解析完成！';
+                    
+                    setTimeout(() => {
+                        resetForm();
+                    }, 3000);
+                } else {
+                    showAlert('error', result.error || '上传失败');
+                    progressText.textContent = '解析失败';
+                }
+            } catch (error) {
+                showAlert('error', '网络错误，请稍后重试: ' + error.message);
+                progressText.textContent = '上传失败';
+            } finally {
+                submitBtn.disabled = false;
+                btnText.innerHTML = '上传并解析报表';
+                setTimeout(() => {
+                    progressContainer.classList.remove('show');
+                    progressFill.style.width = '0%';
+                }, 2000);
+            }
+        });
+
+        function displayMetrics(indicators) {
+            const grid = document.getElementById('metricsGrid');
+            const metrics = [
+                { label: '资产负债率', value: indicators.asset_liability_ratio, type: 'ratio' },
+                { label: '流动比率', value: indicators.current_ratio, type: 'ratio' },
+                { label: '速动比率', value: indicators.quick_ratio, type: 'ratio' },
+                { label: '现金流比率', value: indicators.cash_flow_ratio, type: 'ratio' },
+                { label: '财务健康评分', value: indicators.financial_health_score, type: 'score' }
+            ];
+
+            grid.innerHTML = metrics.map(m => {
+                let level = 'high';
+                if (m.type === 'score') {
+                    const score = parseFloat(m.value);
+                    if (score >= 80) level = 'high';
+                    else if (score >= 60) level = 'medium';
+                    else level = 'low';
+                }
+                return `
+                    <div class="metric-card">
+                        <div class="metric-label">${m.label}</div>
+                        <div class="metric-value ${level}">${m.value}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        function showAlert(type, message) {
+            hideAlerts();
+            const alert = document.getElementById(type + 'Alert');
+            alert.textContent = message;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        function hideAlerts() {
+            document.querySelectorAll('.alert').forEach(alert => alert.classList.remove('show'));
+        }
+
+        function resetForm() {
+            document.getElementById('uploadForm').reset();
+            removeFile();
+            document.getElementById('customerInfo').style.display = 'none';
+        }
+
+        function loadCustomerFilters() {
+            const select = document.getElementById('filterCustomer');
+            const customers = {{ customers|tojson }};
+            select.innerHTML = '<option value="">全部客户</option>' + 
+                customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        async function loadRecords(page) {
+            currentPage = page;
+            const customerId = document.getElementById('filterCustomer').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            let url = `/api/uploads?page=${page}&per_page=10`;
+            if (customerId) url += `&customer_id=${customerId}`;
+            if (status) url += `&parse_status=${status}`;
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderRecords(result.data);
+                    renderPagination(result.page, result.total_pages);
+                } else {
+                    document.getElementById('recordsBody').innerHTML = 
+                        `<tr><td colspan="8" style="text-align: center; color: #e53e3e;">加载失败: ${result.error}</td></tr>`;
+                }
+            } catch (error) {
+                document.getElementById('recordsBody').innerHTML = 
+                    `<tr><td colspan="8" style="text-align: center; color: #e53e3e;">网络错误: ${error.message}</td></tr>`;
+            }
+        }
+
+        function renderRecords(records) {
+            const tbody = document.getElementById('recordsBody');
+            
+            if (records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 40px; color: #718096;">暂无上传记录</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>
+                        <span class="customer-badge">${r.customer_name}</span>
+                    </td>
+                    <td>${r.file_name}</td>
+                    <td>${formatFileSize(r.file_size)}</td>
+                    <td>${r.uploader || '-'}</td>
+                    <td>${r.upload_time || '-'}</td>
+                    <td><span class="status-badge status-${r.parse_status}">${getStatusText(r.parse_status)}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" 
+                                onclick="viewDetail(${r.id})">查看</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'pending': '待解析',
+                'parsing': '解析中',
+                'success': '解析成功',
+                'failed': '解析失败'
+            };
+            return map[status] || status;
+        }
+
+        function renderPagination(page, total) {
+            totalPages = total;
+            const pagination = document.getElementById('pagination');
+            
+            let html = `
+                <button onclick="loadRecords(${page - 1})" ${page === 1 ? 'disabled' : ''}>上一页</button>
+            `;
+
+            for (let i = 1; i <= total; i++) {
+                if (i === 1 || i === total || (i >= page - 1 && i <= page + 1)) {
+                    html += `<button class="${i === page ? 'active' : ''}" onclick="loadRecords(${i})">${i}</button>`;
+                } else if (i === page - 2 || i === page + 2) {
+                    html += `<button disabled>...</button>`;
+                }
+            }
+
+            html += `
+                <button onclick="loadRecords(${page + 1})" ${page === total ? 'disabled' : ''}>下一页</button>
+            `;
+
+            pagination.innerHTML = html;
+        }
+
+        async function viewDetail(id) {
+            try {
+                const response = await fetch(`/api/uploads/${id}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    let detailHtml = `
+                        <h3 style="margin-bottom: 16px;">上传记录详情 #${data.upload.id}</h3>
+                        <p><strong>客户:</strong> ${data.upload.customer_name}</p>
+                        <p><strong>文件名:</strong> ${data.upload.file_name}</p>
+                        <p><strong>文件大小:</strong> ${formatFileSize(data.upload.file_size)}</p>
+                        <p><strong>上传人:</strong> ${data.upload.uploader || '-'}</p>
+                        <p><strong>上传时间:</strong> ${data.upload.upload_time}</p>
+                        <p><strong>状态:</strong> <span class="status-badge status-${data.upload.parse_status}">${getStatusText(data.upload.parse_status)}</span></p>
+                    `;
+
+                    if (data.financial_record) {
+                        detailHtml += `
+                            <h4 style="margin-top: 20px; margin-bottom: 12px;">财务指标</h4>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-label">资产负债率</div>
+                                    <div class="metric-value">${data.financial_record.asset_liability_ratio || '-'}</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">流动比率</div>
+                                    <div class="metric-value">${data.financial_record.current_ratio || '-'}</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">速动比率</div>
+                                    <div class="metric-value">${data.financial_record.quick_ratio || '-'}</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">现金流比率</div>
+                                    <div class="metric-value">${data.financial_record.cash_flow_ratio || '-'}</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">财务健康评分</div>
+                                    <div class="metric-value">${data.financial_record.financial_health_score || '-'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (data.upload.parse_message && data.upload.parse_status === 'failed') {
+                        detailHtml += `
+                            <div class="alert alert-error show" style="margin-top: 20px;">
+                                解析错误: ${data.upload.parse_message}
+                            </div>
+                        `;
+                    }
+
+                    const popup = window.open('', '查看详情', 'width=600,height=700');
+                    popup.document.write(`
+                        <html>
+                        <head>
+                            <title>上传记录详情</title>
+                            <style>
+                                body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; }
+                                .metric-card { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+                                .metric-label { color: #718096; font-size: 12px; margin-bottom: 4px; }
+                                .metric-value { font-size: 20px; font-weight: 700; color: #2d3748; }
+                                .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+                            </style>
+                        </head>
+                        <body>${detailHtml}</body>
+                        </html>
+                    `);
+                }
+            } catch (error) {
+                alert('加载详情失败: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

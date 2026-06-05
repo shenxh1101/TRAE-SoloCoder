@@ -1,0 +1,101 @@
+2026-06-04 10:23:02 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:28:11 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:28:52 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:28:52 - backup_system.backup - INFO - Creating full backup for test_system, version: 20260604_102852
+2026-06-04 10:28:52 - backup_system.operation - INFO - [backup] System: test_system - Status: start - Message: Starting full backup - {'backup_version': '20260604_102852'}
+2026-06-04 10:28:52 - backup_system.storage.local - INFO - Uploaded /Users/mac/AI Coding/solo coder/00058/data/temp/test_system_20260604_102852/test_system_full_20260604_102852.tar.gz to /Users/mac/AI Coding/solo coder/00058/data/backups/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz
+2026-06-04 10:28:52 - backup_system.operation - INFO - [backup] System: test_system - Status: success - Message: full backup completed successfully - {'file_count': 3, 'total_size': 307}
+2026-06-04 10:28:52 - backup_system.backup - INFO - Backup completed successfully for test_system, version: 20260604_102852
+2026-06-04 10:29:44 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:29:44 - backup_system.backup - INFO - Creating incremental backup for test_system, version: 20260604_102944
+2026-06-04 10:29:44 - backup_system.operation - INFO - [backup] System: test_system - Status: start - Message: Starting incremental backup - {'backup_version': '20260604_102944'}
+2026-06-04 10:29:44 - backup_system.backup - INFO - Scanning for changes since 2026-06-04 10:28:52.975663
+2026-06-04 10:29:44 - backup_system.storage.local - INFO - Uploaded /Users/mac/AI Coding/solo coder/00058/data/temp/test_system_20260604_102944/test_system_incremental_20260604_102944.tar.gz to /Users/mac/AI Coding/solo coder/00058/data/backups/test_system/incremental_20260604_102944/test_system_incremental_20260604_102944.tar.gz
+2026-06-04 10:29:44 - backup_system.operation - INFO - [backup] System: test_system - Status: success - Message: incremental backup completed successfully - {'file_count': 2, 'total_size': 280}
+2026-06-04 10:29:44 - backup_system.backup - INFO - Backup completed successfully for test_system, version: 20260604_102944
+2026-06-04 10:29:59 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:30:09 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:30:09 - backup_system.verifier - INFO - Starting quick verification for backup 1
+2026-06-04 10:30:09 - backup_system.operation - INFO - [verify] System: test_system - Status: start - Message: Starting quick verification - {'backup_id': 1, 'backup_version': '20260604_102852'}
+2026-06-04 10:30:09 - backup_system.storage.local - ERROR - Failed to download test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz: [Errno 2] No such file or directory: '/Users/mac/AI Coding/solo coder/00058/data/backups/test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz'
+2026-06-04 10:30:09 - backup_system.verifier - WARNING - Verification retry 1/2 for backup 1
+2026-06-04 10:30:09 - backup_system.operation - WARNING - [verify_retry] System: test_system - Status: warning - Message: Retry 1 after failure: Failed to download backup from storage
+2026-06-04 10:30:09 - backup_system.storage.local - ERROR - Failed to download test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz: [Errno 2] No such file or directory: '/Users/mac/AI Coding/solo coder/00058/data/backups/test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz'
+2026-06-04 10:30:09 - backup_system.verifier - WARNING - Verification retry 2/2 for backup 1
+2026-06-04 10:30:09 - backup_system.operation - WARNING - [verify_retry] System: test_system - Status: warning - Message: Retry 2 after failure: Failed to download backup from storage
+2026-06-04 10:30:09 - backup_system.storage.local - ERROR - Failed to download test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz: [Errno 2] No such file or directory: '/Users/mac/AI Coding/solo coder/00058/data/backups/test_system/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz'
+2026-06-04 10:30:09 - backup_system.operation - ERROR - [verify] System: test_system - Status: error - Message: Verification failed after 2 retries - {'backup_id': 1, 'error': 'Failed to download backup from storage'}
+2026-06-04 10:30:09 - backup_system.notifier - INFO - Notification disabled, skipping alert
+2026-06-04 10:31:52 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:31:52 - backup_system.verifier - INFO - Starting quick verification for backup 1
+2026-06-04 10:31:52 - backup_system.operation - INFO - [verify] System: test_system - Status: start - Message: Starting quick verification - {'backup_id': 1, 'backup_version': '20260604_102852'}
+2026-06-04 10:31:52 - backup_system.storage.local - INFO - Downloaded /Users/mac/AI Coding/solo coder/00058/data/backups/test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz to /var/folders/ld/584667g11h1f87sghgjd3qt00000gp/T/verify_jlj07p0a/test_system_20260604_102852.tar.gz
+2026-06-04 10:31:52 - backup_system.verifier - DEBUG - Downloaded file checksum: fd153088d9ccef8c1e67d37c724985601a0651a7b6a284bcec350d3ab217ef37
+2026-06-04 10:31:52 - backup_system.operation - INFO - [verify] System: test_system - Status: success - Message: Verification passed - {'backup_id': 1}
+2026-06-04 10:32:11 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:32:11 - backup_system.restore - INFO - Starting restore of test_system version 20260604_102944 to /Users/mac/AI Coding/solo coder/00058/test_data/restore_test
+2026-06-04 10:32:11 - backup_system.operation - INFO - [restore] System: test_system - Status: start - Message: Restoring backup 20260604_102944 to /Users/mac/AI Coding/solo coder/00058/test_data/restore_test - {'backup_id': 2}
+2026-06-04 10:32:11 - backup_system.storage.local - INFO - Downloaded /Users/mac/AI Coding/solo coder/00058/data/backups/test_system/incremental_20260604_102944/test_system_incremental_20260604_102944.tar.gz to /var/folders/ld/584667g11h1f87sghgjd3qt00000gp/T/restore_j4ppyvi9/test_system_20260604_102944.tar.gz
+2026-06-04 10:32:11 - backup_system.operation - INFO - [restore] System: test_system - Status: success - Message: Restore completed successfully - {'backup_version': '20260604_102944', 'restore_path': '/Users/mac/AI Coding/solo coder/00058/test_data/restore_test'}
+2026-06-04 10:32:37 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:32:37 - backup_system.report - INFO - Generating weekly backup report
+2026-06-04 10:32:37 - backup_system.report - WARNING - reportlab not available, generating text report instead: No module named 'reportlab'
+2026-06-04 10:32:37 - backup_system.report - INFO - Text report generated at /Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.txt
+2026-06-04 10:32:37 - backup_system.report - INFO - Excel report generated at /Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.xlsx
+2026-06-04 10:32:37 - backup_system.report - INFO - JSON report generated at /Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.json
+2026-06-04 10:32:37 - backup_system.notifier - INFO - Notification disabled, skipping alert
+2026-06-04 10:32:37 - backup_system.operation - INFO - [report] System: all - Status: success - Message: weekly report generated - {'report_id': 1, 'paths': ['/Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.txt', '/Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.xlsx', '/Users/mac/AI Coding/solo coder/00058/logs/reports/backup_report_weekly_20260604_103237.json']}
+2026-06-04 10:32:49 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:02 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:11 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:11 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:16 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:25 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:32 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:38 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:49 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:33:49 - backup_system.query - INFO - Exported 2 records to CSV: /Users/mac/AI Coding/solo coder/00058/test_data/export.csv
+2026-06-04 10:33:49 - backup_system.operation - INFO - [export] System: all - Status: success - Message: Exported 2 backup records to csv - {'output_path': '/Users/mac/AI Coding/solo coder/00058/test_data/export.csv', 'count': 2}
+2026-06-04 10:35:23 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:35:23 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:35:23 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:51:34 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:51:44 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:51:44 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:51:50 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:53:20 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Scheduled backup job for test_system: 0 2 * * *
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Scheduled backup job for example_system: 0 2 * * *
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Scheduled retention cleanup: daily at 3:0
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Scheduled weekly report: 0 8 * * 0
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Backup scheduler started successfully
+2026-06-04 10:53:20 - backup_system.operation - INFO - [scheduler] System: system - Status: start - Message: Backup scheduler started - {'jobs': 4}
+2026-06-04 10:53:20 - backup_system.backup_system.scheduler - INFO - Backup scheduler stopped
+2026-06-04 10:53:20 - backup_system.operation - INFO - [scheduler] System: system - Status: stop - Message: Backup scheduler stopped
+2026-06-04 10:53:34 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:54:18 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Scheduled backup job for test_system: 0 2 * * *
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Scheduled backup job for example_system: 0 2 * * *
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Scheduled retention cleanup: 0 3 * * *
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Scheduled weekly report: 0 8 * * 0
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Backup scheduler started successfully
+2026-06-04 10:54:18 - backup_system.operation - INFO - [scheduler] System: system - Status: start - Message: Backup scheduler started - {'jobs': 4}
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - INFO - Starting scheduled backup for system: test_system
+2026-06-04 10:54:18 - backup_system.operation - INFO - [scheduled_backup] System: test_system - Status: start - Message: Starting scheduled backup for test_system
+2026-06-04 10:54:18 - backup_system.backup - INFO - Creating incremental backup for test_system, version: 20260604_105418
+2026-06-04 10:54:18 - backup_system.operation - INFO - [backup] System: test_system - Status: start - Message: Starting incremental backup - {'backup_version': '20260604_105418'}
+2026-06-04 10:54:18 - backup_system.backup - INFO - Scanning for changes since 2026-06-04 10:29:44.380595
+2026-06-04 10:54:18 - backup_system.backup - INFO - No changes detected for test_system, skipping incremental backup
+2026-06-04 10:54:18 - backup_system.operation - INFO - [backup] System: test_system - Status: success - Message: Backup skipped - no changes
+2026-06-04 10:54:18 - backup_system.backup_system.scheduler - ERROR - Scheduled backup failed for test_system: None
+2026-06-04 10:54:18 - backup_system.operation - ERROR - [scheduled_backup] System: test_system - Status: error - Message: Scheduled backup failed: None - {'error': None}
+2026-06-04 10:54:18 - backup_system.notifier - INFO - Notification disabled, skipping alert
+2026-06-04 10:54:21 - backup_system.backup_system.scheduler - INFO - Backup scheduler stopped
+2026-06-04 10:54:21 - backup_system.operation - INFO - [scheduler] System: system - Status: stop - Message: Backup scheduler stopped
+2026-06-04 11:02:55 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 11:02:55 - backup_system.storage - INFO - Using storage backend: local
+2026-06-04 11:02:55 - backup_system.backup - INFO - Creating incremental backup for test_system, version: 20260604_110255
+2026-06-04 11:02:55 - backup_system.operation - INFO - [backup] System: test_system - Status: start - Message: Starting incremental backup - {'backup_version': '20260604_110255'}
+2026-06-04 11:02:55 - backup_system.backup - INFO - Scanning for changes since 2026-06-04 10:29:44.380595
+2026-06-04 11:02:55 - backup_system.backup - INFO - No changes detected for test_system, skipping incremental backup
+2026-06-04 11:02:55 - backup_system.operation - INFO - [backup] System: test_system - Status: success - Message: Backup skipped - no changes

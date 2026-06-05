@@ -1,0 +1,134 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+}
+
+.searchBar {
+  padding: $spacing-md $page-padding;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  height: 72rpx;
+}
+
+.searchIcon {
+  font-size: $font-size-lg;
+  margin-right: $spacing-sm;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.categoryTabs {
+  display: flex;
+  background: $color-bg-card;
+  padding: 0 $page-padding;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.tabItem {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-lg 0;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  position: relative;
+  transition: all $transition-base;
+
+  &.active {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60rpx;
+      height: 6rpx;
+      background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+      border-radius: 3rpx;
+    }
+  }
+}
+
+.filterBar {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.filterItem {
+  flex: 1;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+
+  &.active {
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.viewSwitch {
+  display: flex;
+  padding: $spacing-md $page-padding;
+  gap: $spacing-md;
+}
+
+.switchBtn {
+  flex: 1;
+  @include button-reset;
+  height: $button-height-sm;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  background: $color-bg-page;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+
+  &.active {
+    background: rgba(30, 136, 229, 0.1);
+    color: $color-primary;
+    border-color: $color-primary;
+  }
+}
+
+.packageList {
+  padding: $spacing-md $page-padding;
+}
+
+.storeList {
+  padding: $spacing-md $page-padding;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl * 2;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+}
+
+.loading {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-tertiary;
+}

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D递归嵌套形状 - 俄罗斯套娃</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            width: 320px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        #control-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #control-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        #control-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.5);
+            transition: transform 0.2s;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .control-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .control-group select:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .control-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .value-display {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .layer-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .layer-indicator span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container"></div>
+        
+        <div id="control-panel">
+            <h1>🔮 3D递归嵌套形状</h1>
+            
+            <div class="control-group">
+                <label>递归深度: <span class="value-display" id="depth-value">3</span></label>
+                <input type="range" id="depth-slider" min="1" max="6" value="3">
+            </div>
+
+            <div class="control-group">
+                <label>嵌套形状</label>
+                <select id="shape-select">
+                    <option value="cube">立方体</option>
+                    <option value="sphere">球体</option>
+                    <option value="tetrahedron">四面体</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>缩放比例: <span class="value-display" id="scale-value">0.65</span></label>
+                <input type="range" id="scale-slider" min="0.4" max="0.85" step="0.05" value="0.65">
+            </div>
+
+            <div class="control-group">
+                <label>层间距: <span class="value-display" id="spacing-value">1.0</span></label>
+                <input type="range" id="spacing-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>旋转速度: <span class="value-display" id="speed-value">1.0</span></label>
+                <input type="range" id="speed-slider" min="0.1" max="3.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>速度差: <span class="value-display" id="speed-diff-value">0.5</span></label>
+                <input type="range" id="speed-diff-slider" min="0.1" max="1.5" step="0.1" value="0.5">
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="screenshot-btn">📸 截图</button>
+                <button class="btn btn-success" id="export-btn">💾 导出</button>
+            </div>
+            
+            <div class="button-group" style="margin-top: 10px;">
+                <button class="btn btn-warning" id="import-btn">📂 导入</button>
+                <button class="btn btn-info" id="reset-btn">🔄 重置</button>
+            </div>
+            
+            <input type="file" id="file-input" class="hidden-input" accept=".json">
+
+            <div class="info-text">
+                💡 点击任意嵌套层可聚焦穿透<br>
+                🖱️ 拖拽旋转场景 | 滚轮缩放<br>
+                🔄 重置按钮可回到初始外层视图
+            </div>
+        </div>
+
+        <div class="layer-indicator">
+            当前焦点层: <span id="focus-layer">外层 (层 0)</span>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, raycaster, mouse;
+        let nestedObjects = [];
+        let edges = [];
+        let lights = [];
+        let focusIndex = 0;
+        let focusDepth = 0;
+        let isAnimatingCamera = false;
+        let isRebuilding = false;
+        let shapeAnimations = [];
+        let targetCameraPosition = new THREE.Vector3();
+        let targetLookAt = new THREE.Vector3();
+        
+        let config = {
+            depth: 3,
+            shape: 'cube',
+            scale: 0.65,
+            spacing: 1.0,
+            speed: 1.0,
+            speedDiff: 0.5,
+            baseSize: 2.0
+        };
+
+        const colors = [
+            0x667eea, 0x764ba2, 0xf093fb, 0xf5576c,
+            0x4facfe, 0x00f2fe, 0x43e97b, 0x38f9d7
+        ];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.FogExp2(0x0a0a1a, 0.05);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 8);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            setupLights();
+            createNestedShapes();
+            setupControls();
+            setupEventListeners();
+            animate();
+        }
+
+        function setupLights() {
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+            mainLight.position.set(5, 5, 5);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            scene.add(mainLight);
+            lights.push(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0x667eea, 0.5);
+            fillLight.position.set(-5, -3, -5);
+            scene.add(fillLight);
+            lights.push(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xf5576c, 0.3);
+            rimLight.position.set(0, 5, -5);
+            scene.add(rimLight);
+            lights.push(rimLight);
+
+            const pointLight1 = new THREE.PointLight(0x4facfe, 1, 20);
+            pointLight1.position.set(3, 3, 3);
+            scene.add(pointLight1);
+            lights.push(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0xf093fb, 1, 20);
+            pointLight2.position.set(-3, -3, -3);
+            scene.add(pointLight2);
+            lights.push(pointLight2);
+        }
+
+        function createGeometry(shape, size) {
+            switch(shape) {
+                case 'sphere':
+                    return new THREE.SphereGeometry(size, 32, 32);
+                case 'tetrahedron':
+                    return new THREE.TetrahedronGeometry(size);
+                default:
+                    return new THREE.BoxGeometry(size, size, size);
+            }
+        }
+
+        function createNestedShapes() {
+            nestedObjects.forEach(obj => {
+                scene.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+            edges.forEach(edge => {
+                scene.remove(edge);
+                if (edge.geometry) edge.geometry.dispose();
+                if (edge.material) edge.material.dispose();
+            });
+            nestedObjects = [];
+            edges = [];
+            shapeAnimations = [];
+
+            const baseSize = config.baseSize;
+            
+            for (let i = 0; i < config.depth; i++) {
+                const scale = Math.pow(config.scale, i);
+                const size = baseSize * scale;
+                const zOffset = i * config.spacing * scale * 0.5;
+                
+                const geometry = createGeometry(config.shape, size);
+                const colorIndex = (i + focusDepth) % colors.length;
+                const color = colors[colorIndex];
+                
+                const material = new THREE.MeshPhysicalMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: Math.min(0.3 + (i * 0.1), 0.85),
+                    roughness: 0.2,
+                    metalness: 0.3,
+                    transmission: 0.3,
+                    thickness: 0.5,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.1,
+                    side: THREE.DoubleSide
+                });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.z = zOffset;
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.userData.layerIndex = i;
+                mesh.userData.basePosition = new THREE.Vector3(0, 0, zOffset);
+                mesh.userData.rotationSpeed = config.speed * (1 + i * config.speedDiff) * (i % 2 === 0 ? 1 : -1);
+                
+                if (isRebuilding) {
+                    mesh.scale.set(0.001, 0.001, 0.001);
+                }
+                
+                scene.add(mesh);
+                nestedObjects.push(mesh);
+
+                const edgeGeometry = new THREE.EdgesGeometry(geometry);
+                const edgeMaterial = new THREE.LineBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0.9,
+                    linewidth: 2
+                });
+                const edge = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+                edge.position.copy(mesh.position);
+                edge.userData.layerIndex = i;
+                if (isRebuilding) {
+                    edge.scale.set(0.001, 0.001, 0.001);
+                }
+                scene.add(edge);
+                edges.push(edge);
+
+                shapeAnimations.push({
+                    targetScale: 1,
+                    currentScale: isRebuilding ? 0.001 : 1,
+                    speed: 0.06 + i * 0.015,
+                    done: !isRebuilding
+                });
+            }
+
+            isRebuilding = false;
+        }
+
+        function setupControls() {
+            let isDragging = false;
+            let dragDistance = 0;
+            let previousMousePosition = { x: 0, y: 0 };
+            let rotationVelocity = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                dragDistance = 0;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging && !isAnimatingCamera) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+                    dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
+                    
+                    rotationVelocity.x = deltaY * 0.01;
+                    rotationVelocity.y = deltaX * 0.01;
+
+                    nestedObjects.forEach(obj => {
+                        obj.rotation.x += rotationVelocity.x;
+                        obj.rotation.y += rotationVelocity.y;
+                    });
+                    edges.forEach(edge => {
+                        edge.rotation.x += rotationVelocity.x;
+                        edge.rotation.y += rotationVelocity.y;
+                    });
+                }
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            renderer.domElement.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            renderer.domElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomSpeed = 0.001;
+                camera.position.z += e.deltaY * zoomSpeed;
+                camera.position.z = Math.max(3, Math.min(20, camera.position.z));
+            }, { passive: false });
+
+            renderer.domElement.addEventListener('click', (e) => {
+                if (dragDistance > 5) return;
+                onObjectClick(e);
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('depth-slider').addEventListener('input', (e) => {
+                config.depth = parseInt(e.target.value);
+                document.getElementById('depth-value').textContent = config.depth;
+                createNestedShapes();
+                updateFocusIndicator();
+            });
+
+            document.getElementById('shape-select').addEventListener('change', (e) => {
+                config.shape = e.target.value;
+                createNestedShapes();
+            });
+
+            document.getElementById('scale-slider').addEventListener('input', (e) => {
+                config.scale = parseFloat(e.target.value);
+                document.getElementById('scale-value').textContent = config.scale.toFixed(2);
+                createNestedShapes();
+            });
+
+            document.getElementById('spacing-slider').addEventListener('input', (e) => {
+                config.spacing = parseFloat(e.target.value);
+                document.getElementById('spacing-value').textContent = config.spacing.toFixed(1);
+                createNestedShapes();
+            });
+
+            document.getElementById('speed-slider').addEventListener('input', (e) => {
+                config.speed = parseFloat(e.target.value);
+                document.getElementById('speed-value').textContent = config.speed.toFixed(1);
+                updateRotationSpeeds();
+            });
+
+            document.getElementById('speed-diff-slider').addEventListener('input', (e) => {
+                config.speedDiff = parseFloat(e.target.value);
+                document.getElementById('speed-diff-value').textContent = config.speedDiff.toFixed(1);
+                updateRotationSpeeds();
+            });
+
+            document.getElementById('screenshot-btn').addEventListener('click', takeScreenshot);
+            document.getElementById('export-btn').addEventListener('click', exportConfig);
+            document.getElementById('import-btn').addEventListener('click', () => {
+                document.getElementById('file-input').click();
+            });
+            document.getElementById('file-input').addEventListener('change', importConfig);
+            document.getElementById('reset-btn').addEventListener('click', resetView);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function updateRotationSpeeds() {
+            nestedObjects.forEach((obj, i) => {
+                obj.userData.rotationSpeed = config.speed * (1 + i * config.speedDiff) * (i % 2 === 0 ? 1 : -1);
+            });
+        }
+
+        function onObjectClick(event) {
+            if (isAnimatingCamera) return;
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(nestedObjects);
+
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                const layerIndex = clickedObject.userData.layerIndex;
+                focusOnLayer(layerIndex);
+            }
+        }
+
+        function focusOnLayer(layerIndex) {
+            focusDepth++;
+            focusIndex = layerIndex;
+            updateFocusIndicator();
+
+            isRebuilding = true;
+            createNestedShapes();
+
+            targetCameraPosition.set(0, 0, 5);
+            targetLookAt.set(0, 0, 0);
+            isAnimatingCamera = true;
+        }
+
+        function updateFocusIndicator() {
+            const indicator = document.getElementById('focus-layer');
+            if (focusDepth === 0) {
+                indicator.textContent = '外层 (层 0)';
+            } else {
+                indicator.textContent = `穿透深度 ${focusDepth} · 起始层 ${focusIndex}`;
+            }
+        }
+
+        function takeScreenshot() {
+            renderer.render(scene, camera);
+            const link = document.createElement('a');
+            link.download = `nested-shapes-${Date.now()}.png`;
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+        }
+
+        function exportConfig() {
+            const exportData = Object.assign({}, config, { focusDepth: focusDepth });
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `nested-shapes-config-${Date.now()}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function importConfig(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedConfig = JSON.parse(e.target.result);
+                    if (importedConfig.focusDepth !== undefined) {
+                        focusDepth = importedConfig.focusDepth;
+                        delete importedConfig.focusDepth;
+                    }
+                    Object.assign(config, importedConfig);
+                    
+                    document.getElementById('depth-slider').value = config.depth;
+                    document.getElementById('depth-value').textContent = config.depth;
+                    document.getElementById('shape-select').value = config.shape;
+                    document.getElementById('scale-slider').value = config.scale;
+                    document.getElementById('scale-value').textContent = config.scale.toFixed(2);
+                    document.getElementById('spacing-slider').value = config.spacing;
+                    document.getElementById('spacing-value').textContent = config.spacing.toFixed(1);
+                    document.getElementById('speed-slider').value = config.speed;
+                    document.getElementById('speed-value').textContent = config.speed.toFixed(1);
+                    document.getElementById('speed-diff-slider').value = config.speedDiff;
+                    document.getElementById('speed-diff-value').textContent = config.speedDiff.toFixed(1);
+                    
+                    isRebuilding = true;
+                    createNestedShapes();
+                    updateFocusIndicator();
+                } catch (err) {
+                    alert('配置文件格式错误！');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function resetView() {
+            focusIndex = 0;
+            focusDepth = 0;
+            updateFocusIndicator();
+            
+            isRebuilding = true;
+            createNestedShapes();
+            
+            targetCameraPosition.set(0, 0, 8);
+            targetLookAt.set(0, 0, 0);
+            isAnimatingCamera = true;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = Date.now() * 0.001;
+
+            nestedObjects.forEach((obj, i) => {
+                if (shapeAnimations[i] && !shapeAnimations[i].done) {
+                    const anim = shapeAnimations[i];
+                    anim.currentScale += (anim.targetScale - anim.currentScale) * anim.speed;
+                    if (anim.currentScale > anim.targetScale - 0.005) {
+                        anim.currentScale = anim.targetScale;
+                        anim.done = true;
+                    }
+                    obj.scale.set(anim.currentScale, anim.currentScale, anim.currentScale);
+                    if (edges[i]) {
+                        edges[i].scale.set(anim.currentScale, anim.currentScale, anim.currentScale);
+                    }
+                }
+
+                obj.rotation.x += obj.userData.rotationSpeed * 0.005;
+                obj.rotation.y += obj.userData.rotationSpeed * 0.007;
+            });
+
+            edges.forEach((edge, i) => {
+                if (nestedObjects[i]) {
+                    edge.rotation.copy(nestedObjects[i].rotation);
+                    edge.position.copy(nestedObjects[i].position);
+                }
+            });
+
+            if (lights[3]) lights[3].position.x = Math.sin(time * 0.5) * 5;
+            if (lights[4]) lights[4].position.x = Math.cos(time * 0.5) * 5;
+
+            if (isAnimatingCamera) {
+                camera.position.lerp(targetCameraPosition, 0.05);
+                const currentLookAt = new THREE.Vector3(0, 0, 0);
+                currentLookAt.lerp(targetLookAt, 0.05);
+                camera.lookAt(currentLookAt);
+
+                if (camera.position.distanceTo(targetCameraPosition) < 0.01) {
+                    isAnimatingCamera = false;
+                    camera.position.copy(targetCameraPosition);
+                    camera.lookAt(targetLookAt);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+}
+
+.mapPlaceholder {
+  height: 500rpx;
+  background: linear-gradient(135deg, #4568DC 0%, #B06AB3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.mapContent {
+  text-align: center;
+  color: $color-text-white;
+}
+
+.mapIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.mapText {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.userPin {
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  font-size: 48rpx;
+}
+
+.rescuePin {
+  position: absolute;
+  top: 40%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  font-size: 48rpx;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+.detailCard {
+  margin: -$spacing-lg $page-padding 0;
+  position: relative;
+  z-index: 10;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  box-shadow: $shadow-float;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+}
+
+.typeInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.typeIcon {
+  font-size: 48rpx;
+}
+
+.typeName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.statusBadge {
+  padding: 8rpx 24rpx;
+  background: rgba(30, 136, 229, 0.1);
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.etaCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  text-align: center;
+  color: $color-text-white;
+  margin-bottom: $spacing-xl;
+}
+
+.etaValue {
+  font-size: 80rpx;
+  font-weight: $font-weight-bold;
+  display: block;
+}
+
+.etaLabel {
+  font-size: $font-size-md;
+  opacity: 0.9;
+}
+
+.infoSection {
+  margin-bottom: $spacing-lg;
+}
+
+.infoLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.infoValue {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-normal;
+}
+
+.driverCard {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  background: $color-bg-page;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.driverAvatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: $color-text-white;
+  margin-right: $spacing-md;
+}
+
+.driverInfo {
+  flex: 1;
+}
+
+.driverName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.driverVehicle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.actionBtns {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &.call {
+    background: linear-gradient(135deg, $color-success 0%, #66BB6A 100%);
+    color: $color-text-white;
+  }
+
+  &.cancel {
+    background: $color-bg-page;
+    color: $color-error;
+    border: 2rpx solid $color-error;
+  }
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.timeline {
+  padding: $spacing-lg 0;
+}
+
+.timelineItem {
+  display: flex;
+  position: relative;
+  padding-left: $spacing-xl;
+  padding-bottom: $spacing-lg;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 12rpx;
+    top: 36rpx;
+    bottom: 0;
+    width: 4rpx;
+    background: $color-border;
+  }
+
+  &:last-child::before {
+    display: none;
+  }
+
+  &.completed::before {
+    background: $color-success;
+  }
+
+  &.current::before {
+    background: linear-gradient(180deg, $color-primary 0%, $color-border 100%);
+  }
+}
+
+.timelineDot {
+  position: absolute;
+  left: 0;
+  top: 8rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: $color-border;
+  border: 4rpx solid $color-bg-card;
+
+  .completed & {
+    background: $color-success;
+  }
+
+  .current & {
+    background: $color-primary;
+    box-shadow: 0 0 0 8rpx rgba(30, 136, 229, 0.2);
+  }
+}
+
+.timelineContent {
+  flex: 1;
+}
+
+.timelineTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: 4rpx;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl * 3;
+  color: $color-text-tertiary;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-lg;
+  display: block;
+}

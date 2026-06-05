@@ -1,0 +1,120 @@
+@use '@/styles/compat.scss';
+@use '@/styles/variables.scss' as *;
+
+// 全局样式
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    sans-serif;
+  font-size: $font-size-md;
+  line-height: $line-height-normal;
+  color: $color-text-primary;
+  background: linear-gradient(180deg, #EBF5FF 0%, $color-bg-page 100%);
+  min-height: 100vh;
+}
+
+// 渐变文字
+.gradient-text {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// 卡片通用样式
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+}
+
+// 按钮通用样式
+.btn-primary {
+  @include button-reset;
+  height: $button-height-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  min-width: 120rpx;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btn-rescue {
+  @include button-reset;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-rescue 0%, $color-rescue-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+  box-shadow: 0 8rpx 24rpx rgba(255, 152, 0, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btn-outline {
+  @include button-reset;
+  height: $button-height-md;
+  background: transparent;
+  color: $color-primary;
+  border: 2rpx solid $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+  min-width: 120rpx;
+
+  &:active {
+    background: rgba(30, 136, 229, 0.1);
+    transform: scale(0.98);
+  }
+}
+
+// 标签样式
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 16rpx;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+}
+
+.tag-success {
+  background: rgba(76, 175, 80, 0.1);
+  color: $color-success;
+}
+
+.tag-warning {
+  background: rgba(255, 152, 0, 0.1);
+  color: $color-warning;
+}
+
+.tag-error {
+  background: rgba(244, 67, 54, 0.1);
+  color: $color-error;
+}
+
+.tag-gold {
+  background: rgba(255, 215, 0, 0.15);
+  color: #DAA520;
+}
+
+.tag-silver {
+  background: rgba(192, 192, 192, 0.2);
+  color: #808080;
+}

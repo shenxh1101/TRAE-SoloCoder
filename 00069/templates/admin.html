@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Gateway 管理控制台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>API Gateway 管理控制台</h1>
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot"></span>
+                <span id="statusText">运行中</span>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="routes">路由管理</button>
+            <button class="tab-btn" data-tab="mock">Mock路由</button>
+            <button class="tab-btn" data-tab="auth">鉴权配置</button>
+            <button class="tab-btn" data-tab="rate-limit">限流配置</button>
+            <button class="tab-btn" data-tab="logs">日志查看</button>
+            <button class="tab-btn" data-tab="config">全局配置</button>
+        </nav>
+
+        <main>
+            <section id="routes" class="tab-content active">
+                <div class="section-header">
+                    <h2>路由管理</h2>
+                    <button class="btn btn-primary" onclick="showRouteModal()">添加路由</button>
+                </div>
+                <div id="routesList" class="card-list"></div>
+            </section>
+
+            <section id="mock" class="tab-content">
+                <div class="section-header">
+                    <h2>Mock路由</h2>
+                    <button class="btn btn-primary" onclick="showMockModal()">添加Mock路由</button>
+                </div>
+                <div id="mockRoutesList" class="card-list"></div>
+            </section>
+
+            <section id="auth" class="tab-content">
+                <div class="section-header">
+                    <h2>鉴权配置</h2>
+                    <button class="btn btn-primary" onclick="saveAuthConfig()">保存配置</button>
+                </div>
+                <div id="authConfig" class="form-container"></div>
+            </section>
+
+            <section id="rate-limit" class="tab-content">
+                <div class="section-header">
+                    <h2>限流配置</h2>
+                    <button class="btn btn-primary" onclick="saveRateLimitConfig()">保存配置</button>
+                    <button class="btn btn-secondary" onclick="resetRateLimit()">重置计数器</button>
+                </div>
+                <div id="rateLimitConfig" class="form-container"></div>
+                <div id="rateLimitStats" class="stats-container"></div>
+            </section>
+
+            <section id="logs" class="tab-content">
+                <div class="section-header">
+                    <h2>日志查看</h2>
+                    <div class="log-filters">
+                        <input type="text" id="logPath" placeholder="路径过滤">
+                        <input type="number" id="logStatus" placeholder="状态码">
+                        <button class="btn btn-primary" onclick="loadLogs()">查询</button>
+                    </div>
+                </div>
+                <div id="logsList" class="logs-container"></div>
+            </section>
+
+            <section id="config" class="tab-content">
+                <div class="section-header">
+                    <h2>全局配置</h2>
+                    <button class="btn btn-primary" onclick="saveGlobalConfig()">保存配置</button>
+                    <button class="btn btn-secondary" onclick="reloadConfig()">热加载配置</button>
+                </div>
+                <div id="globalConfig" class="form-container"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="routeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('routeModal')">&times;</span>
+            <h3 id="routeModalTitle">添加路由</h3>
+            <form id="routeForm">
+                <input type="hidden" id="routeEditPrefix">
+                <div class="form-group">
+                    <label>路径前缀</label>
+                    <input type="text" id="routePathPrefix" placeholder="/api/user" required>
+                </div>
+                <div class="form-group">
+                    <label>后端服务地址</label>
+                    <input type="text" id="routeBackendUrl" placeholder="http://user-svc:8080" required>
+                </div>
+                <div class="form-group">
+                    <label>超时时间(秒)</label>
+                    <input type="number" id="routeTimeout" value="30">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="routeAuthEnabled" checked> 启用鉴权
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>鉴权方法(逗号分隔)</label>
+                    <input type="text" id="routeAuthMethods" value="api_key,jwt,basic_auth">
+                </div>
+                <div class="form-group">
+                    <label>请求/响应转换配置 (JSON)</label>
+                    <textarea id="routeTransform" rows="10" placeholder='{"request": {"add_headers": {...}}, "response": {"hide_sensitive_fields": [...]}}'></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveRoute()">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mockModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('mockModal')">&times;</span>
+            <h3 id="mockModalTitle">添加Mock路由</h3>
+            <form id="mockForm">
+                <input type="hidden" id="mockEditPath">
+                <div class="form-group">
+                    <label>路径</label>
+                    <input type="text" id="mockPath" placeholder="/api/mock/test" required>
+                </div>
+                <div class="form-group">
+                    <label>状态码</label>
+                    <input type="number" id="mockStatusCode" value="200">
+                </div>
+                <div class="form-group">
+                    <label>响应头(JSON)</label>
+                    <textarea id="mockHeaders" rows="3">{"Content-Type": "application/json"}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>响应体(JSON)</label>
+                    <textarea id="mockBody" rows="5">{"message": "Mock response"}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>延迟(毫秒)</label>
+                    <input type="number" id="mockDelay" value="0">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveMockRoute()">保存</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='admin.js') }}"></script>
+</body>
+</html>

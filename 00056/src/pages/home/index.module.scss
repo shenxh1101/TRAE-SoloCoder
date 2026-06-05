@@ -1,0 +1,206 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $page-padding;
+  gap: $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.searchBox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  height: 72rpx;
+}
+
+.searchIcon {
+  font-size: $font-size-lg;
+  margin-right: $spacing-sm;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.searchPlaceholder {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.messageIcon {
+  font-size: 40rpx;
+  color: $color-text-white;
+}
+
+.banner {
+  margin: $spacing-lg $page-padding;
+  height: 320rpx;
+  border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+}
+
+.quickEntry {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 $page-padding $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.entryItem {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md 0;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.entryIcon {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  margin-bottom: $spacing-sm;
+
+  &.carWash {
+    background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
+  }
+
+  &.maintenance {
+    background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
+  }
+
+  &.repair {
+    background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  }
+
+  &.rescue {
+    background: linear-gradient(135deg, #F06292 0%, #EC407A 100%);
+  }
+}
+
+.entryText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.section {
+  margin: 0 $page-padding $spacing-lg;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.moreLink {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.scrollContainer {
+  @include scroll-x-container;
+  margin: 0 (-$page-padding);
+  padding: 0 $page-padding;
+}
+
+.packageCard {
+  @include scroll-x-item(520rpx);
+  margin-right: $spacing-md;
+}
+
+.vehicleSection {
+  margin: 0 $page-padding $spacing-lg;
+}
+
+.rescueEntry {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 120rpx);
+  left: $page-padding;
+  right: $page-padding;
+  z-index: 100;
+}
+
+.rescueBtn {
+  @include button-reset;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-rescue 0%, $color-rescue-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(255, 152, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.rescueIcon {
+  font-size: 40rpx;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+}
+
+.loading {
+  text-align: center;
+  padding: $spacing-xl;
+  color: $color-text-tertiary;
+}

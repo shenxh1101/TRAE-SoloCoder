@@ -1,0 +1,4 @@
+pysnmp==4.4.12
+pythonping==1.1.4
+netaddr==0.9.0
+Jinja2==3.1.3

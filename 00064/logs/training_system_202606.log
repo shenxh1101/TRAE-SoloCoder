@@ -1,0 +1,124 @@
+2026-06-04 11:32:47,032 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 11:32:47,944 - TrainingSystem - INFO - Operation: 初始化示例数据 | Operator: system | Target: None:None
+2026-06-04 11:33:02,505 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 11:33:02,897 - TrainingSystem - INFO - Operation: 生成培训计划 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:33:02,907 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:1
+2026-06-04 11:33:02,911 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:2
+2026-06-04 11:33:02,916 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:3
+2026-06-04 11:33:02,919 - TrainingSystem - INFO - Operation: 开始培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:33:02,926 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:1
+2026-06-04 11:33:02,930 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:2
+2026-06-04 11:33:02,934 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:3
+2026-06-04 11:33:02,939 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:4
+2026-06-04 11:33:02,942 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:5
+2026-06-04 11:33:02,947 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:6
+2026-06-04 11:33:02,951 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:7
+2026-06-04 11:33:02,954 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:8
+2026-06-04 11:33:08,149 - TrainingSystem - ERROR - Failed to log operation: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO operation_logs (operator, operation, target_type, target_id, details, ip_address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('admin', '发送学习预警', 'WarningNotification', None, '员工: 员工3, 连续2次采样不达标', None, '2026-06-04 11:33:02.958246')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-06-04 11:33:08,154 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:9
+2026-06-04 11:33:08,159 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:10
+2026-06-04 11:33:08,163 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:11
+2026-06-04 11:33:13,390 - TrainingSystem - ERROR - Failed to log operation: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO operation_logs (operator, operation, target_type, target_id, details, ip_address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('admin', '发送学习预警', 'WarningNotification', None, '员工: 员工3, 连续2次采样不达标', None, '2026-06-04 11:33:08.166469')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-06-04 11:33:13,393 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:12
+2026-06-04 11:33:13,398 - TrainingSystem - INFO - Operation: 结束培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:33:13,407 - TrainingSystem - ERROR - 生成月度报告失败: 'total_participants'
+Traceback (most recent call last):
+  File "/Users/mac/AI Coding/solo coder/00064/src/modules/report_generator.py", line 74, in generate_monthly_report
+    total_participants=current_data['total_participants'],
+                       ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'total_participants'
+2026-06-04 11:33:13,431 - TrainingSystem - INFO - Operation: 导出培训记录 | Operator: admin | Target: None:None
+2026-06-04 11:33:13,442 - TrainingSystem - INFO - Operation: 导出操作日志 | Operator: admin | Target: None:None
+2026-06-04 11:57:58,353 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 11:57:58,971 - TrainingSystem - INFO - Operation: 初始化示例数据 | Operator: system | Target: None:None
+2026-06-04 11:57:58,984 - TrainingSystem - INFO - Operation: 生成培训计划 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:57:58,993 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:1
+2026-06-04 11:57:58,999 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:2
+2026-06-04 11:57:59,005 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:3
+2026-06-04 11:57:59,008 - TrainingSystem - INFO - Operation: 开始培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:57:59,015 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:1
+2026-06-04 11:57:59,019 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:2
+2026-06-04 11:57:59,023 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:3
+2026-06-04 11:57:59,028 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:4
+2026-06-04 11:57:59,032 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:5
+2026-06-04 11:57:59,036 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:6
+2026-06-04 11:57:59,040 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:7
+2026-06-04 11:57:59,044 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:8
+2026-06-04 11:57:59,048 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:9
+2026-06-04 11:57:59,053 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:10
+2026-06-04 11:57:59,055 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:11
+2026-06-04 11:57:59,059 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:12
+2026-06-04 11:57:59,064 - TrainingSystem - INFO - Operation: 结束培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 11:57:59,070 - TrainingSystem - INFO - Operation: 生成考试 | Operator: admin | Target: Exam:1
+2026-06-04 11:57:59,072 - TrainingSystem - ERROR - 系统运行出错: name 'ExamRecord' is not defined
+Traceback (most recent call last):
+  File "/Users/mac/AI Coding/solo coder/00064/main.py", line 439, in main
+    system.run_full_demo()
+    ~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/mac/AI Coding/solo coder/00064/main.py", line 396, in run_full_demo
+    self.simulate_exam_process(exam.id)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/mac/AI Coding/solo coder/00064/main.py", line 247, in simulate_exam_process
+    exam = self.db.query(ExamRecord).filter(ExamRecord.exam_id == exam_id).first()
+                         ^^^^^^^^^^
+NameError: name 'ExamRecord' is not defined
+2026-06-04 12:02:19,061 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 12:02:19,510 - TrainingSystem - INFO - Operation: 初始化示例数据 | Operator: system | Target: None:None
+2026-06-04 12:02:19,523 - TrainingSystem - INFO - Operation: 生成培训计划 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 12:02:19,533 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:1
+2026-06-04 12:02:19,539 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:2
+2026-06-04 12:02:19,544 - TrainingSystem - INFO - Operation: 员工报名 | Operator: admin | Target: Enrollment:3
+2026-06-04 12:02:19,547 - TrainingSystem - INFO - Operation: 开始培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 12:02:19,553 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:1
+2026-06-04 12:02:19,557 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:2
+2026-06-04 12:02:19,562 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:3
+2026-06-04 12:02:19,566 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:4
+2026-06-04 12:02:19,570 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:5
+2026-06-04 12:02:19,573 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:6
+2026-06-04 12:02:19,578 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:7
+2026-06-04 12:02:19,581 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:8
+2026-06-04 12:02:19,586 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:9
+2026-06-04 12:02:19,589 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:10
+2026-06-04 12:02:19,593 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:11
+2026-06-04 12:02:19,597 - TrainingSystem - INFO - Operation: 记录学习时长 | Operator: admin | Target: LearningRecord:12
+2026-06-04 12:02:19,601 - TrainingSystem - INFO - Operation: 结束培训监控 | Operator: admin | Target: TrainingPlan:1
+2026-06-04 12:02:19,607 - TrainingSystem - INFO - Operation: 生成考试 | Operator: admin | Target: Exam:1
+2026-06-04 12:02:19,619 - TrainingSystem - INFO - Operation: 开始考试 | Operator: admin | Target: ExamRecord:1
+2026-06-04 12:02:19,625 - TrainingSystem - INFO - Operation: 提交考试 | Operator: admin | Target: ExamRecord:1
+2026-06-04 12:02:19,630 - TrainingSystem - INFO - Operation: 开始考试 | Operator: admin | Target: ExamRecord:2
+2026-06-04 12:02:19,637 - TrainingSystem - INFO - Operation: 提交考试 | Operator: admin | Target: ExamRecord:2
+2026-06-04 12:02:19,641 - TrainingSystem - INFO - Operation: 开始考试 | Operator: admin | Target: ExamRecord:3
+2026-06-04 12:02:19,648 - TrainingSystem - INFO - Operation: 提交考试 | Operator: admin | Target: ExamRecord:3
+2026-06-04 12:02:20,161 - TrainingSystem - INFO - Operation: 生成月度报告 | Operator: admin | Target: Report:1
+2026-06-04 12:02:20,179 - TrainingSystem - INFO - Operation: 导出培训记录 | Operator: admin | Target: None:None
+2026-06-04 12:02:20,191 - TrainingSystem - INFO - Operation: 导出考试成绩 | Operator: admin | Target: None:None
+2026-06-04 12:02:20,205 - TrainingSystem - INFO - Operation: 导出操作日志 | Operator: admin | Target: None:None
+2026-06-04 14:52:00,652 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 14:54:24,730 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 14:54:25,377 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:25,378 - TrainingSystem - INFO - 定时任务调度器已初始化
+2026-06-04 14:54:25,378 - TrainingSystem - INFO - 已注册任务: ['月度报告生成', '每30分钟采集学习时长', '自动颁发证书']
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Added job "月度报告生成" to job store "default"
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Added job "每30分钟采集学习时长" to job store "default"
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Added job "自动颁发证书" to job store "default"
+2026-06-04 14:54:25,378 - apscheduler.scheduler - INFO - Scheduler started
+2026-06-04 14:54:25,378 - TrainingSystem - INFO - 定时任务调度器已启动
+2026-06-04 14:54:41,735 - numexpr.utils - INFO - NumExpr defaulting to 10 threads.
+2026-06-04 14:54:42,349 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:42,349 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:42,350 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-04 14:54:42,350 - TrainingSystem - INFO - 定时任务调度器已初始化
+2026-06-04 14:54:42,350 - TrainingSystem - INFO - 已注册任务: ['月度报告生成', '每30分钟采集学习时长', '自动颁发证书']
+2026-06-04 14:54:42,350 - apscheduler.scheduler - INFO - Added job "月度报告生成" to job store "default"
+2026-06-04 14:54:42,350 - apscheduler.scheduler - INFO - Added job "每30分钟采集学习时长" to job store "default"
+2026-06-04 14:54:42,350 - apscheduler.scheduler - INFO - Added job "自动颁发证书" to job store "default"
+2026-06-04 14:54:42,350 - apscheduler.scheduler - INFO - Scheduler started
+2026-06-04 14:54:42,350 - TrainingSystem - INFO - 定时任务调度器已启动

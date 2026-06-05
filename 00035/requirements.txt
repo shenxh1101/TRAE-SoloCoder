@@ -1,0 +1,15 @@
+# 企业知识文档审核与发布管理系统依赖
+
+# 核心依赖（无需额外安装）
+# - sqlite3 (Python内置)
+# - csv (Python内置)
+# - json (Python内置)
+
+# 可选依赖 - PDF导出
+reportlab>=4.0.0
+
+# 可选依赖 - Excel导出
+openpyxl>=3.1.0
+
+# 可选依赖 - HTTP请求（企业微信通知）
+requests>=2.28.0

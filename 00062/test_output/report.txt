@@ -1,0 +1,59 @@
+================================================================================
+NETWORK TOPOLOGY DISCOVERY REPORT
+================================================================================
+Generated: 2026-06-04 11:09:43
+Total Devices: 3
+Total Connections: 2
+
+--------------------------------------------------------------------------------
+DEVICE SUMMARY
+--------------------------------------------------------------------------------
+
+  ROUTER          1 devices
+  SERVER          1 devices
+  SWITCH          1 devices
+
+--------------------------------------------------------------------------------
+DEVICE DETAILS
+--------------------------------------------------------------------------------
+
+Device: 192.168.1.1
+  Name:         MainRouter
+  Type:         router
+  SNMP:         Yes
+  Neighbors:    2
+    - 192.168.1.2 (CoreSwitch)
+    - 192.168.1.3 (Server01)
+  Interfaces:   2
+  ARP Entries:  1
+  Description:  Cisco IOS Software, 2801 Software (C2801-ADVENTERPRISEK9-M)
+
+Device: 192.168.1.2
+  Name:         CoreSwitch
+  Type:         switch
+  SNMP:         Yes
+  Neighbors:    1
+    - 192.168.1.1 (MainRouter)
+  Description:  Cisco Catalyst 2960 Switch
+
+Device: 192.168.1.3
+  Name:         Server01
+  Type:         server
+  SNMP:         No
+  Neighbors:    1
+    - 192.168.1.1 (MainRouter)
+  Description:  Linux server
+
+--------------------------------------------------------------------------------
+CONNECTION SUMMARY
+--------------------------------------------------------------------------------
+
+  High confidence: 1
+  Medium confidence: 1
+  LLDP: 1
+  CDP: 0
+  ARP inferred: 1
+
+--------------------------------------------------------------------------------
+END OF REPORT
+--------------------------------------------------------------------------------

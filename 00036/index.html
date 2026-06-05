@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D智慧体育场馆运营管理与应急调度可视化平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="top-header">
+            <div class="logo">
+                <span class="logo-icon">🏟️</span>
+                <h1>智慧体育场馆运营管理平台</h1>
+            </div>
+            <div class="header-info">
+                <div class="time-display" id="currentTime">2026-06-03 14:30:00</div>
+                <div class="match-status">
+                    <span class="status-dot live"></span>
+                    <span>比赛进行中 - 第65分钟</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <aside class="left-panel">
+                <div class="panel-section">
+                    <h3>场馆导航</h3>
+                    <div class="nav-buttons">
+                        <button class="nav-btn active" data-area="stadium">
+                            <span class="icon">🏟️</span>主体育场
+                        </button>
+                        <button class="nav-btn" data-area="training">
+                            <span class="icon">🏃</span>训练馆
+                        </button>
+                        <button class="nav-btn" data-area="vip">
+                            <span class="icon">👑</span>VIP包厢
+                        </button>
+                        <button class="nav-btn" data-area="locker">
+                            <span class="icon">👕</span>更衣室
+                        </button>
+                        <button class="nav-btn" data-area="security">
+                            <span class="icon">🛡️</span>安保中心
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>实时上座率</h3>
+                    <div class="attendance-stats">
+                        <div class="attendance-item" data-zone="A">
+                            <div class="zone-name">A区 (VIP)</div>
+                            <div class="attendance-bar">
+                                <div class="attendance-fill" style="width: 95%"></div>
+                            </div>
+                            <div class="attendance-value">95%</div>
+                        </div>
+                        <div class="attendance-item" data-zone="B">
+                            <div class="zone-name">B区 (东看台)</div>
+                            <div class="attendance-bar">
+                                <div class="attendance-fill" style="width: 78%"></div>
+                            </div>
+                            <div class="attendance-value">78%</div>
+                        </div>
+                        <div class="attendance-item" data-zone="C">
+                            <div class="zone-name">C区 (西看台)</div>
+                            <div class="attendance-bar">
+                                <div class="attendance-fill" style="width: 25%"></div>
+                            </div>
+                            <div class="attendance-value low">25%</div>
+                        </div>
+                        <div class="attendance-item" data-zone="D">
+                            <div class="zone-name">D区 (南看台)</div>
+                            <div class="attendance-bar">
+                                <div class="attendance-fill" style="width: 62%"></div>
+                            </div>
+                            <div class="attendance-value">62%</div>
+                        </div>
+                        <div class="attendance-item" data-zone="E">
+                            <div class="zone-name">E区 (北看台)</div>
+                            <div class="attendance-bar">
+                                <div class="attendance-fill" style="width: 45%"></div>
+                            </div>
+                            <div class="attendance-value">45%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>草坪环境监测</h3>
+                    <div class="lawn-stats">
+                        <div class="lawn-stat">
+                            <span class="stat-icon">🌡️</span>
+                            <span class="stat-label">温度</span>
+                            <span class="stat-value" id="lawnTemp">29.5°C</span>
+                        </div>
+                        <div class="lawn-stat">
+                            <span class="stat-icon">💧</span>
+                            <span class="stat-label">湿度</span>
+                            <span class="stat-value" id="lawnHumidity">62%</span>
+                        </div>
+                        <div class="lawn-stat">
+                            <span class="stat-icon">☀️</span>
+                            <span class="stat-label">光照</span>
+                            <span class="stat-value" id="lawnLight">8500 lux</span>
+                        </div>
+                        <div class="lawn-stat">
+                            <span class="stat-icon">📊</span>
+                            <span class="stat-label">pH值</span>
+                            <span class="stat-value" id="lawnPH">6.8</span>
+                        </div>
+                    </div>
+                    <div class="sprinkler-status" id="sprinklerStatus">
+                        <span class="sprinkler-icon">💦</span>
+                        <span>喷灌系统运行中</span>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="center-panel">
+                <div id="three-container"></div>
+                
+                <div class="floating-panel seat-info" id="seatInfoPanel" style="display: none;">
+                    <h4>座位信息</h4>
+                    <div class="seat-detail">
+                        <div class="detail-row">
+                            <span class="label">座位号:</span>
+                            <span class="value" id="seatNumber">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">区域:</span>
+                            <span class="value" id="seatZone">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">状态:</span>
+                            <span class="value" id="seatStatus">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">票价:</span>
+                            <span class="value" id="seatPrice">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="floating-panel big-screen" id="bigScreen">
+                    <div class="screen-header">
+                        <span class="screen-title">场馆大屏 - 战术阵型</span>
+                    </div>
+                    <div class="screen-content" id="tacticalScreen">
+                        <canvas id="tacticalCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="notification-container" id="notificationContainer"></div>
+            </main>
+
+            <aside class="right-panel">
+                <div class="panel-section">
+                    <h3>球员体力监测</h3>
+                    <div class="player-list" id="playerList"></div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>安保监控</h3>
+                    <div class="security-alerts" id="securityAlerts">
+                        <div class="alert-item warning">
+                            <span class="alert-icon">⚠️</span>
+                            <div class="alert-content">
+                                <div class="alert-title">可疑物品检测</div>
+                                <div class="alert-desc">B区入口发现无人认领包裹</div>
+                                <div class="alert-time">14:25:30</div>
+                            </div>
+                        </div>
+                        <div class="alert-item caution">
+                            <span class="alert-icon">⏱️</span>
+                            <div class="alert-content">
+                                <div class="alert-title">人员滞留警告</div>
+                                <div class="alert-desc">C区3排有人滞留超过30分钟</div>
+                                <div class="alert-time">14:20:15</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="camera-feeds">
+                        <div class="camera-feed active" id="cameraFeed1">
+                            <div class="camera-label">摄像头 B-01</div>
+                            <div class="camera-view">
+                                <div class="camera-placeholder">📹 实时画面</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>系统控制</h3>
+                    <div class="control-buttons">
+                        <button class="control-btn" id="btnExport">
+                            <span class="icon">📥</span>导出运营报表
+                        </button>
+                        <button class="control-btn" id="btnToggleLights">
+                            <span class="icon">💡</span>手动控制灯光
+                        </button>
+                        <button class="control-btn" id="btnToggleSprinkler">
+                            <span class="icon">🚿</span>手动控制喷灌
+                        </button>
+                        <button class="control-btn" id="btnSimulate">
+                            <span class="icon">🎲</span>模拟数据刷新
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>能耗统计</h3>
+                    <div class="energy-stats">
+                        <div class="energy-item">
+                            <span class="energy-label">照明能耗</span>
+                            <span class="energy-value">1,250 kWh</span>
+                        </div>
+                        <div class="energy-item">
+                            <span class="energy-label">空调能耗</span>
+                            <span class="energy-value">2,800 kWh</span>
+                        </div>
+                        <div class="energy-item">
+                            <span class="energy-label">喷灌用水</span>
+                            <span class="energy-value">15.3 m³</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="substituteModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>换人建议</h3>
+                <button class="modal-close" onclick="closeModal('substituteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="substitute-content">
+                    <div class="player-out">
+                        <div class="player-card tired">
+                            <div class="player-number" id="tiredPlayerNumber">10</div>
+                            <div class="player-name" id="tiredPlayerName">梅西</div>
+                            <div class="player-stamina">
+                                <div class="stamina-bar">
+                                    <div class="stamina-fill low" id="tiredPlayerStamina" style="width: 45%"></div>
+                                </div>
+                                <span class="stamina-text">体力 45%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="substitute-arrow">⇄</div>
+                    <div class="player-in">
+                        <div class="player-card fresh">
+                            <div class="player-number" id="subPlayerNumber">7</div>
+                            <div class="player-name" id="subPlayerName">登贝莱</div>
+                            <div class="player-stamina">
+                                <div class="stamina-bar">
+                                    <div class="stamina-fill high" style="width: 98%"></div>
+                                </div>
+                                <span class="stamina-text">体力 98%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="action-btn confirm" onclick="confirmSubstitution()">确认换人</button>
+                    <button class="action-btn cancel" onclick="closeModal('substituteModal')">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cameraModal" style="display: none;">
+        <div class="modal large">
+            <div class="modal-header">
+                <h3>安保摄像头监控</h3>
+                <button class="modal-close" onclick="closeModal('cameraModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="camera-grid">
+                    <div class="camera-large">
+                        <div class="camera-label" id="modalCameraLabel">摄像头 B-01</div>
+                        <div class="camera-view large">
+                            <div class="camera-placeholder large">📹 高清实时监控画面</div>
+                        </div>
+                    </div>
+                    <div class="camera-thumbnails">
+                        <div class="camera-thumb active" onclick="selectCamera(this, 'B-01')">B-01</div>
+                        <div class="camera-thumb" onclick="selectCamera(this, 'B-02')">B-02</div>
+                        <div class="camera-thumb" onclick="selectCamera(this, 'C-03')">C-03</div>
+                        <div class="camera-thumb" onclick="selectCamera(this, 'D-05')">D-05</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/scene.js"></script>
+    <script src="js/seats.js"></script>
+    <script src="js/lighting.js"></script>
+    <script src="js/lawn.js"></script>
+    <script src="js/players.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/tactical.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{
+  "report_type": "weekly",
+  "period": "2026-05-28 to 2026-06-04",
+  "start_date": "2026-05-28T10:32:37.250559",
+  "end_date": "2026-06-04T10:32:37.250559",
+  "generated_at": "2026-06-04T10:32:37.251644",
+  "statistics": {
+    "total_backups": 2,
+    "successful_backups": 2,
+    "failed_backups": 0,
+    "success_rate": 100.0,
+    "total_size": 587,
+    "restore_tests": 1,
+    "successful_restores": 1
+  },
+  "system_stats": {
+    "test_system": {
+      "total": 2,
+      "success": 2,
+      "failed": 0,
+      "total_size": 587,
+      "success_size": 587,
+      "success_rate": 100.0
+    }
+  },
+  "backup_records": [
+    {
+      "id": 2,
+      "system_name": "test_system",
+      "backup_type": "incremental",
+      "backup_version": "20260604_102944",
+      "source_path": "/Users/mac/AI Coding/solo coder/00058/test_data/source",
+      "backup_path": "test_system/incremental_20260604_102944/test_system_incremental_20260604_102944.tar.gz",
+      "file_count": 2,
+      "total_size": 280,
+      "checksum": "a0527c6348d3482c5a0cbee578d22a6905b30be0998efb8f4eafea33b7c4aab7",
+      "status": "success",
+      "retry_count": 0,
+      "start_time": "2026-06-04 10:29:44.380595",
+      "end_time": "2026-06-04 10:29:44.390760",
+      "duration": 0,
+      "error_message": null,
+      "metadata": "{\"source_hash\": \"a0527c6348d3482c5a0cbee578d22a6905b30be0998efb8f4eafea33b7c4aab7\", \"files\": [{\"path\": \"file1.txt\", \"hash\": \"52b3272721ffd27d6300389fb9b01a86148447fc78c14f7afde337854cc0860e\", \"size\": 17}, {\"path\": \"newfile.txt\", \"hash\": \"0f15384d18789b1ebf3043dc7b6bc27273c8576373fbeb6f3e15854b588141c0\", \"size\": 9}]}",
+      "created_at": "2026-06-04 02:29:44"
+    },
+    {
+      "id": 1,
+      "system_name": "test_system",
+      "backup_type": "full",
+      "backup_version": "20260604_102852",
+      "source_path": "/Users/mac/AI Coding/solo coder/00058/test_data/source",
+      "backup_path": "test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz",
+      "file_count": 3,
+      "total_size": 307,
+      "checksum": "d538857e4b5c2f45ccafd8e908dc76bfda460f620f48f2b293d9936bd3a701fd",
+      "status": "success",
+      "retry_count": 0,
+      "start_time": "2026-06-04 10:28:52.975663",
+      "end_time": "2026-06-04 10:28:52.987910",
+      "duration": 0,
+      "error_message": null,
+      "metadata": "{\"source_hash\": \"d538857e4b5c2f45ccafd8e908dc76bfda460f620f48f2b293d9936bd3a701fd\", \"files\": [{\"path\": \"file1.txt\", \"hash\": \"670b9578b93e00ce8790429c504e35bb306377172fcd8dfac2ac27c86e45a109\", \"size\": 12}, {\"path\": \"file2.txt\", \"hash\": \"6b8e3c36cb01aa01c65ccd86e04935695e9da0580e3dcc8c0c3bce146c274c2c\", \"size\": 12}, {\"path\": \"subdir/file3.txt\", \"hash\": \"65f03fba9a27a7c6d9bd4fa63b8eb705853e31b802c8a7ae7c7898ebd638104d\", \"size\": 12}]}",
+      "created_at": "2026-06-04 02:28:52"
+    }
+  ],
+  "restore_records": [
+    {
+      "id": 1,
+      "system_name": "test_system",
+      "backup_version": "20260604_102944",
+      "backup_id": 2,
+      "restore_path": "/Users/mac/AI Coding/solo coder/00058/test_data/restore_test",
+      "source_hash": "a0527c6348d3482c5a0cbee578d22a6905b30be0998efb8f4eafea33b7c4aab7",
+      "restore_hash": "a0527c6348d3482c5a0cbee578d22a6905b30be0998efb8f4eafea33b7c4aab7",
+      "hash_match": 1,
+      "status": "success",
+      "start_time": "2026-06-04 10:32:11.488456",
+      "end_time": "2026-06-04 10:32:11.492718",
+      "duration": 0,
+      "error_message": null,
+      "diff_report_path": null,
+      "metadata": null,
+      "created_at": "2026-06-04 02:32:11"
+    }
+  ]
+}

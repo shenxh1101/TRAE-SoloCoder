@@ -1,0 +1,114 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  margin-bottom: $spacing-md;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.typeInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.typeIcon {
+  font-size: 32rpx;
+}
+
+.typeName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.status {
+  padding: 6rpx 20rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &.completed {
+    background: rgba(76, 175, 80, 0.1);
+    color: $color-success;
+  }
+
+  &.inProgress {
+    background: rgba(30, 136, 229, 0.1);
+    color: $color-primary;
+  }
+
+  &.pending {
+    background: rgba(255, 152, 0, 0.1);
+    color: $color-warning;
+  }
+
+  &.cancelled {
+    background: rgba(134, 144, 156, 0.1);
+    color: $color-text-tertiary;
+  }
+}
+
+.content {
+  margin-bottom: $spacing-md;
+}
+
+.storeName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plate {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.orderNo {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.time {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.amount {
+  font-size: $font-size-lg;
+  color: $color-price;
+  font-weight: $font-weight-bold;
+}

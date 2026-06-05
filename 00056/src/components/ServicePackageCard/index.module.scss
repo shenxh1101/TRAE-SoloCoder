@@ -1,0 +1,150 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 320rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.tag {
+  position: absolute;
+  top: $spacing-md;
+  padding: 6rpx 20rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+
+  &.hot {
+    left: $spacing-md;
+    background: linear-gradient(135deg, #FF4D4F 0%, #FF7875 100%);
+  }
+
+  &.recommend {
+    left: $spacing-md;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+    & + .hot {
+      left: 140rpx;
+    }
+  }
+}
+
+.content {
+  padding: $spacing-lg;
+}
+
+.header {
+  margin-bottom: $spacing-sm;
+}
+
+.name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.description {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  @include text-ellipsis-multi(2);
+  margin-bottom: $spacing-md;
+  min-height: 72rpx;
+}
+
+.meta {
+  display: flex;
+  margin-bottom: $spacing-lg;
+}
+
+.metaItem {
+  flex: 1;
+}
+
+.metaLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.metaValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.priceWrap {
+  display: flex;
+  align-items: baseline;
+  flex: 1;
+}
+
+.currency {
+  font-size: $font-size-sm;
+  color: $color-price;
+  font-weight: $font-weight-semibold;
+}
+
+.price {
+  font-size: $font-size-xl;
+  color: $color-price;
+  font-weight: $font-weight-bold;
+  margin-right: $spacing-sm;
+}
+
+.originalPrice {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+}
+
+.discountTag {
+  padding: 4rpx 12rpx;
+  background: rgba(244, 67, 54, 0.1);
+  color: $color-price;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.bookBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+  }
+}

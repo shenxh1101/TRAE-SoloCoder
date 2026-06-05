@@ -1,0 +1,266 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding;
+  padding-bottom: 140rpx;
+}
+
+.monthSelector {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monthLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.monthValue {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.selectBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  background: $color-bg-page;
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: rgba(30, 136, 229, 0.1);
+  }
+}
+
+.summaryCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.summaryCard {
+  width: calc((100% - 24rpx) / 2);
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.summaryIcon {
+  font-size: 40rpx;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.summaryValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  display: block;
+}
+
+.summaryLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.section {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.dataCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.dataRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dataName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex: 1;
+}
+
+.dataValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.profitRow {
+  padding-top: $spacing-md;
+  margin-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+
+  .dataName, .dataValue {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+  }
+
+  .dataValue {
+    color: $color-success;
+  }
+}
+
+.storeList {
+  max-height: 400rpx;
+  overflow: hidden;
+}
+
+.storeRow {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.storeRank {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: $color-bg-page;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-semibold;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+
+  &.top1 {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: $color-text-white;
+  }
+
+  &.top2 {
+    background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+    color: $color-text-white;
+  }
+
+  &.top3 {
+    background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+    color: $color-text-white;
+  }
+}
+
+.storeName {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.storeRevenue {
+  font-size: $font-size-sm;
+  color: $color-price;
+  font-weight: $font-weight-semibold;
+}
+
+.serviceChart {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.serviceBar {
+  flex: 1;
+  text-align: center;
+}
+
+.barContainer {
+  height: 200rpx;
+  display: flex;
+  align-items: flex-end;
+  background: $color-bg-page;
+  border-radius: $radius-sm;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.barFill {
+  width: 100%;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xs;
+  transition: height $transition-base;
+}
+
+.barLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-bottom: 4rpx;
+}
+
+.barValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.footer {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+  left: $page-padding;
+  right: $page-padding;
+  z-index: 100;
+  display: flex;
+  gap: $spacing-md;
+}
+
+.exportBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+
+  &.excel {
+    background: linear-gradient(135deg, #217346 0%, #2E8555 100%);
+    color: $color-text-white;
+  }
+
+  &.pdf {
+    background: linear-gradient(135deg, #F44336 0%, #E53935 100%);
+    color: $color-text-white;
+  }
+
+  &:active {
+    opacity: 0.9;
+  }
+}

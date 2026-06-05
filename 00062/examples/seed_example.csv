@@ -1,0 +1,4 @@
+ip,sys_name,device_type
+192.168.1.1,MainRouter,router
+192.168.1.2,CoreSwitch,switch
+192.168.1.3,Firewall,firewall

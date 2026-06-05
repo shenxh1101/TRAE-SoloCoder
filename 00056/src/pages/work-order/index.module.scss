@@ -1,0 +1,302 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 140rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl $page-padding;
+  color: $color-text-white;
+}
+
+.orderNo {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+  margin-bottom: $spacing-sm;
+}
+
+.status {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+}
+
+.statusDesc {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+  margin-top: $spacing-xs;
+}
+
+.progressSection {
+  margin: -$spacing-lg $page-padding 0;
+  position: relative;
+  z-index: 10;
+}
+
+.progressCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+}
+
+.progressSteps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 20rpx;
+    left: 40rpx;
+    right: 40rpx;
+    height: 4rpx;
+    background: $color-border;
+    z-index: 0;
+  }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
+
+.stepDot {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+
+  .completed & {
+    background: $color-success;
+    color: $color-text-white;
+  }
+
+  .current & {
+    background: $color-primary;
+    color: $color-text-white;
+    box-shadow: 0 0 0 8rpx rgba(30, 136, 229, 0.2);
+    animation: pulse 1.5s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 8rpx rgba(30, 136, 229, 0.2); }
+  50% { box-shadow: 0 0 0 16rpx rgba(30, 136, 229, 0.1); }
+}
+
+.stepName {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+
+  .completed &, .current & {
+    color: $color-text-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.stepTime {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.section {
+  margin: $spacing-lg $page-padding;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.infoRow {
+  display: flex;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.infoLabel {
+  width: 160rpx;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.itemsList {
+  border-top: 1rpx solid $color-divider;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+}
+
+.itemQty {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin: 0 $spacing-md;
+}
+
+.itemPrice {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  margin-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.totalLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.totalValue {
+  font-size: $font-size-xl;
+  color: $color-price;
+  font-weight: $font-weight-bold;
+}
+
+.technicianCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.technicianAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: $color-text-white;
+}
+
+.technicianInfo {
+  flex: 1;
+}
+
+.technicianName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.technicianTitle {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.callBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-success 0%, #66BB6A 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.footer {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+  left: $page-padding;
+  right: $page-padding;
+  z-index: 100;
+  display: flex;
+  gap: $spacing-md;
+}
+
+.footerBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+
+  &.confirm {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.pay {
+    background: linear-gradient(135deg, $color-success 0%, #66BB6A 100%);
+    color: $color-text-white;
+  }
+
+  &.outline {
+    background: $color-bg-card;
+    color: $color-primary;
+    border: 2rpx solid $color-primary;
+  }
+
+  &:active {
+    opacity: 0.9;
+  }
+}

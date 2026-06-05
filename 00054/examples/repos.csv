@@ -1,0 +1,5 @@
+name,path,tags,enabled
+project-frontend,/path/to/project-frontend,"frontend;web",true
+project-backend,/path/to/project-backend,"backend;api",true
+project-mobile,/path/to/project-mobile,"mobile;app",true
+legacy-system,/path/to/legacy-system,"legacy;deprecated",false

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员控制台 - 员工培训管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-layout">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>🎓 培训管理系统</h2>
+            <p>管理员控制台</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">📊</span> 数据概览
+            </a>
+            <a href="#" class="nav-item" data-page="courses">
+                <span class="nav-icon">📚</span> 课程管理
+            </a>
+            <a href="#" class="nav-item" data-page="plans">
+                <span class="nav-icon">📋</span> 培训计划
+            </a>
+            <a href="#" class="nav-item" data-page="monitoring">
+                <span class="nav-icon">👁️</span> 学习监控
+            </a>
+            <a href="#" class="nav-item" data-page="exams">
+                <span class="nav-icon">✍️</span> 考试管理
+            </a>
+            <a href="#" class="nav-item" data-page="certificates">
+                <span class="nav-icon">🏆</span> 证书管理
+            </a>
+            <a href="#" class="nav-item" data-page="reports">
+                <span class="nav-icon">📈</span> 报告中心
+            </a>
+            <a href="#" class="nav-item" data-page="query">
+                <span class="nav-icon">🔍</span> 数据查询
+            </a>
+            <a href="#" class="nav-item" data-page="logs">
+                <span class="nav-icon">📝</span> 操作日志
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info" id="userInfo">
+                <span class="user-avatar">👤</span>
+                <span class="user-name" id="userName">管理员</span>
+            </div>
+            <button class="btn btn-logout" id="logoutBtn">退出登录</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h1 id="pageTitle">数据概览</h1>
+            <div class="top-bar-actions">
+                <span class="current-time" id="currentTime"></span>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div id="pageContent">
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+  OVERDUE
+}
+
+enum ReservationStatus {
+  PENDING
+  NOTIFIED
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+enum FineType {
+  OVERDUE
+  DAMAGE
+  LOST
+}
+
+enum FineStatus {
+  UNPAID
+  PAID
+}
+
+enum MessageType {
+  BORROW
+  RENEW
+  RESERVE
+  FINE
+  REMINDER
+  SYSTEM
+}
+
+model User {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  password        String
+  name            String
+  email           String?   @unique
+  phone           String?
+  role            UserRole  @default(STUDENT)
+  department      String?
+  studentId       String?   @unique
+  avatar          String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  borrowRecords   BorrowRecord[]
+  reservations    Reservation[]
+  fines           Fine[]
+  messages        Message[]   @relation("UserMessages")
+
+  @@map("users")
+}
+
+model Book {
+  id              String    @id @default(uuid())
+  isbn            String    @unique
+  title           String
+  author          String
+  publisher       String?
+  publishDate     DateTime?
+  category        String
+  description     String?
+  coverImage      String?
+  location        String?
+  totalCopies     Int       @default(1)
+  availableCopies Int       @default(1)
+  borrowCount     Int       @default(0)
+  price           Decimal   @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  borrowRecords   BorrowRecord[]
+  reservations    Reservation[]
+
+  @@index([title, author, category])
+  @@map("books")
+}
+
+model BorrowRecord {
+  id              String        @id @default(uuid())
+  userId          String
+  bookId          String
+  borrowDate      DateTime      @default(now())
+  dueDate         DateTime
+  returnDate      DateTime?
+  status          BorrowStatus  @default(BORROWED)
+  renewCount      Int           @default(0)
+  damageLevel     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book            Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  fines           Fine[]
+
+  @@index([userId, bookId, status])
+  @@map("borrow_records")
+}
+
+model Reservation {
+  id              String            @id @default(uuid())
+  userId          String
+  bookId          String
+  reserveDate     DateTime          @default(now())
+  notifyDate      DateTime?
+  expireDate      DateTime?
+  status          ReservationStatus @default(PENDING)
+  queuePosition   Int               @default(1)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book            Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId, status])
+  @@map("reservations")
+}
+
+model Fine {
+  id              String      @id @default(uuid())
+  userId          String
+  borrowRecordId  String?
+  amount          Decimal
+  type            FineType
+  description     String?
+  status          FineStatus  @default(UNPAID)
+  paidDate        DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  borrowRecord    BorrowRecord? @relation(fields: [borrowRecordId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@map("fines")
+}
+
+model Message {
+  id              String      @id @default(uuid())
+  userId          String
+  title           String
+  content         String
+  type            MessageType @default(SYSTEM)
+  read            Boolean     @default(false)
+  readAt          DateTime?
+  createdAt       DateTime    @default(now())
+
+  user            User        @relation("UserMessages", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@map("messages")
+}
+
+model MonthlyStats {
+  id              String      @id @default(uuid())
+  month           String      @unique
+  totalBorrows    Int         @default(0)
+  totalReturns    Int         @default(0)
+  totalFines      Decimal     @default(0)
+  overdueRate     Decimal     @default(0)
+  popularBooks    Json?
+  readerStats     Json?
+  createdAt       DateTime    @default(now())
+
+  @@map("monthly_stats")
+}

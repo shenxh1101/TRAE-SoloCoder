@@ -1,0 +1,8 @@
+{
+  "static": true,
+  "message": "来自静态文件的响应",
+  "data": {
+    "items": ["a", "b", "c"],
+    "count": 3
+  }
+}

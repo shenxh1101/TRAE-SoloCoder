@@ -1,0 +1,276 @@
+{
+  "global": {
+    "port": 5000,
+    "host": "0.0.0.0",
+    "log_level": "INFO",
+    "log_dir": "logs",
+    "admin_enabled": true,
+    "admin_prefix": "/_admin",
+    "hot_reload_interval": 5
+  },
+  "auth": {
+    "api_keys": [
+      {
+        "name": "X-API-Key",
+        "location": "header",
+        "keys": [
+          "test-api-key-123",
+          "prod-api-key-456"
+        ]
+      },
+      {
+        "name": "api_key",
+        "location": "query",
+        "keys": [
+          "query-key-789"
+        ]
+      }
+    ],
+    "jwt": {
+      "enabled": true,
+      "secret": "my-super-secret-key-for-hs256",
+      "public_key": "",
+      "algorithm": "HS256",
+      "algorithms": [
+        "HS256"
+      ],
+      "header": "Authorization",
+      "prefix": "Bearer ",
+      "issuer": "api-gateway",
+      "audience": "gateway-services"
+    },
+    "basic_auth": {
+      "enabled": true,
+      "users": [
+        {
+          "username": "admin",
+          "password": "admin123",
+          "roles": [
+            "admin",
+            "user"
+          ]
+        },
+        {
+          "username": "guest",
+          "password": "guest123",
+          "roles": [
+            "user"
+          ]
+        },
+        {
+          "username": "service",
+          "password_hash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+          "roles": [
+            "service"
+          ]
+        }
+      ]
+    }
+  },
+  "rate_limit": {
+    "default": {
+      "enabled": true,
+      "algorithm": "token_bucket",
+      "capacity": 200,
+      "rate": 20,
+      "per_route": {
+        "/api/test-gui": {
+          "enabled": true,
+          "algorithm": "leaky_bucket",
+          "capacity": 10,
+          "rate": 2
+        }
+      }
+    }
+  },
+  "routes": [
+    {
+      "path_prefix": "/api/user",
+      "backend_url": "http://user-svc:8080",
+      "timeout": 30,
+      "auth": {
+        "enabled": true,
+        "methods": [
+          "api_key",
+          "jwt"
+        ]
+      },
+      "transform": {
+        "request": {
+          "add_headers": {
+            "X-Gateway-Forwarded": "true",
+            "X-Service-Name": "user-service"
+          },
+          "remove_headers": [
+            "X-Internal-Token"
+          ],
+          "rename_headers": {
+            "X-Old-Header": "X-New-Header"
+          },
+          "add_query_params": {
+            "gateway_source": "api-gateway"
+          },
+          "remove_query_params": [
+            "debug"
+          ],
+          "add_body_fields": {
+            "metadata.gateway_version": "1.0.0",
+            "metadata.trace_source": "gateway"
+          },
+          "remove_body_fields": [
+            "internal_token"
+          ],
+          "rename_body_fields": {
+            "old_name": "new_name"
+          },
+          "rewrite_path": {
+            "pattern": "^/api/user/(v\\d+)/",
+            "replacement": "/$1/"
+          }
+        },
+        "response": {
+          "add_headers": {
+            "X-Processed-By": "api-gateway"
+          },
+          "remove_headers": [
+            "X-Internal-Debug"
+          ],
+          "hide_sensitive_fields": [
+            "password",
+            "token",
+            "secret",
+            "ssn"
+          ],
+          "add_body_fields": {
+            "gateway_meta.processed": true
+          },
+          "remove_body_fields": [
+            "internal_debug_info"
+          ]
+        }
+      }
+    },
+    {
+      "path_prefix": "/api/order",
+      "backend_url": "http://order-svc:8081",
+      "timeout": 30,
+      "auth": {
+        "enabled": true,
+        "methods": [
+          "jwt",
+          "basic_auth"
+        ]
+      },
+      "transform": {
+        "request": {
+          "add_headers": {
+            "X-Service-Name": "order-service"
+          },
+          "add_query_params": {
+            "gateway_source": "api-gateway"
+          },
+          "add_body_fields": {
+            "metadata.source": "gateway"
+          },
+          "rewrite_path": {
+            "pattern": "^/api/order/(v1|v2)/",
+            "replacement": "/$1/"
+          }
+        },
+        "response": {
+          "hide_sensitive_fields": [
+            "credit_card",
+            "cvv"
+          ]
+        }
+      }
+    },
+    {
+      "path_prefix": "/public",
+      "backend_url": "http://public-svc:8082",
+      "timeout": 30,
+      "auth": {
+        "enabled": false
+      }
+    }
+  ],
+  "mock_routes": [
+    {
+      "path": "/api/mock/health",
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "status": "ok",
+        "service": "api-gateway",
+        "version": "1.0.0",
+        "timestamp": "2024-01-01T00:00:00Z"
+      },
+      "delay_ms": 0
+    },
+    {
+      "path": "/api/mock/user/1",
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "id": 1,
+        "username": "mock_user",
+        "email": "mock@example.com",
+        "password": "should_be_hidden",
+        "role": "user",
+        "token": "secret-token-123",
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "delay_ms": 100,
+      "transform": {
+        "response": {
+          "hide_sensitive_fields": [
+            "password",
+            "token"
+          ]
+        }
+      }
+    },
+    {
+      "path": "/api/mock/error",
+      "status_code": 500,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "error": "Internal Server Error",
+        "message": "This is a mock error response",
+        "code": 50001
+      },
+      "delay_ms": 500
+    },
+    {
+      "path": "/api/mock/rate-limited",
+      "status_code": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "Retry-After": "10"
+      },
+      "body": {
+        "error": "Too Many Requests",
+        "message": "Rate limit exceeded. Please try again later."
+      },
+      "delay_ms": 0
+    },
+    {
+      "path": "/api/mock/basicauth",
+      "status_code": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "message": "Basic Auth test endpoint",
+        "authenticated": true
+      },
+      "delay_ms": 0
+    }
+  ]
+}

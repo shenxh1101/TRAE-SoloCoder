@@ -1,0 +1,32 @@
+[
+  {
+    "slotId": "shelf_0_L0_S0",
+    "name": "电子元件A",
+    "quantity": 100,
+    "timestamp": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "slotId": "shelf_0_L0_S1",
+    "name": "电子元件B",
+    "quantity": 50,
+    "timestamp": "2024-01-15T09:15:00.000Z"
+  },
+  {
+    "slotId": "shelf_0_L1_S0",
+    "name": "机械零件C",
+    "quantity": 75,
+    "timestamp": "2024-01-16T10:00:00.000Z"
+  },
+  {
+    "slotId": "shelf_1_L2_S3",
+    "name": "包装材料D",
+    "quantity": 200,
+    "timestamp": "2024-01-16T14:30:00.000Z"
+  },
+  {
+    "slotId": "shelf_2_L3_S5",
+    "name": "工具套装E",
+    "quantity": 30,
+    "timestamp": "2024-01-17T11:45:00.000Z"
+  }
+]

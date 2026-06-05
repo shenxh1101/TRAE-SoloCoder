@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>节奏大师 - 钢琴块游戏</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --cyan: #00d4ff;
+      --purple: #9333ea;
+      --pink: #ec4899;
+      --green: #10b981;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --yellow: #fbbf24;
+      --bg-dark: #0a0a0f;
+      --bg-card: rgba(31, 41, 55, 0.5);
+      --border-color: rgba(75, 85, 99, 0.5);
+    }
+
+    body {
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1e1b4b 50%, #0a0a0f 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .font-display {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes judge-float {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
+    }
+
+    @keyframes grade-rotate {
+      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .page {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .bg-particles {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 50%;
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      color: white;
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(0, 212, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: #d1d5db;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(55, 65, 81, 0.7);
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-success.active {
+      background: var(--green);
+      color: white;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .card.selected {
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .difficulty-easy { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .difficulty-normal { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .difficulty-hard { background: rgba(245, 158, 11, 0.2); color: var(--orange); }
+    .difficulty-expert { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+
+    .filter-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: #9ca3af;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--cyan);
+      color: white;
+      border-color: var(--cyan);
+    }
+
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .track-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .track-info {
+      flex: 1;
+    }
+
+    .track-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .track-artist {
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+
+    .track-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .score-preview {
+      text-align: right;
+      padding-right: 1rem;
+    }
+
+    .score-grade {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--yellow);
+      font-weight: 700;
+    }
+
+    .score-value {
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+
+    .score-plays {
+      color: #6b7280;
+      font-size: 0.75rem;
+    }
+
+    .game-container {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0f;
+      z-index: 100;
+    }
+
+    .game-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 20;
+    }
+
+    .game-score {
+      text-align: right;
+    }
+
+    .score-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cyan);
+      font-family: 'Orbitron', monospace;
+    }
+
+    .combo-display {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.25rem;
+    }
+
+    .combo-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .combo-low { color: white; }
+    .combo-medium { color: var(--purple); }
+    .combo-high { color: var(--yellow); }
+
+    .lives-display {
+      position: absolute;
+      top: 5rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .heart {
+      color: var(--red);
+    }
+
+    .heart.empty {
+      color: #374151;
+    }
+
+    .game-area {
+      position: absolute;
+      top: 6rem;
+      bottom: 6rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(80px * 4);
+      max-width: 100vw;
+    }
+
+    .lanes {
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    .lane {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-left: 1px solid rgba(75, 85, 99, 0.3);
+      border-right: 1px solid rgba(75, 85, 99, 0.3);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .lane:active {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .judge-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      top: 85%;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--purple), var(--pink), transparent);
+      box-shadow: 0 0 20px var(--cyan);
+      z-index: 10;
+    }
+
+    .note {
+      position: absolute;
+      border-radius: 4px;
+      will-change: transform, opacity;
+    }
+
+    .judge-effect {
+      position: absolute;
+      text-align: center;
+      font-weight: 700;
+      animation: judge-float 0.5s ease-out forwards;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .judge-perfect { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+    .judge-good { color: var(--green); text-shadow: 0 0 10px var(--green); }
+    .judge-miss { color: var(--red); text-shadow: 0 0 10px var(--red); }
+
+    .key-hints {
+      position: absolute;
+      bottom: 1rem;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .key-hint {
+      width: 60px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .countdown {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 30;
+    }
+
+    .countdown-number {
+      font-size: 8rem;
+      font-weight: 900;
+      color: var(--cyan);
+      animation: pulse-glow 0.5s ease-in-out;
+    }
+
+    .pause-menu {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 30;
+    }
+
+    .pause-title {
+      font-size: 3rem;
+      font-weight: 700;
+    }
+
+    .result-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .grade-badge {
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 1.5rem;
+      animation: grade-rotate 0.7s ease-out;
+    }
+
+    .grade-S { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 0 40px rgba(251, 191, 36, 0.5); }
+    .grade-A { background: linear-gradient(135deg, #00d4ff, #3b82f6); box-shadow: 0 0 40px rgba(0, 212, 255, 0.5); }
+    .grade-B { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 0 40px rgba(16, 185, 129, 0.5); }
+    .grade-C { background: linear-gradient(135deg, #6b7280, #4b5563); box-shadow: 0 0 40px rgba(107, 114, 128, 0.5); }
+
+    .result-score {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+
+    .result-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .settings-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .settings-section {
+      margin-bottom: 2rem;
+    }
+
+    .settings-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .key-mapping-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .key-mapping-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .key-mapping-label {
+      width: 70px;
+      color: #9ca3af;
+    }
+
+    .key-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      text-align: center;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .key-input:hover {
+      border-color: var(--cyan);
+    }
+
+    .key-input.editing {
+      border-color: var(--cyan);
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+    }
+
+    .slider-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(75, 85, 99, 0.5);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .new-record {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--yellow);
+      border-radius: 9999px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      animation: pulse-glow 1s ease-in-out infinite;
+    }
+
+    .instructions {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      line-height: 1.8;
+    }
+
+    .instructions li {
+      margin-bottom: 0.25rem;
+    }
+
+    .file-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--purple);
+      color: white;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .file-upload:hover {
+      background: #a855f7;
+    }
+
+    .file-upload input {
+      display: none;
+    }
+
+    .custom-track-card {
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.5);
+    }
+
+    @media (max-width: 640px) {
+      .title {
+        font-size: 2rem;
+      }
+
+      .game-area {
+        width: 100%;
+        left: 0;
+        transform: none;
+      }
+
+      .key-hint {
+        width: 48px;
+        height: 40px;
+        font-size: 0.75rem;
+      }
+
+      .score-number {
+        font-size: 1.5rem;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-particles" id="bgParticles"></div>
+
+  <div id="menuPage" class="page active">
+    <div class="container">
+      <h1 class="title font-display">节奏大师</h1>
+      <p class="subtitle">跟随节拍，挑战极限</p>
+
+      <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button id="practiceModeBtn" class="btn btn-secondary" onclick="togglePracticeMode()">
+          <span>⚡</span> 练习模式
+        </button>
+        <button class="btn btn-secondary" onclick="showPage('settings')">
+          <span>⚙️</span> 设置
+        </button>
+        <label class="file-upload">
+          <span>📁</span> 导入 MIDI
+          <input type="file" accept=".mid,.midi" onchange="handleMidiUpload(event)">
+        </label>
+      </div>
+
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all" onclick="filterTracks('all')">全部</button>
+        <button class="filter-btn" data-filter="easy" onclick="filterTracks('easy')">简单</button>
+        <button class="filter-btn" data-filter="normal" onclick="filterTracks('normal')">普通</button>
+        <button class="filter-btn" data-filter="hard" onclick="filterTracks('hard')">困难</button>
+        <button class="filter-btn" data-filter="expert" onclick="filterTracks('expert')">专家</button>
+      </div>
+
+      <div class="track-list" id="trackList"></div>
+
+      <div id="customTrackSection" style="display: none; margin-top: 1.5rem;">
+        <div class="card custom-track-card" id="customTrackCard">
+          <div class="track-item">
+            <div class="track-info">
+              <div class="track-name" id="customTrackName">自定义曲目</div>
+              <div class="track-artist">MIDI 导入</div>
+              <div class="track-meta">
+                <span id="customTrackNotes">0 音符</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="startCustomTrack()">
+              <span>▶</span> 开始
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gamePage" class="page">
+    <div class="game-container" id="gameContainer">
+      <div class="game-hud">
+        <div>
+          <button class="btn btn-secondary" onclick="togglePause()">
+            <span id="pauseIcon">⏸</span>
+          </button>
+          <button class="btn btn-secondary" onclick="exitGame()" style="margin-top: 0.5rem;">
+            <span>🏠</span>
+          </button>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-weight: 600; margin-bottom: 0.25rem;" id="gameTrackName">曲目名称</div>
+          <div style="font-size: 0.75rem; color: #9ca3af;" id="practiceIndicator"></div>
+        </div>
+        <div class="game-score">
+          <div class="score-number" id="scoreDisplay">0</div>
+          <div class="combo-display" id="comboDisplay" style="display: none;">
+            <span>🔥</span>
+            <span class="combo-number combo-low" id="comboNumber">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lives-display" id="livesDisplay"></div>
+
+      <div class="game-area" id="gameArea">
+        <div class="lanes" id="lanesContainer"></div>
+        <div class="judge-line"></div>
+        <div id="particlesContainer"></div>
+        <div id="judgeEffectsContainer"></div>
+      </div>
+
+      <div class="key-hints" id="keyHints"></div>
+
+      <div class="countdown" id="countdown" style="display: none;">
+        <div class="countdown-number" id="countdownNumber">3</div>
+      </div>
+
+      <div class="pause-menu" id="pauseMenu" style="display: none;">
+        <div class="pause-title">暂停</div>
+        <button class="btn btn-primary" onclick="togglePause()">继续游戏</button>
+        <button class="btn btn-secondary" onclick="exitGame()">返回菜单</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultPage" class="page">
+    <div class="result-container">
+      <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;" id="resultTrackName">曲目名称</h2>
+      <div id="newRecordBadge" class="new-record" style="display: none;">
+        <span>🏆</span> 新纪录！
+      </div>
+      <div class="grade-badge" id="gradeBadge">S</div>
+      <div class="result-score" id="resultScore">0</div>
+      
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" style="color: var(--cyan);" id="statAccuracy">0%</div>
+          <div class="stat-label">准确率</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: var(--orange);" id="statMaxCombo">0</div>
+          <div class="stat-label">最大连击</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: var(--yellow);" id="statPerfect">0</div>
+          <div class="stat-label">Perfect</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: var(--green);" id="statGood">0</div>
+          <div class="stat-label">Good</div>
+        </div>
+      </div>
+
+      <div style="width: 100%; max-width: 400px; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span style="color: #9ca3af;">总音符</span>
+          <span id="statTotal">0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #9ca3af;">Miss</span>
+          <span style="color: var(--red);" id="statMiss">0</span>
+        </div>
+      </div>
+
+      <div class="result-buttons" style="margin-top: 2rem;">
+        <button class="btn btn-secondary" onclick="showPage('menu')">
+          <span>🏠</span> 返回菜单
+        </button>
+        <button class="btn btn-primary" onclick="retryGame()">
+          <span>🔄</span> 再来一次
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsPage" class="page">
+    <div class="settings-container">
+      <div class="settings-header">
+        <button class="btn btn-secondary" onclick="showPage('menu')">
+          <span>←</span>
+        </button>
+        <h1 style="font-size: 1.5rem; font-weight: 700;">设置</h1>
+      </div>
+
+      <div class="card settings-section">
+        <div class="settings-title" style="color: var(--cyan);">
+          <span>⌨️</span> 键位设置
+        </div>
+        <div class="key-mapping-grid" id="keyMappingGrid"></div>
+        <button class="btn btn-secondary" onclick="resetKeyMapping()" style="font-size: 0.875rem;">
+          <span>🔄</span> 恢复默认键位
+        </button>
+      </div>
+
+      <div class="card settings-section">
+        <div class="settings-title" style="color: var(--purple);">
+          <span>🎮</span> 游戏设置
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #9ca3af;">
+            <span>难度</span>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn difficulty-btn" data-difficulty="easy" onclick="setDifficulty('easy')">简单</button>
+            <button class="btn difficulty-btn" data-difficulty="normal" onclick="setDifficulty('normal')">普通</button>
+            <button class="btn difficulty-btn" data-difficulty="hard" onclick="setDifficulty('hard')">困难</button>
+            <button class="btn difficulty-btn" data-difficulty="expert" onclick="setDifficulty('expert')">专家</button>
+          </div>
+        </div>
+
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>轨道数量</span>
+            <span id="laneCountValue">4</span>
+          </div>
+          <input type="range" min="4" max="6" value="4" id="laneCountSlider" oninput="setLaneCount(this.value)">
+        </div>
+
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>下落速度</span>
+            <span id="noteSpeedValue">1.0x</span>
+          </div>
+          <input type="range" min="0.5" max="2" step="0.1" value="1" id="noteSpeedSlider" oninput="setNoteSpeed(this.value)">
+        </div>
+      </div>
+
+      <div class="card settings-section">
+        <div class="settings-title" style="color: var(--green);">
+          <span>🔊</span> 音量设置
+        </div>
+        
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>🎵 音乐音量</span>
+            <span id="musicVolumeValue">70%</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.05" value="0.7" id="musicVolumeSlider" oninput="setMusicVolume(this.value)">
+        </div>
+
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>🔊 音效音量</span>
+            <span id="sfxVolumeValue">50%</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.05" value="0.5" id="sfxVolumeSlider" oninput="setSfxVolume(this.value)">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-weight: 600; margin-bottom: 1rem;">操作说明</h3>
+        <ul class="instructions" style="list-style: none;">
+          <li>• 按键或点击对应轨道击打音符</li>
+          <li>• Perfect: 精准命中 (+100分)</li>
+          <li>• Good: 较好命中 (+50分)</li>
+          <li>• Miss: 错过或过早按键 (0分, 连击中断)</li>
+          <li>• 连击数越高, 分数倍率越大</li>
+          <li>• 按 ESC 暂停游戏</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const AudioManager = {
+      audioContext: null,
+      musicVolume: 0.7,
+      sfxVolume: 0.5,
+
+      ensureContext() {
+        if (!this.audioContext) {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return this.audioContext;
+      },
+
+      setVolume(musicVolume, sfxVolume) {
+        this.musicVolume = musicVolume;
+        this.sfxVolume = sfxVolume;
+      },
+
+      playHit(frequency = 440, duration = 0.1) {
+        const ctx = this.ensureContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+        
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(this.sfxVolume * 0.3, ctx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + duration);
+      },
+
+      playPerfect() {
+        [523.25, 659.25, 783.99].forEach((freq, i) => {
+          setTimeout(() => this.playHit(freq, 0.15), i * 30);
+        });
+      },
+
+      playGood() {
+        this.playHit(440, 0.1);
+      },
+
+      playMiss() {
+        const ctx = this.ensureContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.2);
+        
+        gainNode.gain.setValueAtTime(0, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(this.sfxVolume * 0.2, ctx.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.2);
+      },
+
+      playCombo(combo) {
+        if (combo > 0 && combo % 10 === 0) {
+          const baseFreq = 440 + Math.min(combo, 100) * 2;
+          this.playHit(baseFreq, 0.15);
+        }
+      },
+
+      playStart() {
+        [440, 554.37, 659.25, 880].forEach((freq, i) => {
+          setTimeout(() => this.playHit(freq, 0.2), i * 100);
+        });
+      },
+
+      playGameOver() {
+        [392, 349.23, 311.13, 261.63].forEach((freq, i) => {
+          setTimeout(() => this.playHit(freq, 0.3), i * 150);
+        });
+      },
+
+      resume() {
+        if (this.audioContext?.state === 'suspended') {
+          this.audioContext.resume();
+        }
+      }
+    };
+
+    const DataManager = {
+      SETTINGS_KEY: 'piano_tiles_settings',
+      HIGHSCORES_KEY: 'piano_tiles_highscores',
+
+      defaultSettings: {
+        keyMapping: { 0: 'd', 1: 'f', 2: 'j', 3: 'k' },
+        difficulty: 'normal',
+        musicVolume: 0.7,
+        sfxVolume: 0.5,
+        laneCount: 4,
+        noteSpeed: 1.0,
+      },
+
+      loadSettings() {
+        try {
+          const saved = localStorage.getItem(this.SETTINGS_KEY);
+          if (saved) {
+            return { ...this.defaultSettings, ...JSON.parse(saved) };
+          }
+        } catch (e) {
+          console.error('Failed to load settings:', e);
+        }
+        return { ...this.defaultSettings };
+      },
+
+      saveSettings(settings) {
+        try {
+          localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
+        } catch (e) {
+          console.error('Failed to save settings:', e);
+        }
+      },
+
+      loadHighScores() {
+        try {
+          const saved = localStorage.getItem(this.HIGHSCORES_KEY);
+          if (saved) {
+            return JSON.parse(saved);
+          }
+        } catch (e) {
+          console.error('Failed to load high scores:', e);
+        }
+        return {};
+      },
+
+      saveHighScore(result) {
+        try {
+          const scores = this.loadHighScores();
+          const existing = scores[result.trackId];
+          
+          const newRecord = {
+            trackId: result.trackId,
+            bestScore: existing ? Math.max(existing.bestScore, result.score) : result.score,
+            bestAccuracy: existing ? Math.max(existing.bestAccuracy, result.accuracy) : result.accuracy,
+            bestGrade: existing 
+              ? (result.accuracy > existing.bestAccuracy ? result.grade : existing.bestGrade)
+              : result.grade,
+            plays: (existing?.plays || 0) + 1,
+            lastPlayed: Date.now(),
+          };
+          
+          scores[result.trackId] = newRecord;
+          localStorage.setItem(this.HIGHSCORES_KEY, JSON.stringify(scores));
+          return newRecord;
+        } catch (e) {
+          console.error('Failed to save high score:', e);
+          return null;
+        }
+      },
+
+      getHighScore(trackId) {
+        const scores = this.loadHighScores();
+        return scores[trackId] || null;
+      }
+    };
+
+    const MidiParser = {
+      readVarInt(data, offset) {
+        let value = 0;
+        let byte;
+        do {
+          byte = data[offset++];
+          value = (value << 7) | (byte & 0x7f);
+        } while (byte & 0x80);
+        return { value, offset };
+      },
+
+      readUint16(data, offset) {
+        return (data[offset] << 8) | data[offset + 1];
+      },
+
+      readUint32(data, offset) {
+        return (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
+      },
+
+      generateId() {
+        return Math.random().toString(36).substr(2, 9);
+      },
+
+      parse(arrayBuffer, laneCount = 4) {
+        const uint8 = new Uint8Array(arrayBuffer);
+        let offset = 0;
+
+        const headerChunk = uint8.slice(0, 4);
+        if (String.fromCharCode(...headerChunk) !== 'MThd') {
+          throw new Error('Invalid MIDI file');
+        }
+
+        offset += 4;
+        const headerLength = this.readUint32(uint8, offset);
+        offset += 4;
+        
+        const format = this.readUint16(uint8, offset);
+        offset += 2;
+        const numTracks = this.readUint16(uint8, offset);
+        offset += 2;
+        const timeDivision = this.readUint16(uint8, offset);
+        offset += 2;
+
+        const ticksPerQuarter = timeDivision & 0x7fff;
+        const bpm = 120;
+        const microsecondsPerBeat = 60000000 / bpm;
+        const msPerTick = microsecondsPerBeat / ticksPerQuarter / 1000;
+
+        const notes = [];
+        let totalDuration = 0;
+
+        for (let trackIndex = 0; trackIndex < numTracks; trackIndex++) {
+          const trackHeader = uint8.slice(offset, offset + 4);
+          if (String.fromCharCode(...trackHeader) !== 'MTrk') {
+            throw new Error('Invalid track chunk');
+          }
+          offset += 4;
+
+          const trackLength = this.readUint32(uint8, offset);
+          offset += 4;
+
+          const trackEnd = offset + trackLength;
+          let currentTime = 0;
+          let runningStatus = null;
+
+          while (offset < trackEnd) {
+            const { value: deltaTime, offset: newOffset } = this.readVarInt(uint8, offset);
+            offset = newOffset;
+            currentTime += deltaTime;
+
+            let status = uint8[offset];
+            if (status < 0x80) {
+              status = runningStatus;
+            } else {
+              runningStatus = status;
+              offset++;
+            }
+
+            const eventType = status >> 4;
+
+            if (eventType === 0x9) {
+              const noteNumber = uint8[offset++];
+              const velocity = uint8[offset++];
+              
+              if (velocity > 0) {
+                const timeInMs = currentTime * msPerTick;
+                totalDuration = Math.max(totalDuration, timeInMs);
+                
+                notes.push({
+                  id: this.generateId(),
+                  time: timeInMs,
+                  lane: noteNumber % laneCount,
+                  type: 'normal',
+                });
+              }
+            } else if (eventType === 0x8) {
+              offset += 2;
+            } else if (eventType >= 0x8 && eventType <= 0xe) {
+              if (eventType === 0xc || eventType === 0xd) {
+                offset += 1;
+              } else {
+                offset += 2;
+              }
+            } else if (status === 0xff) {
+              const metaType = uint8[offset++];
+              const { value: length, offset: lenOffset } = this.readVarInt(uint8, offset);
+              offset = lenOffset + length;
+            }
+          }
+        }
+
+        notes.sort((a, b) => a.time - b.time);
+
+        return {
+          name: 'Imported Track',
+          artist: 'MIDI Import',
+          difficulty: 'normal',
+          bpm: bpm,
+          duration: totalDuration + 2000,
+          notes: notes,
+          isCustom: true,
+        };
+      }
+    };
+
+    function generateTrackFromPattern(id, name, artist, difficulty, bpm, pattern, repetitions = 8) {
+      const notes = [];
+      const beatInterval = 60000 / bpm;
+      const noteInterval = beatInterval / 2;
+      
+      let time = 1000;
+      
+      for (let rep = 0; rep < repetitions; rep++) {
+        for (let i = 0; i < pattern.length; i++) {
+          notes.push({
+            id: `${id}-${rep}-${i}`,
+            time: time,
+            lane: pattern[i],
+            type: 'normal',
+          });
+          time += noteInterval;
+        }
+      }
+
+      return {
+        id,
+        name,
+        artist,
+        difficulty,
+        bpm,
+        duration: time + 1000,
+        notes,
+      };
+    }
+
+    const defaultTracks = [
+      generateTrackFromPattern('easy-1', '初学者练习曲', '教程', 'easy', 80, [0, 1, 2, 3], 16),
+      generateTrackFromPattern('easy-2', '小星星', '传统儿歌', 'easy', 90, [0, 0, 1, 1, 2, 2, 1, 3, 3, 2, 2, 1, 0], 12),
+      generateTrackFromPattern('normal-1', '电子节拍', '节奏大师', 'normal', 120, [0, 2, 1, 3, 0, 3, 1, 2], 20),
+      generateTrackFromPattern('normal-2', '欢乐颂', '贝多芬', 'normal', 100, [2, 2, 3, 0, 1, 2, 3, 0, 1, 2, 1, 0, 2, 3, 3, 2, 1, 0], 10),
+      generateTrackFromPattern('hard-1', '极速挑战', '电音大师', 'hard', 160, [0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 3, 2, 1, 0], 24),
+      generateTrackFromPattern('hard-2', '命运交响曲', '贝多芬', 'hard', 140, [0, 0, 0, 1, 2, 1, 0, 2, 3, 2, 1, 0, 1, 2, 3, 0], 20),
+      generateTrackFromPattern('expert-1', '光速穿越', '终极BOSS', 'expert', 200, [0, 3, 1, 2, 3, 0, 2, 1, 0, 1, 2, 3, 1, 0, 3, 2], 30),
+    ];
+
+    let gameState = {
+      score: 0,
+      combo: 0,
+      maxCombo: 0,
+      lives: 5,
+      perfect: 0,
+      good: 0,
+      miss: 0,
+      isPlaying: false,
+      isPaused: false,
+      isPracticeMode: false,
+      speedMultiplier: 1,
+      currentTime: 0,
+      currentTrack: null,
+      activeNotes: [],
+    };
+
+    let settings = DataManager.loadSettings();
+    let customTrack = null;
+    let currentFilter = 'all';
+    let animationFrame = null;
+    let startTime = 0;
+    let noteIndex = 0;
+
+    const JUDGE_LINE_Y = 85;
+    const PERFECT_WINDOW = 50;
+    const GOOD_WINDOW = 100;
+    const NOTE_SPEED_BASE = 0.05;
+
+    const difficultyLabels = {
+      easy: '简单',
+      normal: '普通',
+      hard: '困难',
+      expert: '专家',
+    };
+
+    function init() {
+      createBgParticles();
+      renderTrackList();
+      updateSettingsUI();
+      AudioManager.setVolume(settings.musicVolume, settings.sfxVolume);
+
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    function createBgParticles() {
+      const container = document.getElementById('bgParticles');
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'bg-particle';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 3}s`;
+        container.appendChild(particle);
+      }
+    }
+
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(`${pageName}Page`).classList.add('active');
+    }
+
+    function togglePracticeMode() {
+      gameState.isPracticeMode = !gameState.isPracticeMode;
+      const btn = document.getElementById('practiceModeBtn');
+      btn.classList.toggle('btn-success');
+      btn.classList.toggle('active');
+    }
+
+    function filterTracks(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderTrackList();
+    }
+
+    function renderTrackList() {
+      const container = document.getElementById('trackList');
+      const highScores = DataManager.loadHighScores();
+      
+      const filteredTracks = currentFilter === 'all'
+        ? defaultTracks
+        : defaultTracks.filter(t => t.difficulty === currentFilter);
+
+      container.innerHTML = filteredTracks.map(track => {
+        const score = highScores[track.id];
+        return `
+          <div class="card" onclick="selectAndStartTrack('${track.id}')">
+            <div class="track-item">
+              <div class="track-info">
+                <div class="track-name">${track.name}</div>
+                <div class="track-artist">${track.artist}</div>
+                <div class="track-meta">
+                  <span class="difficulty-badge difficulty-${track.difficulty}">${difficultyLabels[track.difficulty]}</span>
+                  <span>${track.bpm} BPM</span>
+                  <span>${track.notes.length} 音符</span>
+                </div>
+              </div>
+              ${score ? `
+                <div class="score-preview">
+                  <div class="score-grade">
+                    <span>🏆</span>
+                    <span>${score.bestGrade}</span>
+                  </div>
+                  <div class="score-value">${score.bestScore.toLocaleString()} 分</div>
+                  <div class="score-plays">${score.plays} 次游玩</div>
+                </div>
+              ` : ''}
+              <button class="btn btn-primary" onclick="event.stopPropagation(); startTrack('${track.id}')">
+                <span>▶</span> 开始
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectAndStartTrack(trackId) {
+      startTrack(trackId);
+    }
+
+    function startTrack(trackId) {
+      const track = defaultTracks.find(t => t.id === trackId);
+      if (track) {
+        startGame(track);
+      }
+    }
+
+    function startCustomTrack() {
+      if (customTrack) {
+        startGame(customTrack);
+      }
+    }
+
+    function handleMidiUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = MidiParser.parse(e.target.result, settings.laneCount);
+          customTrack = {
+            ...parsed,
+            id: `custom-${Date.now()}`,
+            name: file.name.replace('.mid', '').replace('.midi', ''),
+          };
+          
+          document.getElementById('customTrackName').textContent = customTrack.name;
+          document.getElementById('customTrackNotes').textContent = `${customTrack.notes.length} 音符`;
+          document.getElementById('customTrackSection').style.display = 'block';
+        } catch (err) {
+          console.error('Failed to parse MIDI:', err);
+          alert('无法解析 MIDI 文件，请确保文件格式正确');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      event.target.value = '';
+    }
+
+    function startGame(track) {
+      AudioManager.resume();
+      AudioManager.playStart();
+
+      gameState = {
+        score: 0,
+        combo: 0,
+        maxCombo: 0,
+        lives: gameState.isPracticeMode ? 999 : 5,
+        perfect: 0,
+        good: 0,
+        miss: 0,
+        isPlaying: false,
+        isPaused: false,
+        isPracticeMode: gameState.isPracticeMode,
+        speedMultiplier: gameState.isPracticeMode ? settings.noteSpeed : 1,
+        currentTime: 0,
+        currentTrack: track,
+        activeNotes: [],
+      };
+
+      showPage('game');
+      setupGameUI();
+      startCountdown();
+    }
+
+    function setupGameUI() {
+      document.getElementById('gameTrackName').textContent = gameState.currentTrack.name;
+      document.getElementById('practiceIndicator').textContent = 
+        gameState.isPracticeMode ? `练习模式 x${gameState.speedMultiplier.toFixed(1)}` : '';
+      
+      updateScoreDisplay();
+      updateComboDisplay();
+      updateLivesDisplay();
+      setupLanes();
+      setupKeyHints();
+    }
+
+    function setupLanes() {
+      const container = document.getElementById('lanesContainer');
+      const laneWidth = 100 / settings.laneCount;
+      
+      container.innerHTML = '';
+      for (let i = 0; i < settings.laneCount; i++) {
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        lane.style.left = `${i * laneWidth}%`;
+        lane.style.width = `${laneWidth}%`;
+        lane.onclick = () => handleLaneInput(i);
+        lane.ontouchstart = (e) => {
+          e.preventDefault();
+          handleLaneInput(i);
+        };
+        container.appendChild(lane);
+      }
+    }
+
+    function setupKeyHints() {
+      const container = document.getElementById('keyHints');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < settings.laneCount; i++) {
+        const hint = document.createElement('div');
+        hint.className = 'key-hint';
+        hint.textContent = settings.keyMapping[i] || '';
+        container.appendChild(hint);
+      }
+    }
+
+    function startCountdown() {
+      const countdownEl = document.getElementById('countdown');
+      const numberEl = document.getElementById('countdownNumber');
+      let count = 3;
+
+      countdownEl.style.display = 'flex';
+      numberEl.textContent = count;
+
+      const interval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          numberEl.textContent = count;
+          numberEl.style.animation = 'none';
+          setTimeout(() => numberEl.style.animation = 'pulse-glow 0.5s ease-in-out', 10);
+        } else if (count === 0) {
+          numberEl.textContent = 'GO!';
+        } else {
+          clearInterval(interval);
+          countdownEl.style.display = 'none';
+          beginGame();
+        }
+      }, 1000);
+    }
+
+    function beginGame() {
+      gameState.isPlaying = true;
+      startTime = performance.now();
+      noteIndex = 0;
+      gameLoop();
+    }
+
+    function gameLoop() {
+      if (!gameState.isPlaying || gameState.isPaused) {
+        if (gameState.isPlaying) {
+          animationFrame = requestAnimationFrame(gameLoop);
+        }
+        return;
+      }
+
+      const elapsed = performance.now() - startTime;
+      gameState.currentTime = elapsed;
+
+      const track = gameState.currentTrack;
+      const noteSpeed = NOTE_SPEED_BASE * settings.noteSpeed * gameState.speedMultiplier;
+
+      while (
+        noteIndex < track.notes.length &&
+        track.notes[noteIndex].time <= elapsed + 2000
+      ) {
+        const note = { ...track.notes[noteIndex], judged: false };
+        gameState.activeNotes.push(note);
+        noteIndex++;
+      }
+
+      gameState.activeNotes.forEach(note => {
+        if (note.judged) return;
+        const noteY = ((elapsed - note.time) * noteSpeed);
+        if (noteY > JUDGE_LINE_Y + 10) {
+          handleMiss(note);
+        }
+      });
+
+      renderNotes();
+      cleanupNotes();
+
+      if (elapsed > track.duration && noteIndex >= track.notes.length && gameState.activeNotes.filter(n => !n.judged).length === 0) {
+        setTimeout(() => endGame(), 1000);
+        return;
+      }
+
+      animationFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function renderNotes() {
+      const container = document.getElementById('lanesContainer');
+      const noteSpeed = NOTE_SPEED_BASE * settings.noteSpeed * gameState.speedMultiplier;
+      const laneWidth = 100 / settings.laneCount;
+      const colors = ['#00d4ff', '#9333ea', '#ec4899', '#10b981', '#f59e0b', '#ef4444'];
+
+      container.querySelectorAll('.note').forEach(n => n.remove());
+
+      gameState.activeNotes.forEach(note => {
+        if (note.judged) return;
+        const noteY = ((gameState.currentTime - note.time) * noteSpeed);
+        if (noteY < -10 || noteY > 110) return;
+
+        const noteEl = document.createElement('div');
+        noteEl.className = 'note';
+        noteEl.style.left = `${note.lane * laneWidth + 2}%`;
+        noteEl.style.width = `${laneWidth - 4}%`;
+        noteEl.style.height = '40px';
+        noteEl.style.top = `${noteY}%`;
+        noteEl.style.transform = 'translateY(-50%)';
+        noteEl.style.backgroundColor = colors[note.lane % colors.length];
+        noteEl.style.boxShadow = `0 0 20px ${colors[note.lane % colors.length]}40`;
+        container.appendChild(noteEl);
+      });
+    }
+
+    function cleanupNotes() {
+      const noteSpeed = NOTE_SPEED_BASE * settings.noteSpeed * gameState.speedMultiplier;
+      gameState.activeNotes = gameState.activeNotes.filter(note => {
+        if (!note.judged) return true;
+        const noteY = ((gameState.currentTime - note.time) * noteSpeed);
+        return noteY < 120;
+      });
+    }
+
+    function handleKeyDown(e) {
+      if (e.repeat) return;
+
+      if (e.key === 'Escape') {
+        if (gameState.isPlaying && !gameState.isPaused) {
+          togglePause();
+        } else if (gameState.isPaused) {
+          togglePause();
+        }
+        return;
+      }
+
+      if (document.getElementById('keyMappingGrid')) {
+        const editingInput = document.querySelector('.key-input.editing');
+        if (editingInput) {
+          const lane = parseInt(editingInput.dataset.lane);
+          if (e.key === 'Escape' || e.key === 'Backspace') {
+            editingInput.classList.remove('editing');
+            editingInput.textContent = settings.keyMapping[lane] || '未设置';
+            return;
+          }
+          if (e.key.length === 1) {
+            settings.keyMapping[lane] = e.key.toLowerCase();
+            DataManager.saveSettings(settings);
+            editingInput.classList.remove('editing');
+            editingInput.textContent = e.key.toUpperCase();
+            setupKeyHints();
+          }
+          return;
+        }
+      }
+
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      const key = e.key.toLowerCase();
+      for (const [lane, mappedKey] of Object.entries(settings.keyMapping)) {
+        if (key === mappedKey.toLowerCase()) {
+          handleLaneInput(parseInt(lane));
+          break;
+        }
+      }
+    }
+
+    function handleLaneInput(lane) {
+      if (!gameState.isPlaying || gameState.isPaused) return;
+
+      const noteSpeed = NOTE_SPEED_BASE * settings.noteSpeed * gameState.speedMultiplier;
+
+      const noteToJudge = gameState.activeNotes.find(note => {
+        if (note.lane !== lane || note.judged) return false;
+        const noteY = ((gameState.currentTime - note.time) * noteSpeed);
+        const distance = Math.abs(noteY - JUDGE_LINE_Y);
+        return distance < 15;
+      });
+
+      if (noteToJudge) {
+        const noteY = ((gameState.currentTime - noteToJudge.time) * noteSpeed);
+        const distance = Math.abs(noteY - JUDGE_LINE_Y);
+        
+        let result;
+        let color;
+        
+        if (distance * 10 < PERFECT_WINDOW) {
+          result = 'perfect';
+          color = '#00d4ff';
+        } else if (distance * 10 < GOOD_WINDOW) {
+          result = 'good';
+          color = '#10b981';
+        } else {
+          result = 'miss';
+          color = '#ef4444';
+        }
+
+        handleJudge(noteToJudge, result, lane, color);
+      }
+    }
+
+    function handleJudge(note, result, lane, color) {
+      note.judged = true;
+      note.judgeResult = result;
+
+      const baseScore = result === 'perfect' ? 100 : result === 'good' ? 50 : 0;
+      const comboMultiplier = 1 + Math.floor(gameState.combo / 10) * 0.1;
+      const scoreGain = Math.floor(baseScore * comboMultiplier);
+
+      if (result === 'perfect') {
+        AudioManager.playPerfect();
+        gameState.perfect++;
+        gameState.combo++;
+      } else if (result === 'good') {
+        AudioManager.playGood();
+        gameState.good++;
+        gameState.combo++;
+      } else {
+        AudioManager.playMiss();
+        gameState.miss++;
+        gameState.combo = 0;
+        if (!gameState.isPracticeMode) {
+          gameState.lives--;
+        }
+      }
+
+      gameState.score += scoreGain;
+      gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
+      AudioManager.playCombo(gameState.combo);
+
+      updateScoreDisplay();
+      updateComboDisplay();
+      updateLivesDisplay();
+      showJudgeEffect(lane, result);
+      spawnParticles(lane, color);
+
+      if (gameState.lives <= 0 && !gameState.isPracticeMode) {
+        endGame();
+      }
+    }
+
+    function handleMiss(note) {
+      note.judged = true;
+      note.judgeResult = 'miss';
+      AudioManager.playMiss();
+      gameState.miss++;
+      gameState.combo = 0;
+      if (!gameState.isPracticeMode) {
+        gameState.lives--;
+      }
+
+      updateComboDisplay();
+      updateLivesDisplay();
+      showJudgeEffect(note.lane, 'miss');
+
+      if (gameState.lives <= 0 && !gameState.isPracticeMode) {
+        endGame();
+      }
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('scoreDisplay').textContent = gameState.score.toLocaleString();
+    }
+
+    function updateComboDisplay() {
+      const comboDisplay = document.getElementById('comboDisplay');
+      const comboNumber = document.getElementById('comboNumber');
+      
+      if (gameState.combo > 0) {
+        comboDisplay.style.display = 'flex';
+        comboNumber.textContent = gameState.combo;
+        comboNumber.className = 'combo-number';
+        if (gameState.combo >= 50) {
+          comboNumber.classList.add('combo-high');
+        } else if (gameState.combo >= 20) {
+          comboNumber.classList.add('combo-medium');
+        } else {
+          comboNumber.classList.add('combo-low');
+        }
+      } else {
+        comboDisplay.style.display = 'none';
+      }
+    }
+
+    function updateLivesDisplay() {
+      const container = document.getElementById('livesDisplay');
+      const maxLives = gameState.isPracticeMode ? 3 : Math.min(gameState.lives, 10);
+      
+      let html = '';
+      for (let i = 0; i < maxLives; i++) {
+        html += `<span class="heart ${gameState.isPracticeMode || gameState.lives > i ? '' : 'empty'}">❤️</span>`;
+      }
+      if (!gameState.isPracticeMode && gameState.lives > 10) {
+        html += `<span style="color: #ef4444; font-size: 0.75rem;">+${gameState.lives - 10}</span>`;
+      }
+      container.innerHTML = html;
+    }
+
+    function showJudgeEffect(lane, result) {
+      const container = document.getElementById('judgeEffectsContainer');
+      const laneWidth = 100 / settings.laneCount;
+      
+      const effect = document.createElement('div');
+      effect.className = `judge-effect judge-${result}`;
+      effect.style.left = `${lane * laneWidth}%`;
+      effect.style.width = `${laneWidth}%`;
+      effect.style.top = '70%';
+      effect.textContent = result.toUpperCase();
+      container.appendChild(effect);
+      
+      setTimeout(() => effect.remove(), 500);
+    }
+
+    function spawnParticles(lane, color) {
+      const container = document.getElementById('particlesContainer');
+      const laneWidth = 100 / settings.laneCount;
+      const centerX = (lane + 0.5) * laneWidth;
+      
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = `${centerX}%`;
+        particle.style.top = '85%';
+        particle.style.backgroundColor = color;
+        particle.style.boxShadow = `0 0 10px ${color}`;
+        
+        const angle = (Math.PI * 2 * i) / 12;
+        const velocity = 2 + Math.random() * 3;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity;
+        
+        let life = 1;
+        const animate = () => {
+          life -= 0.03;
+          if (life <= 0) {
+            particle.remove();
+            return;
+          }
+          
+          const currentX = parseFloat(particle.style.left);
+          const currentY = parseFloat(particle.style.top);
+          particle.style.left = `${currentX + vx * 0.3}%`;
+          particle.style.top = `${currentY + vy * 0.3}%`;
+          particle.style.opacity = life;
+          
+          requestAnimationFrame(animate);
+        };
+        
+        container.appendChild(particle);
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function togglePause() {
+      gameState.isPaused = !gameState.isPaused;
+      document.getElementById('pauseMenu').style.display = gameState.isPaused ? 'flex' : 'none';
+      document.getElementById('pauseIcon').textContent = gameState.isPaused ? '▶' : '⏸';
+      
+      if (!gameState.isPaused && gameState.isPlaying) {
+        startTime = performance.now() - gameState.currentTime;
+      }
+    }
+
+    function exitGame() {
+      gameState.isPlaying = false;
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      showPage('menu');
+    }
+
+    function endGame() {
+      gameState.isPlaying = false;
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+      AudioManager.playGameOver();
+      showResult();
+    }
+
+    function showResult() {
+      const track = gameState.currentTrack;
+      const totalNotes = track.notes.length;
+      const accuracy = totalNotes > 0
+        ? ((gameState.perfect * 100 + gameState.good * 50) / (totalNotes * 100)) * 100
+        : 0;
+
+      let grade = 'C';
+      if (accuracy >= 95) grade = 'S';
+      else if (accuracy >= 85) grade = 'A';
+      else if (accuracy >= 70) grade = 'B';
+
+      const result = {
+        trackId: track.id,
+        trackName: track.name,
+        score: gameState.score,
+        maxCombo: gameState.maxCombo,
+        perfect: gameState.perfect,
+        good: gameState.good,
+        miss: gameState.miss,
+        totalNotes,
+        accuracy: Math.round(accuracy * 100) / 100,
+        grade,
+      };
+
+      const previousBest = DataManager.getHighScore(track.id);
+      const isNewRecord = !previousBest || result.score > previousBest.bestScore;
+      DataManager.saveHighScore(result);
+
+      document.getElementById('resultTrackName').textContent = track.name;
+      document.getElementById('newRecordBadge').style.display = isNewRecord ? 'inline-flex' : 'none';
+      document.getElementById('gradeBadge').className = `grade-badge grade-${grade}`;
+      document.getElementById('gradeBadge').textContent = grade;
+      
+      animateScore(result.score);
+      
+      document.getElementById('statAccuracy').textContent = `${result.accuracy}%`;
+      document.getElementById('statMaxCombo').textContent = result.maxCombo;
+      document.getElementById('statPerfect').textContent = result.perfect;
+      document.getElementById('statGood').textContent = result.good;
+      document.getElementById('statTotal').textContent = totalNotes;
+      document.getElementById('statMiss').textContent = result.miss;
+
+      showPage('result');
+    }
+
+    function animateScore(targetScore) {
+      const scoreEl = document.getElementById('resultScore');
+      const duration = 1500;
+      const startTime = performance.now();
+      
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentScore = Math.floor(targetScore * easeOut);
+        
+        scoreEl.textContent = currentScore.toLocaleString();
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }
+
+    function retryGame() {
+      if (gameState.currentTrack) {
+        startGame(gameState.currentTrack);
+      }
+    }
+
+    function updateSettingsUI() {
+      document.getElementById('laneCountSlider').value = settings.laneCount;
+      document.getElementById('laneCountValue').textContent = settings.laneCount;
+      
+      document.getElementById('noteSpeedSlider').value = settings.noteSpeed;
+      document.getElementById('noteSpeedValue').textContent = `${settings.noteSpeed.toFixed(1)}x`;
+      
+      document.getElementById('musicVolumeSlider').value = settings.musicVolume;
+      document.getElementById('musicVolumeValue').textContent = `${Math.round(settings.musicVolume * 100)}%`;
+      
+      document.getElementById('sfxVolumeSlider').value = settings.sfxVolume;
+      document.getElementById('sfxVolumeValue').textContent = `${Math.round(settings.sfxVolume * 100)}%`;
+
+      document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.classList.toggle('btn-success', btn.dataset.difficulty === settings.difficulty);
+        btn.classList.toggle('active', btn.dataset.difficulty === settings.difficulty);
+      });
+
+      updateKeyMappingGrid();
+    }
+
+    function updateKeyMappingGrid() {
+      const container = document.getElementById('keyMappingGrid');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < settings.laneCount; i++) {
+        const item = document.createElement('div');
+        item.className = 'key-mapping-item';
+        item.innerHTML = `
+          <span class="key-mapping-label">轨道 ${i + 1}</span>
+          <div class="key-input" data-lane="${i}" onclick="editKeyMapping(${i})">
+            ${(settings.keyMapping[i] || '').toUpperCase()}
+          </div>
+        `;
+        container.appendChild(item);
+      }
+    }
+
+    function editKeyMapping(lane) {
+      const input = document.querySelector(`.key-input[data-lane="${lane}"]`);
+      document.querySelectorAll('.key-input.editing').forEach(el => {
+        el.classList.remove('editing');
+        el.textContent = (settings.keyMapping[parseInt(el.dataset.lane)] || '').toUpperCase();
+      });
+      
+      input.classList.add('editing');
+      input.textContent = '按任意键';
+    }
+
+    function resetKeyMapping() {
+      const defaultKeys = ['d', 'f', 'j', 'k', 's', 'l'];
+      for (let i = 0; i < settings.laneCount; i++) {
+        settings.keyMapping[i] = defaultKeys[i] || ' ';
+      }
+      DataManager.saveSettings(settings);
+      updateKeyMappingGrid();
+    }
+
+    function setDifficulty(difficulty) {
+      settings.difficulty = difficulty;
+      DataManager.saveSettings(settings);
+      updateSettingsUI();
+    }
+
+    function setLaneCount(value) {
+      const count = parseInt(value);
+      settings.laneCount = count;
+      
+      const defaultKeys = ['d', 'f', 'j', 'k', 's', 'l'];
+      const newMapping = {};
+      for (let i = 0; i < count; i++) {
+        newMapping[i] = settings.keyMapping[i] || defaultKeys[i] || ' ';
+      }
+      settings.keyMapping = newMapping;
+      
+      DataManager.saveSettings(settings);
+      document.getElementById('laneCountValue').textContent = count;
+      updateKeyMappingGrid();
+    }
+
+    function setNoteSpeed(value) {
+      settings.noteSpeed = parseFloat(value);
+      DataManager.saveSettings(settings);
+      document.getElementById('noteSpeedValue').textContent = `${settings.noteSpeed.toFixed(1)}x`;
+    }
+
+    function setMusicVolume(value) {
+      settings.musicVolume = parseFloat(value);
+      AudioManager.setVolume(settings.musicVolume, settings.sfxVolume);
+      DataManager.saveSettings(settings);
+      document.getElementById('musicVolumeValue').textContent = `${Math.round(settings.musicVolume * 100)}%`;
+    }
+
+    function setSfxVolume(value) {
+      settings.sfxVolume = parseFloat(value);
+      AudioManager.setVolume(settings.musicVolume, settings.sfxVolume);
+      DataManager.saveSettings(settings);
+      document.getElementById('sfxVolumeValue').textContent = `${Math.round(settings.sfxVolume * 100)}%`;
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

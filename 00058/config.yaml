@@ -1,0 +1,39 @@
+max_retry_count: 2
+notification:
+  admin_emails:
+  - admin@example.com
+  enabled: false
+report_day: sunday
+scheduler:
+  coalesce: true
+  daemon_enabled: true
+  max_instances: 1
+  misfire_grace_time: 3600
+  retention_cleanup_schedule: 0 3 * * *
+  timezone: Asia/Shanghai
+  weekly_report_schedule: 0 8 * * 0
+storage:
+  local_path: /Users/mac/AI Coding/solo coder/00058/data/backups
+  type: local
+systems:
+  test_system:
+    backup_schedule: 0 2 * * *
+    excludes:
+    - '*.tmp'
+    - '*.log'
+    - node_modules
+    full_backup_interval: 7
+    incremental_enabled: true
+    retention_days: 30
+    source_path: /Users/mac/AI Coding/solo coder/00058/test_data/source
+  example_system:
+    backup_schedule: 0 2 * * *
+    excludes:
+    - '*.tmp'
+    - '*.log'
+    - node_modules
+    full_backup_interval: 7
+    incremental_enabled: true
+    retention_days: 30
+    source_path: /path/to/source
+verify_timeout: 300

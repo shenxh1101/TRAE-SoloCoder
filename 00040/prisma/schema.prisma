@@ -1,0 +1,350 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SUBJECTIVE
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  ONGOING
+  ENDED
+  GRADED
+  CANCELLED
+}
+
+enum PaperStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+  LATE_SUBMITTED
+}
+
+enum MakeupStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum NotificationType {
+  EXAM_CREATED
+  EXAM_PUBLISHED
+  EXAM_STARTED
+  EXAM_ENDED
+  SCORE_PUBLISHED
+  ANOMALY_DETECTED
+  MAKEUP_REQUESTED
+  MAKEUP_APPROVED
+  MAKEUP_REJECTED
+  GRADING_ASSIGNED
+  SYSTEM_NOTICE
+}
+
+enum AnomalyStatus {
+  DETECTED
+  REVIEWING
+  CONFIRMED
+  DISMISSED
+}
+
+model User {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  email           String    @unique
+  passwordHash    String
+  name            String
+  role            UserRole
+  studentId       String?   @unique
+  classId         String?
+  department      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  class           Class?    @relation(fields: [classId], references: [id])
+  taughtCourses   Course[]  @relation("CourseTeacher")
+  createdExams    Exam[]    @relation("ExamCreator")
+  assignedGradings GradingAssignment[]
+  notifications   Notification[]
+  submittedAnswers ExamPaper[]
+  makeupRequests  MakeUpExam[] @relation("MakeupRequester")
+  gradedAnswers   Answer[]   @relation("GradedBy")
+  reviewedAnomalies ScoreAnomaly[] @relation("ReviewedBy")
+  approvedMakeups MakeUpExam[] @relation("ApprovedBy")
+
+  @@index([role])
+  @@index([classId])
+}
+
+model Class {
+  id            String    @id @default(uuid())
+  name          String
+  grade         String
+  department    String
+  createdAt     DateTime  @default(now())
+
+  students      User[]
+  courses       Course[]
+  exams         Exam[]
+}
+
+model Course {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  credit        Int
+  classId       String
+  teacherId     String
+  createdAt     DateTime  @default(now())
+
+  class         Class     @relation(fields: [classId], references: [id])
+  teacher       User      @relation("CourseTeacher", fields: [teacherId], references: [id])
+  questionBanks QuestionBank[]
+  exams         Exam[]
+}
+
+model QuestionBank {
+  id            String    @id @default(uuid())
+  name          String
+  courseId      String
+  description   String?
+  createdAt     DateTime  @default(now())
+
+  course        Course    @relation(fields: [courseId], references: [id])
+  questions     Question[]
+}
+
+model Question {
+  id            String    @id @default(uuid())
+  bankId        String
+  type          QuestionType
+  content       String
+  options       Json?
+  answer        String?
+  score         Int
+  difficulty    Float     @default(0.5)
+  knowledgePoint String?
+  createdAt     DateTime  @default(now())
+
+  bank          QuestionBank @relation(fields: [bankId], references: [id])
+  paperQuestions PaperQuestion[]
+  answers       Answer[]
+
+  @@index([bankId])
+  @@index([type])
+}
+
+model Exam {
+  id            String    @id @default(uuid())
+  title         String
+  courseId      String
+  classId       String
+  creatorId     String
+  status        ExamStatus @default(DRAFT)
+  duration      Int
+  startTime     DateTime
+  endTime       DateTime
+  passingScore  Int       @default(60)
+  totalScore    Int
+  isMakeup      Boolean   @default(false)
+  originalExamId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  course        Course    @relation(fields: [courseId], references: [id])
+  class         Class     @relation(fields: [classId], references: [id])
+  creator       User      @relation("ExamCreator", fields: [creatorId], references: [id])
+  rules         ExamRule[]
+  papers        ExamPaper[]
+  makeupRequestsAsOriginal MakeUpExam[] @relation("OriginalExam")
+  makeupRequestsAsMakeup   MakeUpExam[] @relation("MakeupExam")
+  statistics    ExamStatistics[]
+  originalExam  Exam?     @relation("MakeupExams", fields: [originalExamId], references: [id])
+  makeupOf      Exam[]    @relation("MakeupExams")
+
+  @@index([status])
+  @@index([courseId])
+  @@index([classId])
+}
+
+model ExamRule {
+  id            String    @id @default(uuid())
+  examId        String
+  questionType  QuestionType
+  count         Int
+  scorePerQuestion Int
+  createdAt     DateTime  @default(now())
+
+  exam          Exam      @relation(fields: [examId], references: [id])
+
+  @@unique([examId, questionType])
+}
+
+model ExamPaper {
+  id            String    @id @default(uuid())
+  examId        String
+  studentId     String
+  status        PaperStatus @default(NOT_STARTED)
+  startedAt     DateTime?
+  submittedAt   DateTime?
+  totalScore    Float?
+  isPassed      Boolean?
+  rank          Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  exam          Exam      @relation(fields: [examId], references: [id])
+  student       User      @relation(fields: [studentId], references: [id])
+  questions     PaperQuestion[]
+  answers       Answer[]
+  anomaly       ScoreAnomaly?
+
+  @@unique([examId, studentId])
+  @@index([examId])
+  @@index([studentId])
+}
+
+model PaperQuestion {
+  id            String    @id @default(uuid())
+  paperId       String
+  questionId    String
+  order         Int
+  assignedScore Int
+  createdAt     DateTime  @default(now())
+
+  paper         ExamPaper @relation(fields: [paperId], references: [id])
+  question      Question  @relation(fields: [questionId], references: [id])
+  answer        Answer?
+
+  @@unique([paperId, questionId])
+  @@index([paperId])
+}
+
+model Answer {
+  id            String    @id @default(uuid())
+  paperId       String
+  questionId    String
+  studentAnswer String?
+  autoScore     Float?
+  manualScore   Float?
+  finalScore    Float?
+  gradedById    String?
+  gradedAt      DateTime?
+  comment       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  paper         ExamPaper @relation(fields: [paperId], references: [id])
+  question      Question  @relation(fields: [questionId], references: [id])
+  gradedBy      User?     @relation("GradedBy", fields: [gradedById], references: [id])
+  paperQuestion PaperQuestion? @relation(fields: [paperId, questionId], references: [paperId, questionId])
+  gradingAssignments GradingAssignment[]
+
+  @@unique([paperId, questionId])
+  @@index([paperId])
+  @@index([gradedById])
+}
+
+model GradingAssignment {
+  id            String    @id @default(uuid())
+  teacherId     String
+  answerId      String
+  assignedAt    DateTime  @default(now())
+  completedAt   DateTime?
+
+  teacher       User      @relation(fields: [teacherId], references: [id])
+  answer        Answer    @relation(fields: [answerId], references: [id])
+
+  @@unique([teacherId, answerId])
+}
+
+model ScoreAnomaly {
+  id            String    @id @default(uuid())
+  paperId       String   @unique
+  historicalAvg Float
+  historicalStd Float
+  currentScore  Float
+  deviation     Float
+  threshold     Float
+  status        AnomalyStatus @default(DETECTED)
+  detectedAt    DateTime  @default(now())
+  reviewedById  String?
+  reviewedAt    DateTime?
+  reviewComment String?
+
+  paper         ExamPaper @relation(fields: [paperId], references: [id])
+  reviewedBy    User?     @relation("ReviewedBy", fields: [reviewedById], references: [id])
+}
+
+model MakeUpExam {
+  id            String    @id @default(uuid())
+  originalExamId String
+  studentId     String
+  status        MakeupStatus @default(PENDING)
+  attemptCount  Int       @default(1)
+  reason        String
+  approvedById  String?
+  approvedAt    DateTime?
+  makeupExamId  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  originalExam  Exam      @relation("OriginalExam", fields: [originalExamId], references: [id])
+  student       User      @relation("MakeupRequester", fields: [studentId], references: [id])
+  approvedBy    User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
+  makeupExam    Exam?     @relation("MakeupExam", fields: [makeupExamId], references: [id])
+
+  @@index([originalExamId])
+  @@index([studentId])
+}
+
+model Notification {
+  id            String    @id @default(uuid())
+  userId        String
+  type          NotificationType
+  title         String
+  content       String
+  relatedId     String?
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model ExamStatistics {
+  id            String    @id @default(uuid())
+  examId        String
+  averageScore  Float
+  highestScore  Float
+  lowestScore   Float
+  passRate      Float
+  stdDeviation  Float
+  questionStats Json
+  difficultyIndex Float
+  discriminationIndex Float
+  createdAt     DateTime  @default(now())
+
+  exam          Exam      @relation(fields: [examId], references: [id])
+
+  @@unique([examId])
+}

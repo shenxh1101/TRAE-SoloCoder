@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Noto Sans SC', system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3050 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #2a3050;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #3a4060;
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-seismo-panel/80 backdrop-blur-xl border border-seismo-border rounded-xl;
+  }
+
+  .glass-card {
+    @apply bg-seismo-card/90 backdrop-blur-md border border-seismo-border/50 rounded-lg;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-seismo-cyan to-seismo-cyan-dim text-seismo-bg font-medium 
+           px-4 py-2 rounded-lg shadow-lg shadow-seismo-cyan/20 
+           hover:shadow-seismo-cyan/40 hover:scale-[1.02] transition-all duration-200
+           active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply border border-seismo-border text-seismo-text-dim px-4 py-2 rounded-lg
+           hover:bg-seismo-panel hover:text-seismo-text transition-all duration-200
+           active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply bg-seismo-red/20 border border-seismo-red/50 text-seismo-red px-4 py-2 rounded-lg
+           hover:bg-seismo-red/30 transition-all duration-200;
+  }
+
+  .input-field {
+    @apply bg-seismo-bg border border-seismo-border rounded-lg px-3 py-2 text-sm text-seismo-text
+           placeholder:text-seismo-text-muted focus:outline-none focus:border-seismo-cyan/50
+           focus:ring-1 focus:ring-seismo-cyan/30 transition-all duration-200;
+  }
+
+  .stat-card {
+    @apply glass-card p-4 flex flex-col gap-1;
+  }
+
+  .stat-value {
+    @apply text-2xl font-mono font-bold text-seismo-text;
+  }
+
+  .stat-label {
+    @apply text-xs text-seismo-text-muted uppercase tracking-wider;
+  }
+
+  .section-title {
+    @apply text-lg font-mono font-semibold text-seismo-text flex items-center gap-2;
+  }
+
+  .page-container {
+    @apply min-h-screen p-6 animate-fade-in;
+  }
+}

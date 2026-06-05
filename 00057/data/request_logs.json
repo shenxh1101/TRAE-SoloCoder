@@ -1,0 +1,114 @@
+[
+  {
+    "timestamp": "2026-06-04T09:52:01.124305",
+    "method": "GET",
+    "path": "/user/123",
+    "matchedRuleId": "1a437dbb-bc64-45c9-8680-d6bd53a40a53",
+    "matchedRuleName": "获取用户"
+  },
+  {
+    "timestamp": "2026-06-04T09:52:06.495776",
+    "method": "GET",
+    "path": "/user/123",
+    "matchedRuleId": "1a437dbb-bc64-45c9-8680-d6bd53a40a53",
+    "matchedRuleName": "获取用户"
+  },
+  {
+    "timestamp": "2026-06-04T09:52:34.984974",
+    "method": "GET",
+    "path": "/user/123",
+    "matchedRuleId": "1a437dbb-bc64-45c9-8680-d6bd53a40a53",
+    "matchedRuleName": "获取用户"
+  },
+  {
+    "timestamp": "2026-06-04T09:52:55.969216",
+    "method": "GET",
+    "path": "/items",
+    "matchedRuleId": "f3c0b52a-6ce9-4007-aea6-47a875c85ae3",
+    "matchedRuleName": "列表接口"
+  },
+  {
+    "timestamp": "2026-06-04T09:53:00.519409",
+    "method": "GET",
+    "path": "/nonexistent",
+    "matchedRuleId": null,
+    "matchedRuleName": null
+  },
+  {
+    "timestamp": "2026-06-04T09:59:52.633503",
+    "method": "GET",
+    "path": "/static/data",
+    "matchedRuleId": "f5d9bfc5-2efb-4654-898e-e6cab203beb4",
+    "matchedRuleName": "静态文件响应"
+  },
+  {
+    "timestamp": "2026-06-04T10:00:20.219544",
+    "method": "GET",
+    "path": "/api/todos/999",
+    "matchedRuleId": "661111fd-aacf-4a0a-b964-f7c6d182224f",
+    "matchedRuleName": "Get Single Todo"
+  },
+  {
+    "timestamp": "2026-06-04T10:00:30.136127",
+    "method": "GET",
+    "path": "/api/todos",
+    "matchedRuleId": "8148e935-e15a-4661-ac98-f7bf2f833cfc",
+    "matchedRuleName": "Get Todos"
+  },
+  {
+    "timestamp": "2026-06-04T10:00:56.559295",
+    "method": "GET",
+    "path": "/user/999",
+    "matchedRuleId": "1a437dbb-bc64-45c9-8680-d6bd53a40a53",
+    "matchedRuleName": "获取用户"
+  },
+  {
+    "timestamp": "2026-06-04T10:00:56.642280",
+    "method": "GET",
+    "path": "/user/999",
+    "matchedRuleId": null,
+    "matchedRuleName": null
+  },
+  {
+    "timestamp": "2026-06-04T10:00:56.703571",
+    "method": "GET",
+    "path": "/user/999",
+    "matchedRuleId": "1a437dbb-bc64-45c9-8680-d6bd53a40a53",
+    "matchedRuleName": "获取用户"
+  },
+  {
+    "timestamp": "2026-06-04T10:01:13.568362",
+    "method": "GET",
+    "path": "/test/delay/fixed",
+    "matchedRuleId": "e27446bc-e606-4e0d-9f01-878362122745",
+    "matchedRuleName": "延迟测试-固定"
+  },
+  {
+    "timestamp": "2026-06-04T10:01:14.096163",
+    "method": "GET",
+    "path": "/test/delay/random",
+    "matchedRuleId": "9d81e6c5-58ed-439e-9459-05868aeb3c43",
+    "matchedRuleName": "延迟测试-随机"
+  },
+  {
+    "timestamp": "2026-06-04T10:01:14.632885",
+    "method": "GET",
+    "path": "/test/delay/random",
+    "matchedRuleId": "9d81e6c5-58ed-439e-9459-05868aeb3c43",
+    "matchedRuleName": "延迟测试-随机"
+  },
+  {
+    "timestamp": "2026-06-04T10:01:15.091568",
+    "method": "GET",
+    "path": "/test/delay/random",
+    "matchedRuleId": "9d81e6c5-58ed-439e-9459-05868aeb3c43",
+    "matchedRuleName": "延迟测试-随机"
+  },
+  {
+    "timestamp": "2026-06-04T10:01:51.559690",
+    "method": "GET",
+    "path": "/@vite/client",
+    "matchedRuleId": null,
+    "matchedRuleName": null
+  }
+]

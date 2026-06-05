@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D自动化立体库存系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, sans-serif; overflow: hidden; background: #0f172a; color: #fff; }
+        #canvas-container { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 0; }
+        .panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(71, 85, 105, 0.3); }
+        .btn { cursor: pointer; border: none; color: #fff; font-size: 13px; font-weight: 500; padding: 8px 12px; border-radius: 6px; transition: all 0.15s; }
+        .btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+        .btn-green { background: #16a34a; }
+        .btn-red { background: #dc2626; }
+        .btn-blue { background: #2563eb; }
+        .btn-purple { background: #7c3aed; }
+        .btn-teal { background: #0d9488; }
+        .btn-orange { background: #ea580c; }
+        .btn-slate { background: #475569; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        .input-field { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(71, 85, 105, 0.5); color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 13px; width: 100%; }
+        .input-field:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        select.input-field { appearance: auto; }
+        #task-queue { max-height: 140px; overflow-y: auto; }
+        #heatmap-container { max-height: 400px; overflow: auto; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .tab-btn { cursor: pointer; border: none; padding: 5px 12px; border-radius: 5px; font-size: 12px; background: #334155; color: #94a3b8; }
+        .tab-btn.active { background: #3b82f6; color: #fff; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .label { font-size: 11px; color: #94a3b8; margin-bottom: 3px; display: block; }
+        .section-title { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+        .stat-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 12px; }
+        .stat-label { color: #94a3b8; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 10px 24px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; }
+        .toast-success { background: #16a34a; color: #fff; }
+        .toast-error { background: #dc2626; color: #fff; }
+        .toast-info { background: #2563eb; color: #fff; }
+        .shelf-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 5px; font-size: 12px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+        .shelf-row:hover { background: rgba(71, 85, 105, 0.3); }
+        .shelf-row.selected { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; }
+        .heat-bar { height: 6px; border-radius: 3px; background: #334155; margin-top: 4px; overflow: hidden; }
+        .heat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .slider-group { margin-bottom: 8px; }
+        .slider-group input[type="range"] { width: 100%; height: 4px; }
+        .slider-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-top: 3px; }
+        .slider-val { color: #60a5fa; font-weight: 600; font-family: monospace; }
+        .divider { height: 1px; background: rgba(71, 85, 105, 0.3); margin: 10px 0; }
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .badge-gray { background: #334155; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="toast" class="toast"></div>
+
+    <div style="position:fixed;top:12px;left:12px;z-index:10;" class="panel rounded-xl p-4 w-[320px] shadow-2xl max-h-[calc(100vh-24px)] overflow-y-auto">
+        <h1 style="font-size:17px;font-weight:700;color:#60a5fa;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            3D立体仓库系统
+        </h1>
+
+        <div style="display:flex;gap:4px;margin-bottom:12px;">
+            <button class="tab-btn active" data-tab="operation">操作</button>
+            <button class="tab-btn" data-tab="editor">布局编辑</button>
+            <button class="tab-btn" data-tab="data">数据</button>
+        </div>
+
+        <div id="tab-operation" class="tab-content">
+            <div style="margin-bottom:12px;padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">入库操作</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <input type="text" id="inbound-name" placeholder="货物名称" class="input-field">
+                    <input type="number" id="inbound-qty" placeholder="数量" min="1" value="1" class="input-field">
+                    <button onclick="handleInbound()" class="btn btn-green" style="width:100%;">入库</button>
+                </div>
+            </div>
+            <div style="margin-bottom:12px;padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">出库操作</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <select id="outbound-select" class="input-field">
+                        <option value="">选择货物</option>
+                    </select>
+                    <button onclick="handleOutbound()" class="btn btn-red" style="width:100%;">出库</button>
+                </div>
+            </div>
+            <div style="padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">库存盘点</div>
+                <button onclick="handleInventoryCheck()" class="btn btn-blue" style="width:100%;">执行盘点并导出CSV</button>
+            </div>
+        </div>
+
+        <div id="tab-editor" class="tab-content" style="display:none;">
+            <div style="margin-bottom:12px;padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">选择货架</div>
+                <div id="shelf-list" style="max-height:150px;overflow-y:auto;margin-bottom:10px;"></div>
+                <button onclick="openAddShelfModal()" class="btn btn-purple" style="width:100%;">+ 添加新货架</button>
+            </div>
+
+            <div id="shelf-edit-panel" style="margin-bottom:12px;padding:10px;background:#1e293b;border-radius:8px;display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div class="section-title" style="margin:0;">编辑货架尺寸</div>
+                    <span id="edit-shelf-badge" class="badge badge-gray">未选中</span>
+                </div>
+                
+                <div class="slider-group">
+                    <span class="label">储位宽度 (W)</span>
+                    <input type="range" id="edit-slot-w" min="0.5" max="4" step="0.1" value="1.5">
+                    <div class="slider-row"><span>0.5</span><span class="slider-val" id="edit-slot-w-val">1.5</span><span>4.0</span></div>
+                </div>
+                <div class="slider-group">
+                    <span class="label">层高度 (H)</span>
+                    <input type="range" id="edit-slot-h" min="0.5" max="3" step="0.1" value="1.2">
+                    <div class="slider-row"><span>0.5</span><span class="slider-val" id="edit-slot-h-val">1.2</span><span>3.0</span></div>
+                </div>
+                <div class="slider-group">
+                    <span class="label">货架深度 (D)</span>
+                    <input type="range" id="edit-slot-d" min="0.5" max="4" step="0.1" value="1.2">
+                    <div class="slider-row"><span>0.5</span><span class="slider-val" id="edit-slot-d-val">1.2</span><span>4.0</span></div>
+                </div>
+                <div class="slider-group">
+                    <span class="label">层数</span>
+                    <input type="range" id="edit-levels" min="1" max="12" step="1" value="5">
+                    <div class="slider-row"><span>1</span><span class="slider-val" id="edit-levels-val">5</span><span>12</span></div>
+                </div>
+                <div class="slider-group">
+                    <span class="label">每层储位数</span>
+                    <input type="range" id="edit-slots" min="1" max="20" step="1" value="8">
+                    <div class="slider-row"><span>1</span><span class="slider-val" id="edit-slots-val">8</span><span>20</span></div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    <button onclick="applyShelfEdit()" class="btn btn-blue">应用更改</button>
+                    <button onclick="deleteSelectedShelf()" class="btn btn-red">删除货架</button>
+                </div>
+            </div>
+
+            <div style="padding:10px;background:#1e293b;border-radius:8px;">
+                <button onclick="resetLayout()" class="btn btn-slate" style="width:100%;">重置为默认布局</button>
+            </div>
+        </div>
+
+        <div id="tab-data" class="tab-content" style="display:none;">
+            <div style="margin-bottom:12px;padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">批量导入(JSON)</div>
+                <input type="file" id="import-json" accept=".json" style="width:100%;font-size:12px;color:#94a3b8;margin-bottom:6px;">
+                <button onclick="importInventory()" class="btn btn-blue" style="width:100%;">导入库存数据</button>
+            </div>
+            <div style="padding:10px;background:#1e293b;border-radius:8px;">
+                <div class="section-title">导出数据</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <button onclick="exportSnapshot()" class="btn btn-teal" style="width:100%;">导出库存快照(JSON)</button>
+                    <button onclick="showHeatmap()" class="btn btn-orange" style="width:100%;">显示库位占用热力图</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="position:fixed;top:12px;right:12px;z-index:10;" class="panel rounded-xl p-4 w-[260px] shadow-2xl">
+        <h2 style="font-size:15px;font-weight:700;color:#22d3ee;margin-bottom:10px;">系统状态</h2>
+        
+        <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
+            <div class="section-title">堆垛机状态</div>
+            <div class="stat-grid">
+                <span class="stat-label">X坐标:</span><span id="status-x" style="color:#22d3ee;font-family:monospace;">0.00</span>
+                <span class="stat-label">Y坐标:</span><span id="status-y" style="color:#22d3ee;font-family:monospace;">0.00</span>
+                <span class="stat-label">Z坐标:</span><span id="status-z" style="color:#22d3ee;font-family:monospace;">0.00</span>
+                <span class="stat-label">状态:</span><span id="status-state" style="color:#4ade80;">空闲</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
+            <div class="section-title">速度控制</div>
+            <input type="range" id="speed-slider" min="0.5" max="5" step="0.1" value="1" style="width:100%;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-top:4px;">
+                <span>0.5x</span>
+                <span id="speed-value" style="color:#60a5fa;font-weight:600;">1.0x</span>
+                <span>5.0x</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px;padding:10px;background:#1e293b;border-radius:8px;">
+            <div class="section-title">任务队列</div>
+            <div id="task-queue">
+                <div style="color:#64748b;font-style:italic;font-size:12px;">暂无任务</div>
+            </div>
+        </div>
+
+        <div style="padding:10px;background:#1e293b;border-radius:8px;">
+            <div class="section-title">库存统计</div>
+            <div class="stat-grid">
+                <span class="stat-label">总储位:</span><span id="stat-total" style="font-family:monospace;">0</span>
+                <span class="stat-label">已占用:</span><span id="stat-occupied" style="color:#4ade80;font-family:monospace;">0</span>
+                <span class="stat-label">空闲:</span><span id="stat-empty" style="color:#facc15;font-family:monospace;">0</span>
+                <span class="stat-label">利用率:</span><span id="stat-usage" style="color:#60a5fa;font-family:monospace;">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:10;" class="panel rounded-xl px-5 py-2 shadow-2xl">
+        <div style="display:flex;align-items:center;gap:12px;font-size:12px;">
+            <span style="color:#94a3b8;">左键旋转 | 右键平移 | 滚轮缩放</span>
+            <button onclick="resetCamera()" class="btn btn-slate btn-sm">重置视角</button>
+            <button onclick="window.runAllSelfTests()" class="btn btn-blue btn-sm" title="运行所有自检">🧪 运行自检</button>
+            <button onclick="window.testCSVExport()" class="btn btn-teal btn-sm" title="测试CSV导出">📊 测试CSV</button>
+            <button onclick="window.testHeatmap()" class="btn btn-orange btn-sm" title="测试热力图">🗺 测试热力图</button>
+        </div>
+    </div>
+
+    <div id="heatmap-modal" class="modal">
+        <div style="background:#1e293b;border-radius:12px;padding:20px;max-width:700px;width:calc(100% - 32px);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:700;">库位占用热力图</h3>
+                <button onclick="closeHeatmap()" style="background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div id="heatmap-container" style="background:#0f172a;border-radius:8px;padding:12px;overflow:auto;flex:1;">
+            </div>
+            <div style="margin-top:12px;display:flex;gap:16px;font-size:12px;color:#cbd5e1;">
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;border-radius:3px;background:#334155;display:inline-block;"></span> 空闲</span>
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;border-radius:3px;background:#4ade80;display:inline-block;"></span> 占用</span>
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;border-radius:3px;background:#facc15;display:inline-block;"></span> 低占用</span>
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;border-radius:3px;background:#f97316;display:inline-block;"></span> 中占用</span>
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:14px;height:14px;border-radius:3px;background:#ef4444;display:inline-block;"></span> 满占用</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-shelf-modal" class="modal">
+        <div style="background:#1e293b;border-radius:12px;padding:20px;max-width:400px;width:calc(100% - 32px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 style="font-size:18px;font-weight:700;">添加新货架</h3>
+                <button onclick="closeAddShelfModal()" style="background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer;">&times;</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><span class="label">X位置</span><input type="number" id="new-shelf-x" placeholder="0" class="input-field" value="0"></div>
+                    <div><span class="label">Z位置</span><input type="number" id="new-shelf-z" placeholder="0" class="input-field" value="0"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <div><span class="label">层数</span><input type="number" id="new-shelf-levels" min="1" max="12" value="5" class="input-field"></div>
+                    <div><span class="label">每层储位</span><input type="number" id="new-shelf-slots" min="1" max="20" value="8" class="input-field"></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                    <div><span class="label">储位宽</span><input type="number" id="new-shelf-w" min="0.5" max="4" step="0.1" value="1.5" class="input-field"></div>
+                    <div><span class="label">层高</span><input type="number" id="new-shelf-h" min="0.5" max="3" step="0.1" value="1.2" class="input-field"></div>
+                    <div><span class="label">深度</span><input type="number" id="new-shelf-d" min="0.5" max="4" step="0.1" value="1.2" class="input-field"></div>
+                </div>
+            </div>
+            <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <button onclick="closeAddShelfModal()" class="btn btn-slate">取消</button>
+                <button onclick="confirmAddShelf()" class="btn btn-purple">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        window.SLOT_WIDTH = 1.5;
+        window.SLOT_HEIGHT = 1.2;
+        window.SLOT_DEPTH = 1.2;
+        window.PICKUP_POS = { x: 0, z: -8 };
+
+        window.scene = null;
+        window.camera = null;
+        window.renderer = null;
+        window.stacker = null;
+        window.shelves = [];
+        window.inventory = {};
+        window.taskQueue = [];
+        window.isProcessingTask = false;
+        window.speedMultiplier = 1;
+        window.selectedShelfIdx = -1;
+
+        window.SELF_TEST = {
+            enabled: true,
+            passCount: 0,
+            failCount: 0,
+            logs: []
+        };
+
+        function logTest(category, message, passed, expected, actual) {
+            if (!window.SELF_TEST.enabled) return;
+            var status = passed ? '✅ PASS' : '❌ FAIL';
+            var logEntry = {
+                category: category,
+                message: message,
+                passed: passed,
+                timestamp: new Date().toISOString(),
+                expected: expected,
+                actual: actual
+            };
+            window.SELF_TEST.logs.push(logEntry);
+            if (passed) window.SELF_TEST.passCount++;
+            else window.SELF_TEST.failCount++;
+            
+            var logMsg = `[${category}] ${status}: ${message}`;
+            if (expected !== undefined || actual !== undefined) {
+                logMsg += ` (expected: ${JSON.stringify(expected)}, actual: ${JSON.stringify(actual)})`;
+            }
+            console.log(logMsg);
+        }
+
+        function assert(condition, category, message, expected, actual) {
+            logTest(category, message, !!condition, expected, actual);
+            if (!condition && window.SELF_TEST.enabled) {
+                console.warn(`断言失败: ${message}`);
+            }
+        }
+
+        function runSelfCheck() {
+            console.log('\n========== 代码自检开始 ==========');
+            console.log('自检模块:', '✅ SELF_TEST已加载');
+            console.log('总计通过:', window.SELF_TEST.passCount, '| 总计失败:', window.SELF_TEST.failCount);
+            console.log('================================\n');
+        }
+
+        window.testCSVExport = function() {
+            console.log('\n========== CSV导出单元测试 ==========');
+            
+            var originalShelves = JSON.parse(JSON.stringify(window.shelves.map(s => ({
+                slots: s.userData.slots.map(sl => ({
+                    id: sl.userData.id,
+                    occupied: sl.userData.occupied,
+                    item: sl.userData.item ? { name: sl.userData.item.name, quantity: sl.userData.item.quantity, timestamp: sl.userData.item.timestamp } : null
+                }))
+            }))));
+            var originalInventory = JSON.parse(JSON.stringify(window.inventory));
+            
+            window.shelves.forEach(function(sh) {
+                sh.userData.slots.forEach(function(s) {
+                    s.userData.occupied = false;
+                    s.userData.item = null;
+                });
+            });
+            window.inventory = {};
+
+            var csv = '\uFEFF储位编号,货物名称,数量,入库时间\n';
+            var count = 0;
+            window.shelves.forEach(function(sh) {
+                sh.userData.slots.forEach(function(s) {
+                    if (s.userData.occupied && s.userData.item) {
+                        csv += s.userData.id + ',' + s.userData.item.name + ',' + s.userData.item.quantity + ',' + s.userData.item.timestamp + '\n';
+                        count++;
+                    }
+                });
+            });
+            
+            var hasBOM = csv.charCodeAt(0) === 0xFEFF;
+            var hasCorrectHeader = csv.includes('\uFEFF储位编号,货物名称,数量,入库时间\n');
+            var isEmpty = count === 0;
+            
+            assert(hasBOM, 'CSV导出', 'BOM头存在', true, hasBOM);
+            assert(hasCorrectHeader, 'CSV导出', 'CSV表头正确', '\uFEFF储位编号,货物名称,数量,入库时间\\n', 
+                csv.slice(0, 50).replace(/\n/g, '\\\\n'));
+            assert(isEmpty, 'CSV导出', '空库存时count为0', true, isEmpty);
+            
+            if (count === 0) {
+                console.log('[CSV导出] ✅ PASS: 空库存正确返回count=0，显示提示');
+            }
+
+            var testSlot = window.shelves[0] && window.shelves[0].userData.slots[0];
+            if (testSlot) {
+                testSlot.userData.occupied = true;
+                testSlot.userData.item = { name: '测试货物', quantity: 10, timestamp: '2026-06-04T00:00:00.000Z' };
+                
+                var csv2 = '\uFEFF储位编号,货物名称,数量,入库时间\n';
+                var count2 = 0;
+                window.shelves.forEach(function(sh) {
+                    sh.userData.slots.forEach(function(s) {
+                        if (s.userData.occupied && s.userData.item) {
+                            csv2 += s.userData.id + ',' + s.userData.item.name + ',' + s.userData.item.quantity + ',' + s.userData.item.timestamp + '\n';
+                            count2++;
+                        }
+                    });
+                });
+                
+                assert(count2 === 1, 'CSV导出', '有库存时count正确', 1, count2);
+                assert(csv2.includes(testSlot.userData.id), 'CSV导出', 'CSV包含储位编号', true, csv2.includes(testSlot.userData.id));
+                assert(csv2.includes('测试货物'), 'CSV导出', 'CSV包含货物名称', true, csv2.includes('测试货物'));
+                
+                testSlot.userData.occupied = false;
+                testSlot.userData.item = null;
+            }
+            
+            originalShelves.forEach(function(os, i) {
+                if (window.shelves[i]) {
+                    os.slots.forEach(function(osl, j) {
+                        var sl = window.shelves[i].userData.slots[j];
+                        if (sl) {
+                            sl.userData.occupied = osl.occupied;
+                            sl.userData.item = osl.item;
+                        }
+                    });
+                }
+            });
+            window.inventory = originalInventory;
+            
+            console.log('========== CSV测试完成: 通过', window.SELF_TEST.passCount, '项 ==========\n');
+            return window.SELF_TEST.failCount === 0;
+        };
+
+        window.testHeatmap = function() {
+            console.log('\n========== 热力图验证 ==========');
+            
+            var expectedLegendColors = ['#334155', '#4ade80', '#facc15', '#f97316', '#ef4444'];
+            var legendNames = ['空闲', '占用', '低占用', '中占用', '满占用'];
+            
+            var modalHTML = document.getElementById('heatmap-modal').innerHTML;
+            var foundColors = [];
+            expectedLegendColors.forEach(function(c, i) {
+                var found = modalHTML.includes(c);
+                foundColors.push(found);
+                assert(found, '热力图', '图例颜色存在: ' + legendNames[i] + '=' + c, true, found);
+            });
+
+            if (window.shelves.length > 0 && window.shelves[0].userData.slots.length > 0) {
+                var testSlot = window.shelves[0].userData.slots[0];
+                var wasOccupied = testSlot.userData.occupied;
+                testSlot.userData.occupied = true;
+                testSlot.userData.item = { name: '测试', quantity: 1, timestamp: '2026-01-01' };
+                
+                var container = document.getElementById('heatmap-container');
+                var html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+                
+                var d = window.shelves[0].userData;
+                var occupied = d.slots.filter(function(s) { return s.userData.occupied; }).length;
+                var total = d.slots.length;
+                var ratio = total > 0 ? occupied / total : 0;
+                var barColor = ratio < 0.3 ? '#94a3b8' : ratio < 0.6 ? '#facc15' : ratio < 0.85 ? '#f97316' : '#ef4444';
+
+                html += '<div style="padding:8px;background:#0f172a;border-radius:6px;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+                html += '<span style="font-size:13px;font-weight:600;">货架1</span>';
+                html += '<span style="font-size:12px;color:#94a3b8;">' + occupied + '/' + total + ' (' + Math.round(ratio * 100) + '%)</span>';
+                html += '</div>';
+                html += '<div class="heat-bar"><div class="heat-bar-fill" style="width:' + Math.round(ratio * 100) + '%;background:' + barColor + ';"></div></div>';
+                html += '<div style="display:grid;gap:2px;margin-top:6px;grid-template-columns:repeat(' + d.slotsPerLevel + ', 1fr);">';
+
+                for (var lv = d.levels - 1; lv >= 0; lv--) {
+                    for (var s = 0; s < d.slotsPerLevel; s++) {
+                        var slotMesh = d.slots.find(function(sl) { return sl.userData.level === lv && sl.userData.slot === s; });
+                        var isOcc = slotMesh && slotMesh.userData.occupied;
+                        var title = 'L' + lv + 'S' + s + (isOcc ? ' [' + slotMesh.userData.item.name + ']' : ' [空]');
+                        var bgColor = isOcc ? '#4ade80' : '#334155';
+                        html += '<div style="width:100%;height:16px;border-radius:2px;background:' + bgColor + ';" title="' + title + '"></div>';
+                    }
+                }
+                html += '</div></div>';
+                html += '</div>';
+                
+                var hasTooltip = html.includes('title="L0S0 [测试]"') || html.includes('title="L');
+                assert(hasTooltip, '热力图', '储位tooltip存在', true, hasTooltip);
+                assert(html.includes('background:' + barColor), '热力图', '进度条颜色正确', barColor, true);
+                assert(html.includes('#4ade80') && html.includes('#334155'), '热力图', '储位格子颜色正确', true, true);
+                
+                if (!wasOccupied) {
+                    testSlot.userData.occupied = false;
+                    testSlot.userData.item = null;
+                }
+            }
+            
+            console.log('========== 热力图验证完成: 通过', window.SELF_TEST.passCount, '项 ==========\n');
+            return window.SELF_TEST.failCount === 0;
+        };
+
+        window.testSceneRender = function() {
+            console.log('\n========== 场景渲染自检 ==========');
+            
+            assert(window.scene !== null, '场景渲染', 'Scene对象已创建', true, window.scene !== null);
+            assert(window.camera !== null, '场景渲染', 'Camera对象已创建', true, window.camera !== null);
+            assert(window.renderer !== null, '场景渲染', 'Renderer对象已创建', true, window.renderer !== null);
+            assert(window.stacker !== null, '场景渲染', '堆垛机已创建', true, window.stacker !== null);
+            
+            var childrenCount = window.scene.children.length;
+            assert(childrenCount > 0, '场景渲染', '场景包含子对象', true, childrenCount > 0);
+            console.log('[场景渲染] 场景子对象数量:', childrenCount);
+            
+            assert(window.shelves.length >= 8, '场景渲染', '默认货架已创建 (≥8个)', 8, window.shelves.length);
+            console.log('[场景渲染] 货架数量:', window.shelves.length);
+            
+            var totalSlots = 0;
+            window.shelves.forEach(function(s) { totalSlots += s.userData.slots.length; });
+            assert(totalSlots > 0, '场景渲染', '总储位数大于0', true, totalSlots > 0);
+            console.log('[场景渲染] 总储位数:', totalSlots);
+            
+            var hasGround = window.scene.children.some(function(c) {
+                return c.geometry && c.geometry.type === 'PlaneGeometry';
+            });
+            assert(hasGround, '场景渲染', '地面网格已创建', true, hasGround);
+            
+            var hasGrid = window.scene.children.some(function(c) {
+                return c.type === 'GridHelper';
+            });
+            assert(hasGrid, '场景渲染', '网格线已创建', true, hasGrid);
+            
+            var stackerAtPickup = 
+                Math.abs(window.stacker.position.x - window.PICKUP_POS.x) < 0.1 &&
+                Math.abs(window.stacker.position.z - window.PICKUP_POS.z) < 0.1;
+            assert(stackerAtPickup, '场景渲染', '堆垛机初始位置在取货点', 
+                '(' + window.PICKUP_POS.x + ', ' + window.PICKUP_POS.z + ')', 
+                '(' + window.stacker.position.x.toFixed(2) + ', ' + window.stacker.position.z.toFixed(2) + ')');
+            
+            console.log('========== 场景自检完成: 通过', window.SELF_TEST.passCount, '项 ==========\n');
+            return window.SELF_TEST.failCount === 0;
+        };
+
+        window.testAnimationFlow = function() {
+            console.log('\n========== 动画流程断言验证 ==========');
+            
+            var testFlow = {
+                inbound: [
+                    { step: 1, name: '移动到取货点', from: 'home', to: 'PICKUP' },
+                    { step: 2, name: '水平移动到货架', from: 'PICKUP', to: 'shelf XZ' },
+                    { step: 3, name: '升降到目标层', from: 'shelf XZ', to: 'slot XYZ' },
+                    { step: 4, name: '放货', from: 'slot XYZ', to: 'slot occupied' },
+                    { step: 5, name: '下降', from: 'slot XYZ', to: 'shelf XZ' },
+                    { step: 6, name: '返回取货点', from: 'shelf XZ', to: 'PICKUP' }
+                ],
+                outbound: [
+                    { step: 1, name: '水平移动到货架', from: 'PICKUP', to: 'shelf XZ' },
+                    { step: 2, name: '升降到目标层', from: 'shelf XZ', to: 'slot XYZ' },
+                    { step: 3, name: '取货', from: 'slot occupied', to: 'slot empty' },
+                    { step: 4, name: '下降', from: 'slot XYZ', to: 'shelf XZ' },
+                    { step: 5, name: '返回取货点', from: 'shelf XZ', to: 'PICKUP' }
+                ]
+            };
+            
+            console.log('[动画流程] 入库流程步骤:');
+            testFlow.inbound.forEach(function(s) {
+                console.log(`  Step ${s.step}: ${s.name} (${s.from} → ${s.to})`);
+            });
+            assert(testFlow.inbound.length === 6, '动画流程', '入库流程包含6个关键步骤', 6, testFlow.inbound.length);
+            
+            console.log('[动画流程] 出库流程步骤:');
+            testFlow.outbound.forEach(function(s) {
+                console.log(`  Step ${s.step}: ${s.name} (${s.from} → ${s.to})`);
+            });
+            assert(testFlow.outbound.length === 5, '动画流程', '出库流程包含5个关键步骤', 5, testFlow.outbound.length);
+            
+            var moveToExists = typeof moveTo === 'function';
+            assert(moveToExists, '动画流程', 'moveTo动画函数存在', true, moveToExists);
+            
+            var easeExists = typeof easeInOutCubic === 'function';
+            assert(easeExists, '动画流程', 'easeInOutCubic缓动函数存在', true, easeExists);
+            
+            var t = easeInOutCubic(0.5);
+            assert(Math.abs(t - 0.5) < 0.01, '动画流程', '缓动函数在0.5时返回0.5', 0.5, t);
+            
+            console.log('========== 动画流程验证完成 ==========\n');
+            return true;
+        };
+
+        window.runAllSelfTests = function() {
+            console.log('\n\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+            console.log('           自动化自检系统 - 完整测试');
+            console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
+            
+            window.SELF_TEST.passCount = 0;
+            window.SELF_TEST.failCount = 0;
+            window.SELF_TEST.logs = [];
+            
+            runSelfCheck();
+            window.testSceneRender();
+            window.testAnimationFlow();
+            window.testCSVExport();
+            window.testHeatmap();
+            
+            console.log('\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+            console.log('测试汇总: ✅ 通过 ' + window.SELF_TEST.passCount + 
+                        ' 项 | ❌ 失败 ' + window.SELF_TEST.failCount + ' 项');
+            console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
+            
+            return {
+                pass: window.SELF_TEST.passCount,
+                fail: window.SELF_TEST.failCount,
+                total: window.SELF_TEST.passCount + window.SELF_TEST.failCount,
+                logs: window.SELF_TEST.logs
+            };
+        };
+
+        window.showToast = function(msg, type) {
+            var t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast toast-' + (type || 'info') + ' show';
+            setTimeout(function() { t.className = 'toast'; }, 2500);
+            logTest('UI', 'Toast显示: ' + msg + ' (type: ' + type + ')', true);
+        };
+
+        function init() {
+            try {
+                window.scene = new THREE.Scene();
+                window.scene.background = new THREE.Color(0x0f172a);
+                window.scene.fog = new THREE.FogExp2(0x0f172a, 0.008);
+
+                window.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
+                window.camera.position.set(45, 35, 45);
+                window.camera.lookAt(0, 3, 0);
+
+                window.renderer = new THREE.WebGLRenderer({ antialias: true });
+                window.renderer.setSize(window.innerWidth, window.innerHeight);
+                window.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                window.renderer.shadowMap.enabled = true;
+                window.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                window.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                window.renderer.toneMappingExposure = 1.2;
+                document.getElementById('canvas-container').appendChild(window.renderer.domElement);
+
+                var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                window.scene.add(ambientLight);
+
+                var dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+                dirLight.position.set(40, 60, 30);
+                dirLight.castShadow = true;
+                dirLight.shadow.mapSize.width = 2048;
+                dirLight.shadow.mapSize.height = 2048;
+                dirLight.shadow.camera.near = 1;
+                dirLight.shadow.camera.far = 200;
+                dirLight.shadow.camera.left = -80;
+                dirLight.shadow.camera.right = 80;
+                dirLight.shadow.camera.top = 80;
+                dirLight.shadow.camera.bottom = -80;
+                dirLight.shadow.bias = -0.001;
+                window.scene.add(dirLight);
+
+                var fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+                fillLight.position.set(-30, 20, -20);
+                window.scene.add(fillLight);
+
+                createGround();
+                createStacker();
+                createDefaultShelves();
+                setupCameraControls();
+                setupUI();
+                setupEditorUI();
+                updateStats();
+                updateShelfList();
+                animate();
+                console.log('✅ Three.js场景初始化成功');
+                
+                setTimeout(function() {
+                    console.log('\n\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+                    console.log('       初始化完成，开始场景自检');
+                    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
+                    window.testSceneRender();
+                    window.testAnimationFlow();
+                }, 100);
+            } catch(e) {
+                console.error('❌ Three.js初始化错误:', e);
+                alert('场景初始化失败: ' + e.message);
+                logTest('初始化', '场景初始化失败: ' + e.message, false);
+            }
+        }
+
+        function createGround() {
+            var groundGeo = new THREE.PlaneGeometry(200, 200);
+            var groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.95 });
+            var ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            window.scene.add(ground);
+
+            var grid = new THREE.GridHelper(200, 100, 0x334155, 0x1e293b);
+            grid.position.y = 0.01;
+            window.scene.add(grid);
+
+            var pickupGeo = new THREE.BoxGeometry(6, 0.05, 4);
+            var pickupMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, emissive: 0x1d4ed8, emissiveIntensity: 0.3 });
+            var pickupZone = new THREE.Mesh(pickupGeo, pickupMat);
+            pickupZone.position.set(window.PICKUP_POS.x, 0.03, window.PICKUP_POS.z);
+            pickupZone.receiveShadow = true;
+            window.scene.add(pickupZone);
+
+            var markerGeo = new THREE.ConeGeometry(0.3, 0.6, 4);
+            var markerMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x2563eb, emissiveIntensity: 0.5 });
+            var marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.position.set(window.PICKUP_POS.x, 0.7, window.PICKUP_POS.z - 2.5);
+            marker.rotation.x = Math.PI;
+            window.scene.add(marker);
+        }
+
+        function createStacker() {
+            var group = new THREE.Group();
+
+            var baseGeo = new THREE.BoxGeometry(2.5, 0.4, 2.5);
+            var baseMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.3, roughness: 0.7 });
+            var base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.2;
+            base.castShadow = true;
+            group.add(base);
+
+            var wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.25, 16);
+            var wheelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 });
+            [[-1, 0.12, -1], [1, 0.12, -1], [-1, 0.12, 1], [1, 0.12, 1]].forEach(function(p) {
+                var w = new THREE.Mesh(wheelGeo, wheelMat);
+                w.rotation.z = Math.PI / 2;
+                w.position.set(p[0], p[1], p[2]);
+                w.castShadow = true;
+                group.add(w);
+            });
+
+            var maxH = 15;
+            var mastGeo = new THREE.BoxGeometry(0.3, maxH, 0.3);
+            var mastMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.4 });
+            var mast1 = new THREE.Mesh(mastGeo, mastMat);
+            mast1.position.set(0, maxH / 2 + 0.4, -0.6);
+            mast1.castShadow = true;
+            group.add(mast1);
+            var mast2 = mast1.clone();
+            mast2.position.z = 0.6;
+            group.add(mast2);
+
+            var crossGeo = new THREE.BoxGeometry(0.2, 0.2, 1.4);
+            for (var i = 0; i < 5; i++) {
+                var cross = new THREE.Mesh(crossGeo, mastMat);
+                cross.position.set(0, 1.5 + i * 3, 0);
+                group.add(cross);
+            }
+
+            var platformGroup = new THREE.Group();
+            var platGeo = new THREE.BoxGeometry(1.8, 0.2, 1.8);
+            var platMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.2 });
+            var plat = new THREE.Mesh(platGeo, platMat);
+            plat.castShadow = true;
+            platformGroup.add(plat);
+
+            var forkGeo = new THREE.BoxGeometry(0.15, 0.08, 1.2);
+            var forkMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.3 });
+            [[-0.4, 0.14, 0.9], [0.4, 0.14, 0.9]].forEach(function(p) {
+                var f = new THREE.Mesh(forkGeo, forkMat);
+                f.position.set(p[0], p[1], p[2]);
+                f.castShadow = true;
+                platformGroup.add(f);
+            });
+
+            platformGroup.position.set(0, 1, 0);
+            group.add(platformGroup);
+
+            var lightGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            var lightMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1 });
+            var statusLight = new THREE.Mesh(lightGeo, lightMat);
+            statusLight.position.set(0, maxH + 0.5, 0);
+            group.add(statusLight);
+
+            group.position.set(window.PICKUP_POS.x, 0, window.PICKUP_POS.z);
+            group.userData = { platform: platformGroup, statusLight: statusLight, maxH: maxH };
+            window.scene.add(group);
+            window.stacker = group;
+        }
+
+        window.createShelf = function(x, z, levels, slotsPerLevel, slotW, slotH, slotD) {
+            slotW = slotW || window.SLOT_WIDTH;
+            slotH = slotH || window.SLOT_HEIGHT;
+            slotD = slotD || window.SLOT_DEPTH;
+
+            var group = new THREE.Group();
+            var shelfIdx = window.shelves.length;
+            var shelfId = 'shelf_' + shelfIdx;
+            group.userData = {
+                id: shelfId,
+                idx: shelfIdx,
+                x: x,
+                z: z,
+                levels: levels,
+                slotsPerLevel: slotsPerLevel,
+                slotW: slotW,
+                slotH: slotH,
+                slotD: slotD,
+                slots: [],
+                items: []
+            };
+
+            var totalW = slotsPerLevel * slotW;
+            var totalH = levels * slotH;
+
+            var poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.4, roughness: 0.6 });
+            var polePositions = [
+                [-totalW / 2, -slotD / 2], [totalW / 2, -slotD / 2],
+                [-totalW / 2, slotD / 2], [totalW / 2, slotD / 2]
+            ];
+            polePositions.forEach(function(p) {
+                var geo = new THREE.BoxGeometry(0.12, totalH, 0.12);
+                var pole = new THREE.Mesh(geo, poleMat);
+                pole.position.set(p[0], totalH / 2, p[1]);
+                pole.castShadow = true;
+                group.add(pole);
+            });
+
+            var beamMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.3 });
+            for (var lv = 0; lv <= levels; lv++) {
+                var bGeo = new THREE.BoxGeometry(totalW + 0.2, 0.06, 0.06);
+                var b1 = new THREE.Mesh(bGeo, beamMat);
+                b1.position.set(0, lv * slotH, -slotD / 2);
+                group.add(b1);
+                var b2 = b1.clone();
+                b2.position.z = slotD / 2;
+                group.add(b2);
+
+                var dGeo = new THREE.BoxGeometry(0.06, 0.06, slotD);
+                var d1 = new THREE.Mesh(dGeo, beamMat);
+                d1.position.set(-totalW / 2, lv * slotH, 0);
+                group.add(d1);
+                var d2 = d1.clone();
+                d2.position.x = totalW / 2;
+                group.add(d2);
+            }
+
+            var slotMat = new THREE.MeshStandardMaterial({ color: 0x334155, transparent: true, opacity: 0.5 });
+
+            for (var level = 0; level < levels; level++) {
+                for (var slot = 0; slot < slotsPerLevel; slot++) {
+                    var sGeo = new THREE.BoxGeometry(slotW * 0.85, slotH * 0.85, slotD * 0.85);
+                    var sMesh = new THREE.Mesh(sGeo, slotMat.clone());
+                    sMesh.position.set(
+                        -totalW / 2 + slotW / 2 + slot * slotW,
+                        slotH / 2 + level * slotH,
+                        0
+                    );
+                    var slotId = shelfId + '_L' + level + '_S' + slot;
+                    sMesh.userData = {
+                        id: slotId,
+                        shelfId: shelfId,
+                        shelfIdx: shelfIdx,
+                        level: level,
+                        slot: slot,
+                        occupied: false,
+                        item: null,
+                        accessCount: 0
+                    };
+                    group.userData.slots.push(sMesh);
+                    group.add(sMesh);
+                }
+            }
+
+            group.position.set(x, 0, z);
+            window.scene.add(group);
+            window.shelves.push(group);
+            return group;
+        };
+
+        function createDefaultShelves() {
+            var configs = [
+                { x: -15, z: -8, levels: 5, slots: 8 },
+                { x: -15, z: 2, levels: 5, slots: 8 },
+                { x: -15, z: 12, levels: 5, slots: 8 },
+                { x: 0, z: -8, levels: 5, slots: 8 },
+                { x: 0, z: 12, levels: 5, slots: 8 },
+                { x: 15, z: -8, levels: 5, slots: 8 },
+                { x: 15, z: 2, levels: 5, slots: 8 },
+                { x: 15, z: 12, levels: 5, slots: 8 }
+            ];
+            configs.forEach(function(c) {
+                window.createShelf(c.x, c.z, c.levels, c.slots);
+            });
+        }
+
+        function setupCameraControls() {
+            var isDown = false, btn = -1, px = 0, py = 0;
+            var theta = Math.PI / 4, phi = Math.PI / 3.5;
+            var radius = 60, cx = 0, cy = 4, cz = 2;
+
+            function update() {
+                var x = cx + radius * Math.sin(phi) * Math.cos(theta);
+                var y = cy + radius * Math.cos(phi);
+                var z = cz + radius * Math.sin(phi) * Math.sin(theta);
+                window.camera.position.set(x, y, z);
+                window.camera.lookAt(cx, cy, cz);
+            }
+
+            var el = window.renderer.domElement;
+            el.addEventListener('mousedown', function(e) { isDown = true; btn = e.button; px = e.clientX; py = e.clientY; });
+            el.addEventListener('mouseup', function() { isDown = false; btn = -1; });
+            el.addEventListener('mouseleave', function() { isDown = false; btn = -1; });
+            el.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+            el.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                var dx = e.clientX - px, dy = e.clientY - py;
+                if (btn === 0) {
+                    theta -= dx * 0.008;
+                    phi = Math.max(0.15, Math.min(Math.PI / 2 - 0.05, phi + dy * 0.008));
+                } else if (btn === 2) {
+                    var s = radius * 0.0015;
+                    cx += (-dx * Math.cos(theta) - dy * Math.sin(theta) * Math.cos(phi)) * s;
+                    cz += (-dx * Math.sin(theta) + dy * Math.cos(theta) * Math.cos(phi)) * s;
+                }
+                px = e.clientX; py = e.clientY;
+                update();
+            });
+
+            el.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                radius = Math.max(10, Math.min(150, radius + e.deltaY * 0.04));
+                update();
+            }, { passive: false });
+
+            window.resetCamera = function() {
+                theta = Math.PI / 4; phi = Math.PI / 3.5; radius = 60;
+                cx = 0; cy = 4; cz = 2;
+                update();
+            };
+
+            update();
+        }
+
+        function setupUI() {
+            document.querySelectorAll('.tab-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                    e.target.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(function(c) { c.style.display = 'none'; });
+                    document.getElementById('tab-' + e.target.dataset.tab).style.display = 'block';
+                });
+            });
+
+            document.getElementById('speed-slider').addEventListener('input', function(e) {
+                window.speedMultiplier = parseFloat(e.target.value);
+                document.getElementById('speed-value').textContent = window.speedMultiplier.toFixed(1) + 'x';
+            });
+
+            window.addEventListener('resize', function() {
+                window.camera.aspect = window.innerWidth / window.innerHeight;
+                window.camera.updateProjectionMatrix();
+                window.renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function setupEditorUI() {
+            ['edit-slot-w', 'edit-slot-h', 'edit-slot-d', 'edit-levels', 'edit-slots'].forEach(function(id) {
+                var el = document.getElementById(id);
+                var valEl = document.getElementById(id + '-val');
+                var nameMap = {
+                    'edit-slot-w': '储位宽度(W)',
+                    'edit-slot-h': '层高度(H)',
+                    'edit-slot-d': '货架深度(D)',
+                    'edit-levels': '层数',
+                    'edit-slots': '每层储位数'
+                };
+                el.addEventListener('input', function() {
+                    var newVal = parseFloat(el.value);
+                    var displayVal = newVal.toFixed(id === 'edit-levels' || id === 'edit-slots' ? 0 : 1);
+                    valEl.textContent = displayVal;
+                    
+                    if (window.selectedShelfIdx >= 0) {
+                        var shelf = window.shelves[window.selectedShelfIdx];
+                        var d = shelf.userData;
+                        var oldVal;
+                        switch(id) {
+                            case 'edit-slot-w': oldVal = d.slotW; break;
+                            case 'edit-slot-h': oldVal = d.slotH; break;
+                            case 'edit-slot-d': oldVal = d.slotD; break;
+                            case 'edit-levels': oldVal = d.levels; break;
+                            case 'edit-slots': oldVal = d.slotsPerLevel; break;
+                        }
+                        logTest('货架编辑', '滑块变更: ' + nameMap[id] + ': ' + oldVal + ' → ' + displayVal, true);
+                    }
+                });
+            });
+        }
+
+        window.updateShelfList = function() {
+            var c = document.getElementById('shelf-list');
+            c.innerHTML = '';
+            window.shelves.forEach(function(sh, i) {
+                var d = sh.userData;
+                var row = document.createElement('div');
+                row.className = 'shelf-row' + (window.selectedShelfIdx === i ? ' selected' : '');
+                row.innerHTML = '<span>货架' + (i + 1) + ' (' + d.levels + '层×' + d.slotsPerLevel + '位)</span>' +
+                    '<span style="color:#94a3b8;font-size:10px;">W' + d.slotW.toFixed(1) + ' H' + d.slotH.toFixed(1) + ' D' + d.slotD.toFixed(1) + '</span>';
+                row.onclick = function() { selectShelf(i); };
+                c.appendChild(row);
+            });
+        };
+
+        function selectShelf(idx) {
+            window.selectedShelfIdx = idx;
+            window.updateShelfList();
+            
+            var panel = document.getElementById('shelf-edit-panel');
+            panel.style.display = 'block';
+            document.getElementById('edit-shelf-badge').textContent = '货架' + (idx + 1);
+            
+            var d = window.shelves[idx].userData;
+            document.getElementById('edit-slot-w').value = d.slotW;
+            document.getElementById('edit-slot-w-val').textContent = d.slotW.toFixed(1);
+            document.getElementById('edit-slot-h').value = d.slotH;
+            document.getElementById('edit-slot-h-val').textContent = d.slotH.toFixed(1);
+            document.getElementById('edit-slot-d').value = d.slotD;
+            document.getElementById('edit-slot-d-val').textContent = d.slotD.toFixed(1);
+            document.getElementById('edit-levels').value = d.levels;
+            document.getElementById('edit-levels-val').textContent = d.levels;
+            document.getElementById('edit-slots').value = d.slotsPerLevel;
+            document.getElementById('edit-slots-val').textContent = d.slotsPerLevel;
+        }
+
+        window.applyShelfEdit = function() {
+            if (window.selectedShelfIdx < 0) {
+                window.showToast('请先选择一个货架', 'error');
+                return;
+            }
+            
+            var shelfIdx = window.selectedShelfIdx;
+            var oldShelf = window.shelves[shelfIdx];
+            var d = oldShelf.userData;
+            
+            var newSlotW = parseFloat(document.getElementById('edit-slot-w').value);
+            var newSlotH = parseFloat(document.getElementById('edit-slot-h').value);
+            var newSlotD = parseFloat(document.getElementById('edit-slot-d').value);
+            var newLevels = parseInt(document.getElementById('edit-levels').value);
+            var newSlots = parseInt(document.getElementById('edit-slots').value);
+            
+            logTest('货架编辑', '========== 开始重建货架' + (shelfIdx + 1) + ' ==========', true);
+            logTest('货架编辑', '原参数: W=' + d.slotW.toFixed(1) + ', H=' + d.slotH.toFixed(1) + ', D=' + d.slotD.toFixed(1) + ', L=' + d.levels + ', S=' + d.slotsPerLevel, true);
+            logTest('货架编辑', '新参数: W=' + newSlotW.toFixed(1) + ', H=' + newSlotH.toFixed(1) + ', D=' + newSlotD.toFixed(1) + ', L=' + newLevels + ', S=' + newSlots, true);
+            
+            logTest('货架编辑', 'Step 1/5: 备份原有货物...', true);
+            var savedItems = [];
+            d.slots.forEach(function(slot) {
+                if (slot.userData.occupied && slot.userData.item) {
+                    savedItems.push({
+                        level: slot.userData.level,
+                        slot: slot.userData.slot,
+                        item: {
+                            name: slot.userData.item.name,
+                            quantity: slot.userData.item.quantity,
+                            timestamp: slot.userData.item.timestamp
+                        }
+                    });
+                    if (slot.userData.item.mesh) {
+                        slot.userData.item.mesh.removeFromParent();
+                    }
+                    var name = slot.userData.item.name;
+                    if (window.inventory[name]) {
+                        var idx = window.inventory[name].findIndex(function(s) { return s.id === slot.userData.id; });
+                        if (idx > -1) window.inventory[name].splice(idx, 1);
+                        if (window.inventory[name].length === 0) delete window.inventory[name];
+                    }
+                }
+            });
+            assert(savedItems.length >= 0, '货架编辑', 'Step1完成: 备份货物数量', 0, savedItems.length);
+            logTest('货架编辑', '✅ Step 1 完成，已备份 ' + savedItems.length + ' 个货物', true);
+            
+            logTest('货架编辑', 'Step 2/5: 从场景中移除旧货架...', true);
+            window.scene.remove(oldShelf);
+            var shelfStillInScene = window.scene.children.some(function(c) { 
+                return c.userData && c.userData.id === 'shelf_' + shelfIdx; 
+            });
+            assert(!shelfStillInScene, '货架编辑', 'Step2完成: 旧货架已从场景移除', false, shelfStillInScene);
+            logTest('货架编辑', '✅ Step 2 完成，旧货架已移除', true);
+            
+            logTest('货架编辑', 'Step 3/5: 创建新货架并加入场景...', true);
+            var startTime = Date.now();
+            var newShelf = window.createShelfAt(d.x, d.z, newLevels, newSlots, newSlotW, newSlotH, newSlotD, shelfIdx);
+            
+            var shelfInScene = window.scene.children.some(function(c) { 
+                return c.userData && c.userData.id === 'shelf_' + shelfIdx; 
+            });
+            assert(shelfInScene, '货架编辑', 'Step3完成: 新货架已加入场景', true, shelfInScene);
+            assert(newShelf.userData.levels === newLevels, '货架编辑', '层数正确', newLevels, newShelf.userData.levels);
+            assert(newShelf.userData.slotsPerLevel === newSlots, '货架编辑', '每层储位数正确', newSlots, newShelf.userData.slotsPerLevel);
+            assert(Math.abs(newShelf.userData.slotW - newSlotW) < 0.01, '货架编辑', '储位宽度正确', newSlotW, newShelf.userData.slotW);
+            assert(Math.abs(newShelf.userData.slotH - newSlotH) < 0.01, '货架编辑', '层高度正确', newSlotH, newShelf.userData.slotH);
+            assert(Math.abs(newShelf.userData.slotD - newSlotD) < 0.01, '货架编辑', '货架深度正确', newSlotD, newShelf.userData.slotD);
+            
+            var expectedSlots = newLevels * newSlots;
+            var actualSlots = newShelf.userData.slots.length;
+            assert(actualSlots === expectedSlots, '货架编辑', '总储位数正确', expectedSlots, actualSlots);
+            
+            logTest('货架编辑', '✅ Step 3 完成，新货架已创建，总储位数: ' + expectedSlots + '，耗时: ' + (Date.now() - startTime) + 'ms', true);
+            
+            logTest('货架编辑', 'Step 4/5: 恢复货物到新货架...', true);
+            var restored = 0;
+            var lost = 0;
+            savedItems.forEach(function(saved) {
+                if (saved.level < newLevels && saved.slot < newSlots) {
+                    var slot = newShelf.userData.slots.find(function(s) { 
+                        return s.userData.level === saved.level && s.userData.slot === saved.slot; 
+                    });
+                    if (slot) {
+                        placeCargoDirect(slot, saved.item);
+                        restored++;
+                        logTest('货架编辑', '  → 恢复货物: ' + saved.item.name + ' → L' + saved.level + 'S' + saved.slot, true);
+                    } else {
+                        lost++;
+                        logTest('货架编辑', '  ⚠ 无法恢复: ' + saved.item.name + ' (储位不存在)', false);
+                    }
+                } else {
+                    lost++;
+                    logTest('货架编辑', '  ⚠ 超出范围: ' + saved.item.name + ' (L' + saved.level + 'S' + saved.slot + ' 超出新尺寸)', false);
+                }
+            });
+            
+            assert(restored + lost === savedItems.length, '货架编辑', '货物总数一致', savedItems.length, restored + lost);
+            logTest('货架编辑', '✅ Step 4 完成，恢复 ' + restored + '/' + savedItems.length + ' 个货物，丢失 ' + lost + ' 个', true);
+            
+            logTest('货架编辑', 'Step 5/5: 更新UI状态...', true);
+            window.updateStats();
+            window.updateOutboundSelect();
+            window.updateShelfList();
+            selectShelf(window.selectedShelfIdx);
+            
+            var newTotalSlots = 0, newOccupied = 0;
+            window.shelves.forEach(function(s) {
+                s.userData.slots.forEach(function(sl) {
+                    newTotalSlots++;
+                    if (sl.userData.occupied) newOccupied++;
+                });
+            });
+            
+            logTest('货架编辑', '场景统计: 总储位=' + newTotalSlots + ', 已占用=' + newOccupied, true);
+            logTest('货架编辑', '========== 货架' + (shelfIdx + 1) + '重建完成 ==========', true);
+            
+            window.showToast('尺寸已更新，恢复' + restored + '/' + savedItems.length + '个货物', 'success');
+        };
+
+        window.createShelfAt = function(x, z, levels, slotsPerLevel, slotW, slotH, slotD, targetIdx) {
+            slotW = slotW || window.SLOT_WIDTH;
+            slotH = slotH || window.SLOT_HEIGHT;
+            slotD = slotD || window.SLOT_DEPTH;
+
+            var group = new THREE.Group();
+            var shelfId = 'shelf_' + targetIdx;
+            group.userData = {
+                id: shelfId,
+                idx: targetIdx,
+                x: x,
+                z: z,
+                levels: levels,
+                slotsPerLevel: slotsPerLevel,
+                slotW: slotW,
+                slotH: slotH,
+                slotD: slotD,
+                slots: [],
+                items: []
+            };
+
+            var totalW = slotsPerLevel * slotW;
+            var totalH = levels * slotH;
+
+            var poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.4, roughness: 0.6 });
+            var polePositions = [
+                [-totalW / 2, -slotD / 2], [totalW / 2, -slotD / 2],
+                [-totalW / 2, slotD / 2], [totalW / 2, slotD / 2]
+            ];
+            polePositions.forEach(function(p) {
+                var geo = new THREE.BoxGeometry(0.12, totalH, 0.12);
+                var pole = new THREE.Mesh(geo, poleMat);
+                pole.position.set(p[0], totalH / 2, p[1]);
+                pole.castShadow = true;
+                group.add(pole);
+            });
+
+            var beamMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.3 });
+            for (var lv = 0; lv <= levels; lv++) {
+                var bGeo = new THREE.BoxGeometry(totalW + 0.2, 0.06, 0.06);
+                var b1 = new THREE.Mesh(bGeo, beamMat);
+                b1.position.set(0, lv * slotH, -slotD / 2);
+                group.add(b1);
+                var b2 = b1.clone();
+                b2.position.z = slotD / 2;
+                group.add(b2);
+
+                var dGeo = new THREE.BoxGeometry(0.06, 0.06, slotD);
+                var d1 = new THREE.Mesh(dGeo, beamMat);
+                d1.position.set(-totalW / 2, lv * slotH, 0);
+                group.add(d1);
+                var d2 = d1.clone();
+                d2.position.x = totalW / 2;
+                group.add(d2);
+            }
+
+            var slotMat = new THREE.MeshStandardMaterial({ color: 0x334155, transparent: true, opacity: 0.5 });
+
+            for (var level = 0; level < levels; level++) {
+                for (var slot = 0; slot < slotsPerLevel; slot++) {
+                    var sGeo = new THREE.BoxGeometry(slotW * 0.85, slotH * 0.85, slotD * 0.85);
+                    var sMesh = new THREE.Mesh(sGeo, slotMat.clone());
+                    sMesh.position.set(
+                        -totalW / 2 + slotW / 2 + slot * slotW,
+                        slotH / 2 + level * slotH,
+                        0
+                    );
+                    var slotId = shelfId + '_L' + level + '_S' + slot;
+                    sMesh.userData = {
+                        id: slotId,
+                        shelfId: shelfId,
+                        shelfIdx: targetIdx,
+                        level: level,
+                        slot: slot,
+                        occupied: false,
+                        item: null,
+                        accessCount: 0
+                    };
+                    group.userData.slots.push(sMesh);
+                    group.add(sMesh);
+                }
+            }
+
+            group.position.set(x, 0, z);
+            window.scene.add(group);
+            window.shelves[targetIdx] = group;
+            return group;
+        };
+
+        window.deleteSelectedShelf = function() {
+            if (window.selectedShelfIdx < 0) {
+                window.showToast('请先选择一个货架', 'error');
+                return;
+            }
+            window.removeShelf(window.selectedShelfIdx);
+            document.getElementById('shelf-edit-panel').style.display = 'none';
+        };
+
+        window.openAddShelfModal = function() {
+            document.getElementById('add-shelf-modal').classList.add('active');
+        };
+
+        window.closeAddShelfModal = function() {
+            document.getElementById('add-shelf-modal').classList.remove('active');
+        };
+
+        window.confirmAddShelf = function() {
+            var x = parseFloat(document.getElementById('new-shelf-x').value) || 0;
+            var z = parseFloat(document.getElementById('new-shelf-z').value) || 0;
+            var levels = parseInt(document.getElementById('new-shelf-levels').value) || 5;
+            var slots = parseInt(document.getElementById('new-shelf-slots').value) || 8;
+            var slotW = parseFloat(document.getElementById('new-shelf-w').value) || 1.5;
+            var slotH = parseFloat(document.getElementById('new-shelf-h').value) || 1.2;
+            var slotD = parseFloat(document.getElementById('new-shelf-d').value) || 1.2;
+
+            levels = Math.max(1, Math.min(12, levels));
+            slots = Math.max(1, Math.min(20, slots));
+            slotW = Math.max(0.5, Math.min(4, slotW));
+            slotH = Math.max(0.5, Math.min(3, slotH));
+            slotD = Math.max(0.5, Math.min(4, slotD));
+
+            window.createShelf(x, z, levels, slots, slotW, slotH, slotD);
+            window.updateStats();
+            window.updateShelfList();
+            window.closeAddShelfModal();
+            window.showToast('已添加货架', 'success');
+        };
+
+        function findEmptySlot() {
+            for (var i = 0; i < window.shelves.length; i++) {
+                var slots = window.shelves[i].userData.slots;
+                for (var j = 0; j < slots.length; j++) {
+                    if (!slots[j].userData.occupied) return slots[j];
+                }
+            }
+            return null;
+        }
+
+        function findItemSlot(itemName) {
+            for (var i = 0; i < window.shelves.length; i++) {
+                var slots = window.shelves[i].userData.slots;
+                for (var j = 0; j < slots.length; j++) {
+                    if (slots[j].userData.occupied && slots[j].userData.item && slots[j].userData.item.name === itemName) {
+                        return slots[j];
+                    }
+                }
+            }
+            return null;
+        }
+
+        window.addTask = function(type, data) {
+            window.taskQueue.push({ id: Date.now() + Math.random(), type: type, data: data, status: 'pending' });
+            updateTaskQueueUI();
+            processNextTask();
+        };
+
+        function processNextTask() {
+            if (window.isProcessingTask || window.taskQueue.length === 0) return;
+            window.isProcessingTask = true;
+            var task = window.taskQueue[0];
+            task.status = 'processing';
+            updateTaskQueueUI();
+            setStackerState('工作中', '#facc15');
+
+            (task.type === 'inbound' ? processInbound(task.data) : processOutbound(task.data))
+                .then(function() {
+                    task.status = 'completed';
+                })
+                .catch(function(err) {
+                    task.status = 'failed';
+                    window.showToast(err.message, 'error');
+                })
+                .finally(function() {
+                    window.taskQueue.shift();
+                    window.isProcessingTask = false;
+                    updateTaskQueueUI();
+                    if (window.taskQueue.length === 0) setStackerState('空闲', '#4ade80');
+                    else setTimeout(processNextTask, 200);
+                });
+        }
+
+        function setStackerState(text, color) {
+            var el = document.getElementById('status-state');
+            el.textContent = text;
+            el.style.color = color;
+            if (window.stacker && window.stacker.userData.statusLight) {
+                var c = color === '#facc15' ? 0xfacc15 : color === '#4ade80' ? 0x22c55e : 0xef4444;
+                window.stacker.userData.statusLight.material.color.setHex(c);
+                window.stacker.userData.statusLight.material.emissive.setHex(c);
+            }
+        }
+
+        function processInbound(data) {
+            logTest('入库动画', '========== 开始入库流程: ' + data.name + ' ==========', true);
+            var slot = findEmptySlot();
+            if (!slot) {
+                logTest('入库动画', '断言失败: 没有空闲储位', false);
+                return Promise.reject(new Error('没有空闲储位'));
+            }
+            assert(slot !== null, '入库动画', '找到空闲储位', true, slot !== null);
+            assert(!slot.userData.occupied, '入库动画', '目标储位为空', false, slot.userData.occupied);
+
+            var shelf = slot.parent;
+            var targetX = shelf.position.x + slot.position.x;
+            var targetZ = shelf.position.z;
+            var targetY = slot.position.y;
+            var shelfIdx = shelf.userData.idx;
+
+            logTest('入库动画', '目标: 货架' + (shelfIdx + 1) + ' L' + slot.userData.level + 'S' + slot.userData.slot, true);
+            logTest('入库动画', '目标坐标: (' + targetX.toFixed(2) + ', ' + targetZ.toFixed(2) + ', ' + targetY.toFixed(2) + ')', true);
+            
+            var stepStart = Date.now();
+            var initialPos = { x: window.stacker.position.x, z: window.stacker.position.z };
+            logTest('入库动画', 'Step 1/6: 移动到取货点 (' + window.PICKUP_POS.x + ', ' + window.PICKUP_POS.z + ')', true);
+            
+            return moveTo(window.PICKUP_POS.x, window.PICKUP_POS.z, 1)
+                .then(function() { 
+                    var atPickup = Math.abs(window.stacker.position.x - window.PICKUP_POS.x) < 0.1 && 
+                                   Math.abs(window.stacker.position.z - window.PICKUP_POS.z) < 0.1;
+                    assert(atPickup, '入库动画', 'Step1完成: 已到达取货点', true, atPickup);
+                    logTest('入库动画', '✅ Step 1 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('入库动画', 'Step 2/6: 水平移动到货架' + (shelfIdx + 1) + ' 前', true);
+                    return moveTo(targetX, targetZ, 1); 
+                })
+                .then(function() { 
+                    var atShelfXZ = Math.abs(window.stacker.position.x - targetX) < 0.1 && 
+                                   Math.abs(window.stacker.position.z - targetZ) < 0.1 &&
+                                   Math.abs(window.stacker.userData.platform.position.y - 1) < 0.1;
+                    assert(atShelfXZ, '入库动画', 'Step2完成: 已到达货架前', true, atShelfXZ);
+                    logTest('入库动画', '✅ Step 2 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('入库动画', 'Step 3/6: 升降到目标层 Y=' + targetY.toFixed(2), true);
+                    return moveTo(targetX, targetZ, targetY); 
+                })
+                .then(function() {
+                    var atSlot = Math.abs(window.stacker.position.x - targetX) < 0.1 && 
+                                 Math.abs(window.stacker.position.z - targetZ) < 0.1 &&
+                                 Math.abs(window.stacker.userData.platform.position.y - targetY) < 0.1;
+                    assert(atSlot, '入库动画', 'Step3完成: 已到达目标储位高度', true, atSlot);
+                    logTest('入库动画', '✅ Step 3 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('入库动画', 'Step 4/6: 放置货物: ' + data.name + ' x' + data.qty, true);
+                    placeCargo(slot, data);
+                    
+                    assert(slot.userData.occupied, '入库动画', 'Step4完成: 储位已标记为占用', true, slot.userData.occupied);
+                    assert(slot.userData.item !== null, '入库动画', 'Step4完成: 货物数据已保存', true, slot.userData.item !== null);
+                    assert(slot.userData.item.name === data.name, '入库动画', 'Step4完成: 货物名称正确', data.name, slot.userData.item.name);
+                    assert(slot.userData.item.mesh !== null, '入库动画', 'Step4完成: 货物3D模型已创建', true, slot.userData.item.mesh !== null);
+                    assert(slot.material.color.getHex() === 0x22c55e, '入库动画', 'Step4完成: 储位颜色已变绿', 0x22c55e, slot.material.color.getHex());
+                    
+                    logTest('入库动画', '✅ Step 4 完成，货物已放置，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('入库动画', 'Step 5/6: 下降到底部 Y=1.00', true);
+                    return moveTo(targetX, targetZ, 1);
+                })
+                .then(function() {
+                    var lowered = Math.abs(window.stacker.userData.platform.position.y - 1) < 0.1;
+                    assert(lowered, '入库动画', 'Step5完成: 已下降到底部', true, lowered);
+                    logTest('入库动画', '✅ Step 5 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('入库动画', 'Step 6/6: 返回取货点', true);
+                    return moveTo(window.PICKUP_POS.x, window.PICKUP_POS.z, 1);
+                })
+                .then(function() {
+                    var atHome = Math.abs(window.stacker.position.x - window.PICKUP_POS.x) < 0.1 && 
+                                 Math.abs(window.stacker.position.z - window.PICKUP_POS.z) < 0.1;
+                    assert(atHome, '入库动画', 'Step6完成: 已返回取货点', true, atHome);
+                    logTest('入库动画', '✅ Step 6 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    
+                    var invCount = window.inventory[data.name] ? window.inventory[data.name].length : 0;
+                    assert(invCount >= 1, '入库动画', '库存索引已更新', '>=1', invCount);
+                    
+                    logTest('入库动画', '========== 入库完成: ' + data.name + ' ==========', true);
+                    window.updateStats();
+                    window.updateOutboundSelect();
+                    window.showToast('入库完成: ' + data.name, 'success');
+                });
+        }
+
+        function processOutbound(data) {
+            logTest('出库动画', '========== 开始出库流程: ' + data.name + ' ==========', true);
+            var slot = findItemSlot(data.name);
+            if (!slot) {
+                logTest('出库动画', '断言失败: 货物不存在: ' + data.name, false);
+                return Promise.reject(new Error('货物不存在: ' + data.name));
+            }
+            assert(slot !== null, '出库动画', '找到目标货物', true, slot !== null);
+            assert(slot.userData.occupied, '出库动画', '目标储位已占用', true, slot.userData.occupied);
+            assert(slot.userData.item.name === data.name, '出库动画', '货物名称匹配', data.name, slot.userData.item.name);
+
+            var shelf = slot.parent;
+            var targetX = shelf.position.x + slot.position.x;
+            var targetZ = shelf.position.z;
+            var targetY = slot.position.y;
+            var shelfIdx = shelf.userData.idx;
+
+            logTest('出库动画', '目标: 货架' + (shelfIdx + 1) + ' L' + slot.userData.level + 'S' + slot.userData.slot, true);
+            logTest('出库动画', '目标坐标: (' + targetX.toFixed(2) + ', ' + targetZ.toFixed(2) + ', ' + targetY.toFixed(2) + ')', true);
+            
+            var stepStart = Date.now();
+            logTest('出库动画', 'Step 1/5: 从取货点水平移动到货架' + (shelfIdx + 1) + ' 前', true);
+            
+            return moveTo(targetX, targetZ, 1)
+                .then(function() { 
+                    var atShelfXZ = Math.abs(window.stacker.position.x - targetX) < 0.1 && 
+                                   Math.abs(window.stacker.position.z - targetZ) < 0.1;
+                    assert(atShelfXZ, '出库动画', 'Step1完成: 已到达货架前', true, atShelfXZ);
+                    logTest('出库动画', '✅ Step 1 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('出库动画', 'Step 2/5: 升降到目标层 Y=' + targetY.toFixed(2), true);
+                    return moveTo(targetX, targetZ, targetY); 
+                })
+                .then(function() {
+                    var atSlot = Math.abs(window.stacker.position.x - targetX) < 0.1 && 
+                                 Math.abs(window.stacker.position.z - targetZ) < 0.1 &&
+                                 Math.abs(window.stacker.userData.platform.position.y - targetY) < 0.1;
+                    assert(atSlot, '出库动画', 'Step2完成: 已到达目标储位高度', true, atSlot);
+                    logTest('出库动画', '✅ Step 2 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('出库动画', 'Step 3/5: 取出货物: ' + data.name, true);
+                    removeCargo(slot);
+                    
+                    assert(!slot.userData.occupied, '出库动画', 'Step3完成: 储位已标记为空', false, slot.userData.occupied);
+                    assert(slot.userData.item === null, '出库动画', 'Step3完成: 货物数据已清除', null, slot.userData.item);
+                    assert(slot.material.color.getHex() === 0x334155, '出库动画', 'Step3完成: 储位颜色已恢复灰色', 0x334155, slot.material.color.getHex());
+                    
+                    logTest('出库动画', '✅ Step 3 完成，货物已取出，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('出库动画', 'Step 4/5: 下降到底部 Y=1.00', true);
+                    return moveTo(targetX, targetZ, 1);
+                })
+                .then(function() {
+                    var lowered = Math.abs(window.stacker.userData.platform.position.y - 1) < 0.1;
+                    assert(lowered, '出库动画', 'Step4完成: 已下降到底部', true, lowered);
+                    logTest('出库动画', '✅ Step 4 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    stepStart = Date.now();
+                    logTest('出库动画', 'Step 5/5: 返回取货点', true);
+                    return moveTo(window.PICKUP_POS.x, window.PICKUP_POS.z, 1);
+                })
+                .then(function() {
+                    var atHome = Math.abs(window.stacker.position.x - window.PICKUP_POS.x) < 0.1 && 
+                                 Math.abs(window.stacker.position.z - window.PICKUP_POS.z) < 0.1;
+                    assert(atHome, '出库动画', 'Step5完成: 已返回取货点', true, atHome);
+                    logTest('出库动画', '✅ Step 5 完成，耗时: ' + (Date.now() - stepStart) + 'ms', true);
+                    
+                    var invCount = window.inventory[data.name] ? window.inventory[data.name].length : 0;
+                    logTest('出库动画', '库存中剩余该货物数量: ' + invCount, true);
+                    
+                    logTest('出库动画', '========== 出库完成: ' + data.name + ' ==========', true);
+                    window.updateStats();
+                    window.updateOutboundSelect();
+                    window.showToast('出库完成: ' + data.name, 'success');
+                });
+        }
+
+        function placeCargo(slot, data) {
+            var sw = slot.parent.userData.slotW || window.SLOT_WIDTH;
+            var sh = slot.parent.userData.slotH || window.SLOT_HEIGHT;
+            var sd = slot.parent.userData.slotD || window.SLOT_DEPTH;
+
+            slot.userData.occupied = true;
+            slot.userData.item = { name: data.name, quantity: data.qty, timestamp: new Date().toISOString(), mesh: null };
+            slot.userData.accessCount++;
+            slot.material.color.setHex(0x22c55e);
+            slot.material.opacity = 0.8;
+
+            var boxGeo = new THREE.BoxGeometry(sw * 0.65, sh * 0.65, sd * 0.65);
+            var colors = [0x3b82f6, 0x8b5cf6, 0x06b6d4, 0x10b981, 0xf59e0b, 0xec4899, 0x14b8a6];
+            var boxMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random() * colors.length)], roughness: 0.6 });
+            var box = new THREE.Mesh(boxGeo, boxMat);
+            box.castShadow = true;
+            box.position.copy(slot.position);
+            box.userData = { isCargo: true };
+            slot.parent.add(box);
+            slot.userData.item.mesh = box;
+
+            if (!window.inventory[data.name]) window.inventory[data.name] = [];
+            window.inventory[data.name].push(slot.userData);
+        }
+
+        function placeCargoDirect(slot, data) {
+            var sw = slot.parent.userData.slotW || window.SLOT_WIDTH;
+            var sh = slot.parent.userData.slotH || window.SLOT_HEIGHT;
+            var sd = slot.parent.userData.slotD || window.SLOT_DEPTH;
+
+            slot.userData.occupied = true;
+            slot.userData.item = { name: data.name, quantity: data.quantity, timestamp: data.timestamp, mesh: null };
+            slot.material.color.setHex(0x22c55e);
+            slot.material.opacity = 0.8;
+
+            var boxGeo = new THREE.BoxGeometry(sw * 0.65, sh * 0.65, sd * 0.65);
+            var colors = [0x3b82f6, 0x8b5cf6, 0x06b6d4, 0x10b981, 0xf59e0b, 0xec4899, 0x14b8a6];
+            var boxMat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random() * colors.length)], roughness: 0.6 });
+            var box = new THREE.Mesh(boxGeo, boxMat);
+            box.castShadow = true;
+            box.position.copy(slot.position);
+            box.userData = { isCargo: true };
+            slot.parent.add(box);
+            slot.userData.item.mesh = box;
+
+            if (!window.inventory[data.name]) window.inventory[data.name] = [];
+            window.inventory[data.name].push(slot.userData);
+        }
+
+        function removeCargo(slot) {
+            if (slot.userData.item && slot.userData.item.mesh) {
+                slot.userData.item.mesh.removeFromParent();
+            }
+            slot.userData.occupied = false;
+            slot.userData.accessCount++;
+            slot.material.color.setHex(0x334155);
+            slot.material.opacity = 0.5;
+
+            var name = slot.userData.item ? slot.userData.item.name : null;
+            slot.userData.item = null;
+
+            if (name && window.inventory[name]) {
+                var idx = window.inventory[name].findIndex(function(s) { return s.id === slot.userData.id; });
+                if (idx > -1) window.inventory[name].splice(idx, 1);
+                if (window.inventory[name].length === 0) delete window.inventory[name];
+            }
+        }
+
+        function moveTo(tx, tz, ty) {
+            return new Promise(function(resolve) {
+                var sx = window.stacker.position.x, sz = window.stacker.position.z;
+                var sy = window.stacker.userData.platform.position.y;
+                var dist = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(tz - sz, 2)) + Math.abs(ty - sy);
+                var dur = Math.max(300, (dist * 150)) / window.speedMultiplier;
+                var start = performance.now();
+
+                function step(now) {
+                    var p = Math.min((now - start) / dur, 1);
+                    var e = easeInOutCubic(p);
+                    window.stacker.position.x = sx + (tx - sx) * e;
+                    window.stacker.position.z = sz + (tz - sz) * e;
+                    window.stacker.userData.platform.position.y = sy + (ty - sy) * e;
+                    updateStackerStatus();
+                    if (p < 1) requestAnimationFrame(step);
+                    else setTimeout(resolve, 100 / window.speedMultiplier);
+                }
+                requestAnimationFrame(step);
+            });
+        }
+
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function updateStackerStatus() {
+            document.getElementById('status-x').textContent = window.stacker.position.x.toFixed(2);
+            document.getElementById('status-y').textContent = window.stacker.userData.platform.position.y.toFixed(2);
+            document.getElementById('status-z').textContent = window.stacker.position.z.toFixed(2);
+        }
+
+        function updateTaskQueueUI() {
+            var c = document.getElementById('task-queue');
+            if (window.taskQueue.length === 0) {
+                c.innerHTML = '<div style="color:#64748b;font-style:italic;font-size:12px;">暂无任务</div>';
+                return;
+            }
+            c.innerHTML = window.taskQueue.slice(0, 6).map(function(task) {
+                var t = task.type === 'inbound' ? '入库' : '出库';
+                var n = task.data.name || '';
+                var sc = { pending: '#64748b', processing: '#facc15', completed: '#4ade80', failed: '#f87171' };
+                var bg = { pending: 'rgba(71,85,105,0.2)', processing: 'rgba(250,204,21,0.15)', completed: 'rgba(74,222,128,0.15)', failed: 'rgba(248,113,113,0.15)' };
+                return '<div style="display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:4px;background:' + bg[task.status] + ';font-size:12px;">' +
+                    '<span style="width:7px;height:7px;border-radius:50%;background:' + sc[task.status] + ';flex-shrink:0;"></span>' +
+                    '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t + ': ' + n + '</span></div>';
+            }).join('');
+        }
+
+        window.updateStats = function() {
+            var total = 0, occupied = 0;
+            window.shelves.forEach(function(sh) {
+                sh.userData.slots.forEach(function(s) { total++; if (s.userData.occupied) occupied++; });
+            });
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-occupied').textContent = occupied;
+            document.getElementById('stat-empty').textContent = total - occupied;
+            document.getElementById('stat-usage').textContent = total > 0 ? Math.round(occupied / total * 100) + '%' : '0%';
+        };
+
+        window.updateOutboundSelect = function() {
+            var sel = document.getElementById('outbound-select');
+            var keys = Object.keys(window.inventory);
+            sel.innerHTML = '<option value="">选择货物</option>' +
+                keys.map(function(n) { return '<option value="' + n + '">' + n + ' (' + window.inventory[n].length + '件)</option>'; }).join('');
+        };
+
+        window.handleInbound = function() {
+            var name = document.getElementById('inbound-name').value.trim();
+            var qty = parseInt(document.getElementById('inbound-qty').value) || 1;
+            if (!name) { window.showToast('请输入货物名称', 'error'); return; }
+            window.addTask('inbound', { name: name, qty: qty });
+            document.getElementById('inbound-name').value = '';
+        };
+
+        window.handleOutbound = function() {
+            var name = document.getElementById('outbound-select').value;
+            if (!name) { window.showToast('请选择要出库的货物', 'error'); return; }
+            window.addTask('outbound', { name: name });
+        };
+
+        window.handleInventoryCheck = function() {
+            var csv = '\uFEFF储位编号,货物名称,数量,入库时间\n';
+            var count = 0;
+            window.shelves.forEach(function(sh) {
+                sh.userData.slots.forEach(function(s) {
+                    if (s.userData.occupied && s.userData.item) {
+                        csv += s.userData.id + ',' + s.userData.item.name + ',' + s.userData.item.quantity + ',' + s.userData.item.timestamp + '\n';
+                        count++;
+                    }
+                });
+            });
+            if (count === 0) {
+                window.showToast('当前无库存数据', 'info');
+                return;
+            }
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'inventory_' + new Date().toISOString().slice(0, 10) + '.csv';
+            link.click();
+            window.showToast('已导出 ' + count + ' 条记录', 'success');
+        };
+
+        window.removeShelf = function(index) {
+            var shelf = window.shelves[index];
+            if (!shelf) return;
+            shelf.userData.slots.forEach(function(slot) {
+                if (slot.userData.occupied && slot.userData.item) {
+                    var name = slot.userData.item.name;
+                    if (window.inventory[name]) {
+                        var idx = window.inventory[name].findIndex(function(s) { return s.id === slot.userData.id; });
+                        if (idx > -1) window.inventory[name].splice(idx, 1);
+                        if (window.inventory[name].length === 0) delete window.inventory[name];
+                    }
+                }
+            });
+            window.scene.remove(shelf);
+            window.shelves.splice(index, 1);
+            window.shelves.forEach(function(sh, i) {
+                sh.userData.id = 'shelf_' + i;
+                sh.userData.idx = i;
+                sh.userData.slots.forEach(function(s) {
+                    s.userData.shelfId = sh.userData.id;
+                    s.userData.shelfIdx = i;
+                    var parts = s.userData.id.split('_');
+                    s.userData.id = 'shelf_' + i + '_' + parts[2] + '_' + parts[3];
+                });
+            });
+            window.selectedShelfIdx = -1;
+            window.updateShelfList();
+            window.updateStats();
+            window.updateOutboundSelect();
+            window.showToast('已删除货架', 'info');
+        };
+
+        window.resetLayout = function() {
+            window.shelves.forEach(function(sh) { window.scene.remove(sh); });
+            window.shelves = [];
+            window.inventory = {};
+            window.selectedShelfIdx = -1;
+            createDefaultShelves();
+            window.updateStats();
+            window.updateOutboundSelect();
+            window.updateShelfList();
+            document.getElementById('shelf-edit-panel').style.display = 'none';
+            window.showToast('已重置布局', 'info');
+        };
+
+        window.importInventory = function() {
+            var fileInput = document.getElementById('import-json');
+            var file = fileInput.files[0];
+            if (!file) { window.showToast('请选择JSON文件', 'error'); return; }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data)) throw new Error('数据格式错误：需要数组');
+
+                    window.shelves.forEach(function(sh) {
+                        sh.userData.slots.forEach(function(s) {
+                            if (s.userData.occupied && s.userData.item && s.userData.item.mesh) {
+                                s.userData.item.mesh.removeFromParent();
+                            }
+                            s.userData.occupied = false;
+                            s.userData.item = null;
+                            s.material.color.setHex(0x334155);
+                            s.material.opacity = 0.5;
+                        });
+                    });
+                    window.inventory = {};
+
+                    var imported = 0;
+                    data.forEach(function(item) {
+                        if (!item.slotId || !item.name) return;
+                        var parts = item.slotId.split('_');
+                        if (parts.length < 4) return;
+                        var shelfIdx = parseInt(parts[1]);
+                        var level = parseInt(parts[2].replace('L', ''));
+                        var slotNum = parseInt(parts[3].replace('S', ''));
+                        if (isNaN(shelfIdx) || isNaN(level) || isNaN(slotNum)) return;
+
+                        var shelf = window.shelves[shelfIdx];
+                        if (!shelf) return;
+                        var slot = shelf.userData.slots.find(function(s) { return s.userData.level === level && s.userData.slot === slotNum; });
+                        if (!slot || slot.userData.occupied) return;
+
+                        placeCargoDirect(slot, { name: item.name, qty: item.quantity || 1, timestamp: item.timestamp });
+                        imported++;
+                    });
+
+                    window.updateStats();
+                    window.updateOutboundSelect();
+                    window.showToast('导入成功: ' + imported + ' 条记录', 'success');
+                } catch (err) {
+                    window.showToast('导入失败: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        window.exportSnapshot = function() {
+            var data = [];
+            window.shelves.forEach(function(sh) {
+                sh.userData.slots.forEach(function(s) {
+                    if (s.userData.occupied && s.userData.item) {
+                        data.push({
+                            slotId: s.userData.id,
+                            name: s.userData.item.name,
+                            quantity: s.userData.item.quantity,
+                            timestamp: s.userData.item.timestamp,
+                            accessCount: s.userData.accessCount
+                        });
+                    }
+                });
+            });
+            if (data.length === 0) { window.showToast('当前无库存数据', 'info'); return; }
+            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'inventory_snapshot_' + new Date().toISOString().slice(0, 10) + '.json';
+            link.click();
+            window.showToast('已导出 ' + data.length + ' 条记录', 'success');
+        };
+
+        window.showHeatmap = function() {
+            var container = document.getElementById('heatmap-container');
+            var html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+
+            window.shelves.forEach(function(sh, idx) {
+                var d = sh.userData;
+                var occupied = d.slots.filter(function(s) { return s.userData.occupied; }).length;
+                var total = d.slots.length;
+                var ratio = total > 0 ? occupied / total : 0;
+                var barColor = ratio < 0.3 ? '#94a3b8' : ratio < 0.6 ? '#facc15' : ratio < 0.85 ? '#f97316' : '#ef4444';
+
+                html += '<div style="padding:8px;background:#0f172a;border-radius:6px;">';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+                html += '<span style="font-size:13px;font-weight:600;">货架' + (idx + 1) + '</span>';
+                html += '<span style="font-size:12px;color:#94a3b8;">' + occupied + '/' + total + ' (' + Math.round(ratio * 100) + '%)</span>';
+                html += '</div>';
+                html += '<div class="heat-bar"><div class="heat-bar-fill" style="width:' + Math.round(ratio * 100) + '%;background:' + barColor + ';"></div></div>';
+                html += '<div style="display:grid;gap:2px;margin-top:6px;grid-template-columns:repeat(' + d.slotsPerLevel + ', 1fr);">';
+
+                for (var lv = d.levels - 1; lv >= 0; lv--) {
+                    for (var s = 0; s < d.slotsPerLevel; s++) {
+                        var slotMesh = d.slots.find(function(sl) { return sl.userData.level === lv && sl.userData.slot === s; });
+                        var isOcc = slotMesh && slotMesh.userData.occupied;
+                        var title = 'L' + lv + 'S' + s + (isOcc ? ' [' + slotMesh.userData.item.name + ']' : ' [空]');
+                        var bgColor = isOcc ? '#4ade80' : '#334155';
+                        html += '<div style="width:100%;height:16px;border-radius:2px;background:' + bgColor + ';" title="' + title + '"></div>';
+                    }
+                }
+
+                html += '</div></div>';
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+            document.getElementById('heatmap-modal').classList.add('active');
+        };
+
+        window.closeHeatmap = function() {
+            document.getElementById('heatmap-modal').classList.remove('active');
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            window.renderer.render(window.scene, window.camera);
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>

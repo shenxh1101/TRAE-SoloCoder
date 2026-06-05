@@ -1,0 +1,123 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+
+  &.compact {
+    padding: $spacing-md;
+  }
+}
+
+.header {
+  margin-bottom: $spacing-md;
+}
+
+.plate {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.plateText {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  letter-spacing: 4rpx;
+}
+
+.defaultTag {
+  padding: 4rpx 12rpx;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.model {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.info {
+  margin-bottom: $spacing-md;
+}
+
+.infoRow {
+  display: flex;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.infoItem {
+  flex: 1;
+}
+
+.infoLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.infoValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+
+  &.due {
+    color: $color-warning;
+  }
+
+  &.overdue {
+    color: $color-error;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.statusTag {
+  padding: 6rpx 20rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &.normal {
+    background: rgba(76, 175, 80, 0.1);
+    color: $color-success;
+  }
+
+  &.due {
+    background: rgba(255, 152, 0, 0.1);
+    color: $color-warning;
+  }
+
+  &.overdue {
+    background: rgba(244, 67, 54, 0.1);
+    color: $color-error;
+  }
+}
+
+.arrow {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+}

@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --mine-dark: #0A1628;
+  --mine-blue: #00D4FF;
+  --mine-red: #FF3B3B;
+  --mine-green: #00FF88;
+  --mine-yellow: #FFD700;
+  --mine-gray: #1A2740;
+  --mine-light: #2A3A5A;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--mine-dark);
+  color: #fff;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glass-panel {
+  background: rgba(26, 39, 64, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(255, 59, 59, 0.6);
+}
+
+.glow-green {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+.text-glow-blue {
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+}
+
+.text-glow-red {
+  text-shadow: 0 0 10px rgba(255, 59, 59, 0.8);
+}
+
+.border-glow {
+  position: relative;
+}
+
+.border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, var(--mine-blue), transparent, var(--mine-blue));
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--mine-blue);
+  border-radius: 2px;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(255, 59, 59, 0.4);
+    box-shadow: 0 0 10px rgba(255, 59, 59, 0.3);
+  }
+  50% {
+    border-color: rgba(255, 59, 59, 1);
+    box-shadow: 0 0 30px rgba(255, 59, 59, 0.8);
+  }
+}
+
+.warning-border {
+  animation: pulse-border 1s ease-in-out infinite;
+}
+
+@keyframes flow-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.flow-animation {
+  animation: flow-up 2s linear infinite;
+}

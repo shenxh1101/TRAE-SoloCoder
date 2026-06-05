@@ -1,0 +1,114 @@
+[
+  {
+    "name": "获取用户",
+    "method": "GET",
+    "path": "/user/:id",
+    "statusCode": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"id\": \"$path.id\", \"name\": \"张三\", \"timestamp\": \"$timestamp\"}",
+    "delay": 0,
+    "enabled": true,
+    "priority": 1,
+    "id": "1a437dbb-bc64-45c9-8680-d6bd53a40a53"
+  },
+  {
+    "name": "列表接口",
+    "method": "GET",
+    "path": "/items",
+    "statusCode": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"items\": [1,2,3], \"token\": \"$uuid\", \"rand\": \"$random_int(1,100)\", \"str\": \"$random_str(8)\"}",
+    "delay": 0,
+    "delayMin": 100,
+    "delayMax": 300,
+    "enabled": true,
+    "priority": 2,
+    "id": "f3c0b52a-6ce9-4007-aea6-47a875c85ae3"
+  },
+  {
+    "name": "静态文件响应",
+    "method": "GET",
+    "path": "/static/data",
+    "statusCode": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "",
+    "bodyFile": "data/static_response.json",
+    "enabled": true,
+    "priority": 3,
+    "id": "f5d9bfc5-2efb-4654-898e-e6cab203beb4"
+  },
+  {
+    "id": "8148e935-e15a-4661-ac98-f7bf2f833cfc",
+    "name": "Get Todos",
+    "method": "GET",
+    "path": "/api/todos",
+    "statusCode": 200,
+    "headers": {},
+    "body": "",
+    "delay": 0,
+    "delayMin": 0,
+    "delayMax": 0,
+    "bodyFile": "",
+    "enabled": true,
+    "priority": 4
+  },
+  {
+    "id": "b0b03773-7e08-4923-ab6b-77bc5d63061c",
+    "name": "Create Todo",
+    "method": "POST",
+    "path": "/api/todos",
+    "statusCode": 200,
+    "headers": {},
+    "body": "",
+    "delay": 0,
+    "delayMin": 0,
+    "delayMax": 0,
+    "bodyFile": "",
+    "enabled": true,
+    "priority": 5
+  },
+  {
+    "id": "661111fd-aacf-4a0a-b964-f7c6d182224f",
+    "name": "Get Single Todo",
+    "method": "GET",
+    "path": "/api/todos/:id",
+    "statusCode": 200,
+    "headers": {},
+    "body": "",
+    "delay": 0,
+    "delayMin": 0,
+    "delayMax": 0,
+    "bodyFile": "",
+    "enabled": true,
+    "priority": 6
+  },
+  {
+    "name": "延迟测试-固定",
+    "method": "GET",
+    "path": "/test/delay/fixed",
+    "statusCode": 200,
+    "body": "{\"msg\":\"fixed delay\"}",
+    "delay": 500,
+    "enabled": true,
+    "priority": 10,
+    "id": "e27446bc-e606-4e0d-9f01-878362122745"
+  },
+  {
+    "name": "延迟测试-随机",
+    "method": "GET",
+    "path": "/test/delay/random",
+    "statusCode": 200,
+    "body": "{\"msg\":\"random delay\"}",
+    "delayMin": 300,
+    "delayMax": 600,
+    "enabled": true,
+    "priority": 11,
+    "id": "9d81e6c5-58ed-439e-9459-05868aeb3c43"
+  }
+]

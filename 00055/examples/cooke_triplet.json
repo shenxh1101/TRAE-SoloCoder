@@ -1,0 +1,15 @@
+{
+  "name": "库克三片式物镜",
+  "description": "经典库克三片式结构，50mm f/3.5",
+  "surfaces": [
+    { "radius": 28.5, "thickness": 4.2, "refractiveIndex": 1.62, "diameter": 22 },
+    { "radius": -120.0, "thickness": 8.5, "refractiveIndex": 1.0, "diameter": 22 },
+    { "radius": -38.0, "thickness": 1.8, "refractiveIndex": 1.62, "diameter": 18 },
+    { "radius": 28.0, "thickness": 6.5, "refractiveIndex": 1.0, "diameter": 18 },
+    { "radius": 120.0, "thickness": 4.0, "refractiveIndex": 1.62, "diameter": 22 },
+    { "radius": -28.5, "thickness": 45.0, "refractiveIndex": 1.0, "diameter": 22 }
+  ],
+  "wavelengths": [0.4861, 0.5876, 0.6563],
+  "fieldAngles": [0, 12, 24],
+  "apertureRadius": 7.14
+}

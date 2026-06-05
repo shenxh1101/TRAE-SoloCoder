@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光学系统自动设计与像差分析平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔬 光学系统自动设计与像差分析平台</h1>
+            <div class="header-actions">
+                <button id="dashboardBtn" class="btn btn-secondary">📊 性能看板</button>
+                <button id="compareBtn" class="btn btn-secondary">⚖️ 多组对比</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="upload-section">
+                    <h2>📁 上传透镜参数</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" accept=".txt,.csv,.json" hidden>
+                        <div class="upload-icon">📤</div>
+                        <p>拖拽文件到此处或点击上传</p>
+                        <small>支持 .txt, .csv, .json 格式</small>
+                    </div>
+                    <button id="loadSampleBtn" class="btn btn-outline btn-block">📋 加载示例数据</button>
+                    <div class="sample-downloads">
+                        <small>📥 示例文件：</small>
+                        <a href="/examples/cooke_triplet.json" download class="sample-link">JSON格式</a>
+                        <a href="/examples/double_gauss.csv" download class="sample-link">CSV格式</a>
+                    </div>
+                </div>
+
+                <div class="params-section">
+                    <h3>⚙️ 优化阈值设置</h3>
+                    <div class="param-group">
+                        <label>波前RMS阈值 (λ):</label>
+                        <input type="number" id="rmsThreshold" value="0.07" step="0.01" min="0">
+                    </div>
+                    <div class="param-group">
+                        <label>MTF截止频率阈值 (lp/mm):</label>
+                        <input type="number" id="mtfThreshold" value="50" step="5" min="0">
+                    </div>
+                    <div class="param-group">
+                        <label>最大优化迭代次数:</label>
+                        <input type="number" id="maxIterations" value="20" step="1" min="1">
+                    </div>
+                    <div class="param-group">
+                        <label>项目负责人邮箱:</label>
+                        <input type="email" id="adminEmail" value="admin@optical.com">
+                    </div>
+                </div>
+
+                <div class="task-controls">
+                    <button id="startDesignBtn" class="btn btn-primary btn-block" disabled>🚀 开始设计</button>
+                    <button id="pauseDesignBtn" class="btn btn-warning btn-block" disabled>⏸️ 暂停</button>
+                </div>
+            </aside>
+
+            <main class="content">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tasks">📋 任务列表</button>
+                    <button class="tab-btn" data-tab="analysis">📈 分析结果</button>
+                    <button class="tab-btn" data-tab="optimization">🔧 优化日志</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="tasks-tab" class="tab-pane active">
+                        <div class="task-list-header">
+                            <h3>设计任务</h3>
+                            <span id="taskCount">0 个任务</span>
+                        </div>
+                        <div id="taskList" class="task-list">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <p>暂无设计任务，请上传透镜参数开始</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="analysis-tab" class="tab-pane">
+                        <div class="analysis-grid">
+                            <div class="chart-card">
+                                <h4>📍 点列图 (Spot Diagram)</h4>
+                                <canvas id="spotChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h4>🌊 波前图 (Wavefront)</h4>
+                                <canvas id="wavefrontChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h4>📐 MTF曲线</h4>
+                                <canvas id="mtfChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h4>🎯 像差雷达图</h4>
+                                <canvas id="aberrationChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="metrics-summary">
+                            <div class="metric-card">
+                                <span class="metric-label">波前RMS</span>
+                                <span class="metric-value" id="rmsValue">--</span>
+                                <span class="metric-unit">λ</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-label">MTF截止频率</span>
+                                <span class="metric-value" id="mtfValue">--</span>
+                                <span class="metric-unit">lp/mm</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-label">优化次数</span>
+                                <span class="metric-value" id="iterValue">--</span>
+                                <span class="metric-unit">次</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-label">像质评分</span>
+                                <span class="metric-value" id="scoreValue">--</span>
+                                <span class="metric-unit">分</span>
+                            </div>
+                        </div>
+                        <div class="export-section">
+                            <button id="exportPdfBtn" class="btn btn-primary" disabled>📄 导出PDF报告</button>
+                            <button id="exportDataBtn" class="btn btn-secondary" disabled>💾 导出光线数据</button>
+                        </div>
+                    </div>
+
+                    <div id="optimization-tab" class="tab-pane">
+                        <div class="log-header">
+                            <h3>优化调整日志</h3>
+                            <button id="clearLogBtn" class="btn btn-sm btn-outline">清空</button>
+                        </div>
+                        <div id="logContainer" class="log-container">
+                            <div class="log-empty">暂无优化记录</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📊 性能看板</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="completionRate">0%</span>
+                        <span class="stat-label">设计完成率</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="avgIterations">0</span>
+                        <span class="stat-label">平均优化次数</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="qualityRate">0%</span>
+                        <span class="stat-label">像质达标率</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="warningCount">0</span>
+                        <span class="stat-label">预警次数</span>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-charts">
+                <div class="chart-card">
+                    <h4>每日任务统计</h4>
+                    <canvas id="dailyStatsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h4>像差类型分布</h4>
+                    <canvas id="aberrationDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="compareModal" class="modal">
+        <div class="modal-content modal-xlarge">
+            <div class="modal-header">
+                <h2>⚖️ 多组设计参数对比</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="compare-selector">
+                <label>选择要对比的任务:</label>
+                <div id="compareCheckboxes" class="checkbox-group">
+                </div>
+            </div>
+            <div id="compareResults" class="compare-results">
+                <p class="text-center text-muted">请选择至少2个任务进行对比</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header alert-header">
+                <h2>⚠️ 预警通知</h2>
+            </div>
+            <div class="alert-content">
+                <p id="alertMessage"></p>
+                <p class="alert-details" id="alertDetails"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="acknowledgeAlertBtn" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="api-client.js"></script>
+    <script src="visualization.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

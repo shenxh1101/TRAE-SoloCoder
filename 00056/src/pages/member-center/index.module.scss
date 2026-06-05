@@ -1,0 +1,244 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+.headerSection {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-xl * 2 $page-padding;
+  color: $color-text-white;
+}
+
+.levelInfo {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+}
+
+.levelName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+}
+
+.levelDesc {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  opacity: 0.8;
+}
+
+.section {
+  margin: $spacing-lg $page-padding;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.progressCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.progressText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.progressValue {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.levelTip {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+  margin-top: $spacing-md;
+  line-height: $line-height-normal;
+}
+
+.benefitsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.benefitCard {
+  width: calc((100% - 24rpx) / 2);
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.benefitIcon {
+  font-size: 48rpx;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.benefitName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.benefitDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.levelsSection {
+  margin: 0 $page-padding;
+}
+
+.levelCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  border-left: 8rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+
+  &.current {
+    border-left-color: $color-primary;
+    background: linear-gradient(135deg, rgba(30, 136, 229, 0.05) 0%, $color-bg-card 100%);
+  }
+
+  &.gold {
+    border-left-color: #FFD700;
+  }
+
+  &.silver {
+    border-left-color: #C0C0C0;
+  }
+}
+
+.levelIcon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  background: rgba(134, 144, 156, 0.1);
+
+  &.gold {
+    background: rgba(255, 215, 0, 0.2);
+  }
+
+  &.silver {
+    background: rgba(192, 192, 192, 0.2);
+  }
+}
+
+.levelInfoRight {
+  flex: 1;
+}
+
+.levelTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.levelCondition {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.currentBadge {
+  padding: 4rpx 16rpx;
+  background: rgba(30, 136, 229, 0.1);
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.spendingList {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.spendingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.spendingInfo {
+  flex: 1;
+}
+
+.spendingDesc {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.spendingTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+}
+
+.spendingAmount {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-error;
+}

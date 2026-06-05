@@ -1,0 +1,13 @@
+SQLAlchemy>=2.0.0
+PyPDF2>=3.0.0
+python-docx>=1.1.0
+pytz>=2023.3
+reportlab>=4.0.0
+matplotlib>=3.7.0
+pandas>=2.0.0
+openpyxl>=3.1.0
+Flask>=3.0.0
+Flask-SocketIO>=5.0.0
+APScheduler>=3.10.0
+Flask-CORS>=4.0.0
+werkzeug>=3.0.0

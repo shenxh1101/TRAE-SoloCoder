@@ -1,0 +1,268 @@
+{
+  "product-service": {
+    "hash": "1a0f39c1973831138a6744d930f509ca",
+    "framework": "flask",
+    "scan_time": "2026-06-04T11:57:58.145551",
+    "path": "/Users/mac/AI Coding/solo coder/00065/services/product-service",
+    "endpoints": [
+      {
+        "path": "/api/products",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/product-service/app.py",
+        "line_number": 5,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/products/<id>",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/product-service/app.py",
+        "line_number": 9,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/products",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/product-service/app.py",
+        "line_number": 13,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/products/<id>",
+        "method": "PUT",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/product-service/app.py",
+        "line_number": 17,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/products/<id>",
+        "method": "DELETE",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/product-service/app.py",
+        "line_number": 21,
+        "framework": "flask"
+      }
+    ],
+    "outgoing_calls": []
+  },
+  "notification-service": {
+    "hash": "a64ba4a24c4eea7ffe2b2ffa91a50d2c",
+    "framework": "express",
+    "scan_time": "2026-06-04T11:57:58.146609",
+    "path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service",
+    "endpoints": [
+      {
+        "path": "/api/notifications",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 7,
+        "framework": "express"
+      },
+      {
+        "path": "/",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 7,
+        "framework": "express"
+      },
+      {
+        "path": "/api/notifications/:id",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 11,
+        "framework": "express"
+      },
+      {
+        "path": "/",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 11,
+        "framework": "express"
+      },
+      {
+        "path": "/api/notifications/user/:userId",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 15,
+        "framework": "express"
+      },
+      {
+        "path": "/",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 15,
+        "framework": "express"
+      }
+    ],
+    "outgoing_calls": [
+      {
+        "target_service": "user-service",
+        "endpoint": null,
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/notification-service/app.js",
+        "line_number": 17,
+        "call_type": "javascript"
+      }
+    ]
+  },
+  "payment-service": {
+    "hash": "42ec00b09b7d241b635bede23096a3e9",
+    "framework": "flask",
+    "scan_time": "2026-06-04T11:57:58.147146",
+    "path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service",
+    "endpoints": [
+      {
+        "path": "/api/payments",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service/app.py",
+        "line_number": 6,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/payments/<id>",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service/app.py",
+        "line_number": 12,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/payments/<id>/refund",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service/app.py",
+        "line_number": 16,
+        "framework": "flask"
+      }
+    ],
+    "outgoing_calls": [
+      {
+        "target_service": "notification-service",
+        "endpoint": "http://notification-service/api/notifications",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service/app.py",
+        "line_number": 9,
+        "call_type": "python"
+      },
+      {
+        "target_service": "order-service",
+        "endpoint": "http://order-service/api/orders/123/status",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/payment-service/app.py",
+        "line_number": 18,
+        "call_type": "python"
+      }
+    ]
+  },
+  "order-service": {
+    "hash": "9066cb36d972d424da2e8049ea16495b",
+    "framework": "flask",
+    "scan_time": "2026-06-04T11:57:58.147687",
+    "path": "/Users/mac/AI Coding/solo coder/00065/services/order-service",
+    "endpoints": [
+      {
+        "path": "/api/orders",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 6,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/orders",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 11,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/orders/<id>",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 18,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/orders/<id>/status",
+        "method": "PUT",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 22,
+        "framework": "flask"
+      }
+    ],
+    "outgoing_calls": [
+      {
+        "target_service": "product-service",
+        "endpoint": "http://product-service/api/products/1",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 14,
+        "call_type": "python"
+      },
+      {
+        "target_service": "payment-service",
+        "endpoint": "http://payment-service/api/payments",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 15,
+        "call_type": "python"
+      },
+      {
+        "target_service": "notification-service",
+        "endpoint": "http://notification-service/api/notifications",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/order-service/app.py",
+        "line_number": 25,
+        "call_type": "python"
+      }
+    ]
+  },
+  "user-service": {
+    "hash": "0b03aa7401acee43d6e66b162d5c75ef",
+    "framework": "flask",
+    "scan_time": "2026-06-04T11:57:58.148004",
+    "path": "/Users/mac/AI Coding/solo coder/00065/services/user-service",
+    "endpoints": [
+      {
+        "path": "/api/users",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 6,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/users",
+        "method": "POST",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 10,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/users/<id>",
+        "method": "GET",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 16,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/users/<id>",
+        "method": "PUT",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 21,
+        "framework": "flask"
+      },
+      {
+        "path": "/api/users/<id>",
+        "method": "DELETE",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 25,
+        "framework": "flask"
+      }
+    ],
+    "outgoing_calls": [
+      {
+        "target_service": "notification-service",
+        "endpoint": "http://notification-service/api/notifications",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 13,
+        "call_type": "python"
+      },
+      {
+        "target_service": "order-service",
+        "endpoint": "http://order-service/api/orders?user_id={id}",
+        "file_path": "/Users/mac/AI Coding/solo coder/00065/services/user-service/app.py",
+        "line_number": 18,
+        "call_type": "python"
+      }
+    ]
+  }
+}

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Server Manager</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222632;--border:#2e3348;--text:#e4e6f0;--text2:#9ca0b8;--primary:#6c5ce7;--primary-h:#7f70f0;--success:#00b894;--warning:#fdcb6e;--danger:#e17055;--info:#74b9ff;--radius:8px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--info));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-actions{display:flex;gap:10px}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:var(--radius);padding:4px;margin-bottom:20px}
+.tab{padding:10px 20px;border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:6px;font-size:14px;font-weight:500;transition:all .2s}
+.tab.active{background:var(--primary);color:#fff}
+.tab:hover:not(.active){background:var(--surface2);color:var(--text)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-h)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning);color:#333}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:5px 10px;font-size:12px}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary)}
+textarea{resize:vertical;min-height:80px;font-family:'SF Mono',Monaco,monospace}
+label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.form-group{margin-bottom:12px}
+.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-get{background:#00b89422;color:var(--success)}
+.badge-post{background:#6c5ce722;color:var(--primary)}
+.badge-put{background:#fdcb6e22;color:var(--warning)}
+.badge-delete{background:#e1705522;color:var(--danger)}
+.badge-patch{background:#74b9ff22;color:var(--info)}
+.badge-enabled{background:#00b89422;color:var(--success)}
+.badge-disabled{background:#e1705522;color:var(--danger)}
+.rule-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:border-color .2s}
+.rule-item:hover{border-color:var(--primary)}
+.rule-item.disabled{opacity:.5}
+.rule-method{min-width:64px;text-align:center}
+.rule-path{font-family:'SF Mono',Monaco,monospace;font-size:14px;flex:1;color:var(--info)}
+.rule-name{font-size:12px;color:var(--text2);margin-left:8px}
+.rule-status{min-width:70px;text-align:center}
+.rule-priority{font-size:12px;color:var(--text2);min-width:60px;text-align:center}
+.rule-actions{display:flex;gap:6px;min-width:160px;justify-content:flex-end}
+.log-item{display:grid;grid-template-columns:160px 70px 1fr 200px;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px;align-items:center}
+.log-item:hover{background:var(--surface2)}
+.log-time{color:var(--text2);font-family:monospace;font-size:12px}
+.log-method{font-weight:600;text-align:center}
+.log-path{font-family:monospace;color:var(--info)}
+.log-rule{color:var(--text2);font-size:12px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-state svg{width:48px;height:48px;margin-bottom:16px;opacity:.4}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:90%;max-width:640px;max-height:90vh;overflow-y:auto;padding:24px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h2{font-size:18px}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-value{font-size:28px;font-weight:700;color:var(--primary)}
+.stat-label{font-size:12px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.search-bar{display:flex;gap:10px;margin-bottom:16px}
+.search-bar input{flex:1}
+.hint{font-size:12px;color:var(--text2);margin-top:4px}
+.hint code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11px;color:var(--info)}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Mock Server Manager</h1>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="exportRules()">导出规则</button>
+    <button class="btn btn-primary btn-sm" onclick="openModal()">+ 新建规则</button>
+  </div>
+</div>
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('rules',this)">规则管理</button>
+    <button class="tab" onclick="switchTab('logs',this)">请求日志</button>
+    <button class="tab" onclick="switchTab('import',this)">导入</button>
+  </div>
+
+  <div id="tab-rules">
+    <div class="stats" id="stats"></div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="搜索规则（路径、名称、方法）..." oninput="renderRules()">
+    </div>
+    <div id="rules-list"></div>
+  </div>
+
+  <div id="tab-logs" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3>请求日志</h3>
+      <button class="btn btn-danger btn-sm" onclick="clearLogs()">清空日志</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="log-item" style="background:var(--surface2);font-weight:600;font-size:12px;color:var(--text2)">
+        <div>时间</div><div>方法</div><div>路径</div><div>匹配规则</div>
+      </div>
+      <div id="logs-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-import" style="display:none">
+    <div class="card">
+      <h3 style="margin-bottom:12px">导入 Postman Collection</h3>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px">粘贴 Postman 导出的 Collection JSON（v2.1 格式）来批量创建 Mock 规则。</p>
+      <textarea id="postmanJson" rows="12" placeholder='{"info":{"name":"My Collection"},"item":[...]}'></textarea>
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="importPostman()">导入</button>
+        <input type="file" id="postmanFile" accept=".json" style="display:none" onchange="loadPostmanFile(event)">
+        <button class="btn btn-ghost" onclick="document.getElementById('postmanFile').click()">从文件导入</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">新建规则</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <form id="ruleForm" onsubmit="saveRule(event)">
+      <input type="hidden" id="ruleId">
+      <div class="form-row">
+        <div class="form-group">
+          <label>规则名称</label>
+          <input type="text" id="ruleName" placeholder="例：获取用户信息">
+        </div>
+        <div class="form-group">
+          <label>优先级</label>
+          <input type="number" id="rulePriority" value="0" min="0">
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label>请求方法</label>
+          <select id="ruleMethod">
+            <option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option><option>OPTIONS</option><option>HEAD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>URL 路径</label>
+          <input type="text" id="rulePath" placeholder="/user/:id">
+        </div>
+        <div class="form-group">
+          <label>响应状态码</label>
+          <input type="number" id="ruleStatus" value="200">
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-group">
+          <label>固定延迟 (ms)</label>
+          <input type="number" id="ruleDelay" value="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>最小随机延迟 (ms)</label>
+          <input type="number" id="ruleDelayMin" value="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>最大随机延迟 (ms)</label>
+          <input type="number" id="ruleDelayMax" value="0" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>响应头 (JSON)</label>
+        <textarea id="ruleHeaders" rows="3" placeholder='{"Content-Type": "application/json"}'></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>静态 JSON 文件路径 (可选)</label>
+          <input type="text" id="ruleBodyFile" placeholder="data/response.json">
+          <div class="hint">留空则使用下方响应体</div>
+        </div>
+        <div class="form-group">
+          <label>启用状态</label>
+          <select id="ruleEnabled">
+            <option value="true">启用</option>
+            <option value="false">禁用</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>响应体</label>
+        <textarea id="ruleBody" rows="6" placeholder='{"id": "$path.id", "name": "user", "ts": "$timestamp", "token": "$uuid"}'></textarea>
+        <div class="hint">
+          动态变量: <code>$path.参数名</code> <code>$timestamp</code> <code>$timestamp_ms</code> <code>$uuid</code> <code>$random_int</code> <code>$random_int(1,100)</code> <code>$random_float</code> <code>$random_str</code> <code>$random_str(16)</code>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const API='/__manage';
+let rules=[],logs=[];
+
+async function api(path,opts={}){
+  const r=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts});
+  return r.json();
+}
+
+async function loadData(){
+  rules=await api('/rules');
+  logs=await api('/logs');
+  renderStats();
+  renderRules();
+  renderLogs();
+}
+
+function renderStats(){
+  const total=rules.length;
+  const enabled=rules.filter(r=>r.enabled).length;
+  const disabled=total-enabled;
+  const logCount=logs.length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">总规则数</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--success)">${enabled}</div><div class="stat-label">已启用</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--danger)">${disabled}</div><div class="stat-label">已禁用</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--info)">${logCount}</div><div class="stat-label">请求日志</div></div>
+  `;
+}
+
+function renderRules(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const filtered=rules.filter(r=>{
+    if(!q)return true;
+    return (r.path||'').toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q)||(r.method||'').toLowerCase().includes(q);
+  }).sort((a,b)=>(b.priority||0)-(a.priority||0));
+
+  if(!filtered.length){
+    document.getElementById('rules-list').innerHTML='<div class="empty-state"><p>暂无规则，点击右上角「+ 新建规则」开始创建</p></div>';
+    return;
+  }
+  document.getElementById('rules-list').innerHTML=filtered.map(r=>`
+    <div class="rule-item ${r.enabled?'':'disabled'}">
+      <div class="rule-method"><span class="badge badge-${r.method?.toLowerCase()}">${r.method}</span></div>
+      <div class="rule-path">${r.path||'/'}<span class="rule-name">${r.name||''}</span></div>
+      <div class="rule-priority">P${r.priority||0}</div>
+      <div class="rule-status"><span class="badge ${r.enabled?'badge-enabled':'badge-disabled'}">${r.enabled?'启用':'禁用'}</span></div>
+      <div class="rule-actions">
+        <button class="btn btn-sm ${r.enabled?'btn-warning':'btn-success'}" onclick="toggleRule('${r.id}')">${r.enabled?'禁用':'启用'}</button>
+        <button class="btn btn-sm btn-ghost" onclick="editRule('${r.id}')">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRule('${r.id}')">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLogs(){
+  if(!logs.length){
+    document.getElementById('logs-list').innerHTML='<div class="empty-state"><p>暂无请求日志</p></div>';
+    return;
+  }
+  const recent=[...logs].reverse().slice(0,200);
+  document.getElementById('logs-list').innerHTML=recent.map(l=>`
+    <div class="log-item">
+      <div class="log-time">${l.timestamp?.replace('T',' ').slice(0,19)||'-'}</div>
+      <div class="log-method"><span class="badge badge-${(l.method||'').toLowerCase()}">${l.method}</span></div>
+      <div class="log-path">${l.path||'-'}</div>
+      <div class="log-rule">${l.matchedRuleName||l.matchedRuleId||'<span style="color:var(--danger)">未匹配</span>'}</div>
+    </div>
+  `).join('');
+}
+
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['rules','logs','import'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===name?'':'none';
+  });
+  if(name==='logs')loadLogs();
+}
+
+async function loadLogs(){
+  logs=await api('/logs');
+  renderLogs();
+  renderStats();
+}
+
+function openModal(rule){
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-title').textContent=rule?'编辑规则':'新建规则';
+  document.getElementById('ruleId').value=rule?.id||'';
+  document.getElementById('ruleName').value=rule?.name||'';
+  document.getElementById('ruleMethod').value=rule?.method||'GET';
+  document.getElementById('rulePath').value=rule?.path||'';
+  document.getElementById('ruleStatus').value=rule?.statusCode||200;
+  document.getElementById('ruleDelay').value=rule?.delay||0;
+  document.getElementById('ruleDelayMin').value=rule?.delayMin||0;
+  document.getElementById('ruleDelayMax').value=rule?.delayMax||0;
+  document.getElementById('ruleHeaders').value=rule?.headers?JSON.stringify(rule.headers,null,2):'';
+  document.getElementById('ruleBody').value=rule?.body||'';
+  document.getElementById('ruleBodyFile').value=rule?.bodyFile||'';
+  document.getElementById('ruleEnabled').value=rule?.enabled!==false?'true':'false';
+  document.getElementById('rulePriority').value=rule?.priority||0;
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+function editRule(id){
+  const rule=rules.find(r=>r.id===id);
+  if(rule)openModal(rule);
+}
+
+async function saveRule(e){
+  e.preventDefault();
+  const id=document.getElementById('ruleId').value;
+  let headers={};
+  try{headers=JSON.parse(document.getElementById('ruleHeaders').value||'{}');}catch(err){}
+  const data={
+    id:id||undefined,
+    name:document.getElementById('ruleName').value,
+    method:document.getElementById('ruleMethod').value,
+    path:document.getElementById('rulePath').value,
+    statusCode:parseInt(document.getElementById('ruleStatus').value)||200,
+    delay:parseInt(document.getElementById('ruleDelay').value)||0,
+    delayMin:parseInt(document.getElementById('ruleDelayMin').value)||0,
+    delayMax:parseInt(document.getElementById('ruleDelayMax').value)||0,
+    headers,
+    body:document.getElementById('ruleBody').value,
+    bodyFile:document.getElementById('ruleBodyFile').value,
+    enabled:document.getElementById('ruleEnabled').value==='true',
+    priority:parseInt(document.getElementById('rulePriority').value)||0,
+  };
+  if(id){
+    await api(`/rules/${id}`,{method:'PUT',body:JSON.stringify(data)});
+  }else{
+    await api('/rules',{method:'POST',body:JSON.stringify(data)});
+  }
+  closeModal();
+  await loadData();
+}
+
+async function deleteRule(id){
+  if(!confirm('确定删除此规则？'))return;
+  await api(`/rules/${id}`,{method:'DELETE'});
+  await loadData();
+}
+
+async function toggleRule(id){
+  await api(`/rules/${id}/toggle`,{method:'POST'});
+  await loadData();
+}
+
+async function clearLogs(){
+  if(!confirm('确定清空所有日志？'))return;
+  await api('/logs',{method:'DELETE'});
+  await loadData();
+}
+
+async function importPostman(){
+  const raw=document.getElementById('postmanJson').value.trim();
+  if(!raw)return alert('请输入 Postman Collection JSON');
+  try{
+    const data=JSON.parse(raw);
+    const result=await api('/import/postman',{method:'POST',body:JSON.stringify(data)});
+    alert(`成功导入 ${result.imported} 条规则`);
+    document.getElementById('postmanJson').value='';
+    await loadData();
+  }catch(err){
+    alert('导入失败: '+err.message);
+  }
+}
+
+function loadPostmanFile(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{document.getElementById('postmanJson').value=e.target.result;};
+  reader.readAsText(file);
+}
+
+async function exportRules(){
+  const data=JSON.stringify(rules,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='mock_rules.json';a.click();
+  URL.revokeObjectURL(url);
+}
+
+loadData();
+setInterval(()=>{if(document.getElementById('tab-logs').style.display!=='none')loadLogs();},5000);
+</script>
+</body>
+</html>

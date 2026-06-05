@@ -1,0 +1,120 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  color: $color-text-white;
+  box-shadow: 0 8rpx 32rpx rgba(30, 136, 229, 0.25);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.95;
+  }
+
+  &.silver {
+    background: linear-gradient(135deg, #636363 0%, #a1a1a1 100%);
+    box-shadow: 0 8rpx 32rpx rgba(99, 99, 99, 0.25);
+  }
+
+  &.gold {
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #FFD700 100%);
+    box-shadow: 0 8rpx 32rpx rgba(245, 158, 11, 0.3);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-lg;
+}
+
+.levelInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.levelBadge {
+  padding: 8rpx 24rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.points {
+  text-align: right;
+}
+
+.pointsValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  display: block;
+}
+
+.pointsLabel {
+  font-size: $font-size-xs;
+  opacity: 0.8;
+}
+
+.progressSection {
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-md;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.progressLabel {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.progressValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.benefits {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-top: $spacing-lg;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.benefitItem {
+  text-align: center;
+  flex: 1;
+}
+
+.benefitValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.benefitLabel {
+  font-size: $font-size-xs;
+  opacity: 0.8;
+}
+
+.divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.3);
+}

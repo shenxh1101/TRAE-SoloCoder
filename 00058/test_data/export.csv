@@ -1,0 +1,3 @@
+﻿备份ID,系统名称,备份类型,备份版本,源路径,存储路径,文件数,总大小(字节),总大小,校验和,状态,重试次数,开始时间,结束时间,时长(秒),错误信息
+2,test_system,incremental,20260604_102944,/Users/mac/AI Coding/solo coder/00058/test_data/source,test_system/incremental_20260604_102944/test_system_incremental_20260604_102944.tar.gz,2,280,280.0 B,a0527c6348d3482c5a0cbee578d22a6905b30be0998efb8f4eafea33b7c4aab7,success,0,2026-06-04 10:29:44,2026-06-04 10:29:44,0,
+1,test_system,full,20260604_102852,/Users/mac/AI Coding/solo coder/00058/test_data/source,test_system/full_20260604_102852/test_system_full_20260604_102852.tar.gz,3,307,307.0 B,d538857e4b5c2f45ccafd8e908dc76bfda460f620f48f2b293d9936bd3a701fd,success,0,2026-06-04 10:28:52,2026-06-04 10:28:52,0,

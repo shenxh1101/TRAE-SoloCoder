@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D智慧实验室安全与实验流程调度可视化平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            background: #0a0a1a;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(90deg, rgba(20, 40, 80, 0.95), rgba(10, 20, 50, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 100;
+            border-bottom: 2px solid #00d4ff;
+            box-shadow: 0 2px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .header h1 {
+            color: #00d4ff;
+            font-size: 22px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .header-info {
+            display: flex;
+            gap: 30px;
+            color: #a0c4ff;
+            font-size: 14px;
+        }
+
+        .header-info span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sidebar {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 300px;
+            bottom: 0;
+            background: rgba(15, 25, 50, 0.95);
+            border-right: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 90;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            color: #00d4ff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .stat-card.warning {
+            background: rgba(255, 165, 0, 0.1);
+            border-left-color: #ffa500;
+        }
+
+        .stat-card.danger {
+            background: rgba(255, 68, 68, 0.1);
+            border-left-color: #ff4444;
+            animation: danger-pulse 1s infinite;
+        }
+
+        @keyframes danger-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(255, 68, 68, 0.8); }
+        }
+
+        .stat-label {
+            color: #8899aa;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .stat-value.warning {
+            color: #ffa500;
+        }
+
+        .stat-value.danger {
+            color: #ff4444;
+        }
+
+        .right-panel {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 350px;
+            bottom: 0;
+            background: rgba(15, 25, 50, 0.95);
+            border-left: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 90;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #8899aa;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert-item {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .alert-item.warning {
+            background: rgba(255, 165, 0, 0.1);
+            border-color: rgba(255, 165, 0, 0.3);
+        }
+
+        .alert-item.success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .alert-title {
+            color: #ff4444;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .alert-item.warning .alert-title {
+            color: #ffa500;
+        }
+
+        .alert-item.success .alert-title {
+            color: #00ff88;
+        }
+
+        .alert-desc {
+            color: #aabbcc;
+            font-size: 12px;
+        }
+
+        .alert-time {
+            color: #667788;
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 300px;
+            right: 350px;
+            height: 180px;
+            background: rgba(15, 25, 50, 0.95);
+            border-top: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 15px 20px;
+            z-index: 90;
+            overflow-x: auto;
+        }
+
+        .schedule-container {
+            display: flex;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .schedule-item {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .schedule-header {
+            color: #00d4ff;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .schedule-booking {
+            background: rgba(0, 212, 255, 0.15);
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .schedule-booking.conflict {
+            border-left-color: #ff4444;
+            background: rgba(255, 68, 68, 0.15);
+        }
+
+        .booking-time {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .booking-project {
+            color: #ffffff;
+            margin: 3px 0;
+        }
+
+        .booking-person {
+            color: #8899aa;
+            font-size: 11px;
+        }
+
+        .controls {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: rgba(20, 40, 80, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        .control-btn.primary {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .info-tooltip {
+            position: absolute;
+            background: rgba(20, 40, 80, 0.95);
+            border: 1px solid #00d4ff;
+            border-radius: 8px;
+            padding: 15px;
+            color: #ffffff;
+            font-size: 13px;
+            z-index: 200;
+            pointer-events: none;
+            display: none;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .info-tooltip h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .info-label {
+            color: #8899aa;
+        }
+
+        .info-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .info-value.warning {
+            color: #ffa500;
+        }
+
+        .info-value.danger {
+            color: #ff4444;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.normal {
+            background: #00ff88;
+        }
+
+        .progress-fill.warning {
+            background: #ffa500;
+        }
+
+        .progress-fill.danger {
+            background: #ff4444;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a2a4a, #0d1a30);
+            border: 1px solid #00d4ff;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-title {
+            color: #00d4ff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #8899aa;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #ff4444;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            color: #a0c4ff;
+            font-size: 13px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #a0c4ff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(90deg, #ff4444, #cc3333);
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: linear-gradient(90deg, #00ff88, #00cc6a);
+            color: #ffffff;
+        }
+
+        .order-item, .workorder-item {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-id {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .order-status {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .order-status.pending {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+        }
+
+        .order-status.approved {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .order-status.completed {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 212, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="header">
+        <h1>🔬 3D智慧实验室安全与实验流程调度可视化平台</h1>
+        <div class="header-info">
+            <span><span class="status-dot"></span> 系统运行正常</span>
+            <span>📅 <span id="current-date">2024-01-15</span></span>
+            <span>🕐 <span id="current-time">09:30:00</span></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn primary" onclick="resetCamera()">重置视角</button>
+        <button class="control-btn" onclick="toggleRotation()">自动旋转</button>
+        <button class="control-btn" onclick="showStatistics()">📊 数据统计</button>
+        <button class="control-btn" onclick="exportExcel()">📥 导出Excel</button>
+        <button class="control-btn" onclick="simulateAlert()">⚠️ 模拟警报</button>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">📊 实时数据概览</div>
+            <div class="stat-card">
+                <div class="stat-label">在线实验台</div>
+                <div class="stat-value">6 / 6</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">运行中仪器</div>
+                <div class="stat-value">4 / 5</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-label">试剂低库存</div>
+                <div class="stat-value warning" id="low-reagent-count">3</div>
+            </div>
+            <div class="stat-card danger" id="alert-stat">
+                <div class="stat-label">活跃警报</div>
+                <div class="stat-value danger" id="active-alerts">2</div>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">🌡️ 环境监测</div>
+            <div class="stat-card">
+                <div class="stat-label">实验室温度</div>
+                <div class="stat-value">23.5°C</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">实验室湿度</div>
+                <div class="stat-value">45%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">PM2.5</div>
+                <div class="stat-value">12 μg/m³</div>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">👥 人员信息</div>
+            <div class="stat-card">
+                <div class="stat-label">在场人员</div>
+                <div class="stat-value">8 人</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">P3授权人员</div>
+                <div class="stat-value">3 人</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('alerts')">🚨 警报中心</button>
+            <button class="tab-btn" onclick="switchTab('orders')">📦 采购申请</button>
+            <button class="tab-btn" onclick="switchTab('workorders')">🔧 保养工单</button>
+        </div>
+
+        <div class="tab-content active" id="tab-alerts">
+            <div id="alerts-list">
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-orders">
+            <div id="orders-list">
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-workorders">
+            <div id="workorders-list">
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-panel">
+        <div class="sidebar-title" style="margin-bottom: 12px;">📋 今日实验预约调度</div>
+        <div class="schedule-container" id="schedule-container">
+        </div>
+    </div>
+
+    <div class="info-tooltip" id="info-tooltip"></div>
+
+    <div class="modal" id="statistics-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📊 数据统计报表</div>
+                <button class="modal-close" onclick="closeModal('statistics-modal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">统计日期范围</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="date" class="form-input" id="stat-start-date" style="flex: 1;">
+                    <input type="date" class="form-input" id="stat-end-date" style="flex: 1;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">设备使用率统计</label>
+                <div style="background: rgba(0,212,255,0.05); padding: 15px; border-radius: 6px;">
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="color: #a0c4ff;">PCR仪-01</span>
+                            <span style="color: #00d4ff;">78%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill normal" style="width: 78%;"></div></div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="color: #a0c4ff;">离心机-A1</span>
+                            <span style="color: #00d4ff;">65%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill normal" style="width: 65%;"></div></div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="color: #a0c4ff;">光谱仪-01</span>
+                            <span style="color: #ffa500;">45%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill warning" style="width: 45%;"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">试剂消耗统计</label>
+                <div style="background: rgba(0,212,255,0.05); padding: 15px; border-radius: 6px;">
+                    <div class="info-row"><span class="info-label">乙醇 (95%)</span><span class="info-value">1500ml / 5000ml</span></div>
+                    <div class="info-row"><span class="info-label">氯化钠</span><span class="info-value">800g / 2000g</span></div>
+                    <div class="info-row"><span class="info-label">PCR试剂盒</span><span class="info-value warning">50份 / 500份</span></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">异常事件统计</label>
+                <div style="background: rgba(255,68,68,0.05); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,68,68,0.2);">
+                    <div class="info-row"><span class="info-label">温度超阈值</span><span class="info-value danger">3次</span></div>
+                    <div class="info-row"><span class="info-label">pH异常</span><span class="info-value danger">2次</span></div>
+                    <div class="info-row"><span class="info-label">非授权进入尝试</span><span class="info-value danger">1次</span></div>
+                    <div class="info-row"><span class="info-label">废液桶满</span><span class="info-value warning">1次</span></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('statistics-modal')">关闭</button>
+                <button class="btn btn-primary" onclick="exportExcel()">导出Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="purchase-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📦 采购申请单</div>
+                <button class="modal-close" onclick="closeModal('purchase-modal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">申请单号</label>
+                <input type="text" class="form-input" id="purchase-id" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">试剂名称</label>
+                <input type="text" class="form-input" id="purchase-reagent" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">当前剩余量</label>
+                <input type="text" class="form-input" id="purchase-current" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">建议采购量</label>
+                <input type="text" class="form-input" id="purchase-amount">
+            </div>
+            <div class="form-group">
+                <label class="form-label">申请人</label>
+                <input type="text" class="form-input" value="系统自动生成" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">备注</label>
+                <textarea class="form-textarea" id="purchase-remark">试剂库存低于20%阈值，系统自动生成采购申请</textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('purchase-modal')">取消</button>
+                <button class="btn btn-primary" onclick="submitPurchase()">提交申请</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="maintenance-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🔧 保养工单</div>
+                <button class="modal-close" onclick="closeModal('maintenance-modal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">工单号</label>
+                <input type="text" class="form-input" id="maint-id" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">仪器名称</label>
+                <input type="text" class="form-input" id="maint-instrument" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">累计运行时间</label>
+                <input type="text" class="form-input" id="maint-runtime" readonly>
+            </div>
+            <div class="form-group">
+                <label class="form-label">保养类型</label>
+                <select class="form-select" id="maint-type">
+                    <option>常规保养</option>
+                    <option>深度保养</option>
+                    <option>部件更换</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">预计完成时间</label>
+                <input type="date" class="form-input" id="maint-date">
+            </div>
+            <div class="form-group">
+                <label class="form-label">保养说明</label>
+                <textarea class="form-textarea" id="maint-desc">仪器累计运行时间超过保养阈值，需要进行保养维护</textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('maintenance-modal')">取消</button>
+                <button class="btn btn-primary" onclick="submitMaintenance()">创建工单</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="access-modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="modal-header">
+                <div class="modal-title">👤 P3实验室门禁系统</div>
+                <button class="modal-close" onclick="closeModal('access-modal')">&times;</button>
+            </div>
+            <div id="face-scan-area" style="width: 200px; height: 200px; margin: 20px auto; border: 3px solid #00d4ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(0,212,255,0.1);">
+                <span style="font-size: 60px;">📷</span>
+            </div>
+            <div id="access-status" style="color: #a0c4ff; font-size: 16px; margin-bottom: 20px;">请进行人脸识别...</div>
+            <div class="form-group">
+                <label class="form-label">选择人员模拟</label>
+                <select class="form-select" id="person-select">
+                    <option value="authorized">张博士 (已授权)</option>
+                    <option value="authorized">李研究员 (已授权)</option>
+                    <option value="unauthorized">王实习生 (未授权)</option>
+                    <option value="unauthorized">外来人员 (未授权)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="simulateFaceScan()" style="width: 100%;">开始人脸识别</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        let scene, camera, renderer, controls;
+        let labObjects = {};
+        let autoRotate = false;
+        let currentPurchaseReagent = null;
+        let currentMaintenanceInstrument = null;
+        let alertList = [];
+        let orderList = [];
+        let workorderList = [];
+
+        const labData = {
+            experimentTables: [
+                { id: 'table1', name: '生物实验台-01', project: '基因测序项目', person: '张博士', temp: 24.5, ph: 7.2, tempThreshold: 28, phMin: 6.5, phMax: 8.5, status: 'normal' },
+                { id: 'table2', name: '生物实验台-02', project: '疫苗研发', person: '李研究员', temp: 26.8, ph: 7.0, tempThreshold: 28, phMin: 6.5, phMax: 8.5, status: 'normal' },
+                { id: 'table3', name: '化学实验台-01', project: '有机合成', person: '王工程师', temp: 32.5, ph: 5.8, tempThreshold: 30, phMin: 6.0, phMax: 8.0, status: 'danger' },
+                { id: 'table4', name: '化学实验台-02', project: '材料分析', person: '赵技术员', temp: 25.0, ph: 7.5, tempThreshold: 30, phMin: 6.0, phMax: 8.0, status: 'normal' },
+                { id: 'table5', name: '化学实验台-03', project: '药物研发', person: '陈博士', temp: 29.0, ph: 9.2, tempThreshold: 30, phMin: 6.0, phMax: 8.0, status: 'danger' },
+                { id: 'table6', name: '综合实验台', project: '样品制备', person: '刘助理', temp: 24.0, ph: 7.0, tempThreshold: 30, phMin: 6.0, phMax: 8.0, status: 'normal' }
+            ],
+            reagents: [
+                { id: 'reagent1', name: '乙醇(95%)', remaining: 85, capacity: 100, expiry: '2025-06-15', status: 'normal' },
+                { id: 'reagent2', name: '氯化钠', remaining: 72, capacity: 100, expiry: '2026-03-20', status: 'normal' },
+                { id: 'reagent3', name: 'PCR试剂盒', remaining: 15, capacity: 100, expiry: '2024-08-10', status: 'warning' },
+                { id: 'reagent4', name: '琼脂糖', remaining: 18, capacity: 100, expiry: '2025-12-01', status: 'warning' },
+                { id: 'reagent5', name: 'Tris-HCl', remaining: 45, capacity: 100, expiry: '2025-09-30', status: 'normal' },
+                { id: 'reagent6', name: '溴化乙锭', remaining: 12, capacity: 100, expiry: '2024-05-15', status: 'warning' },
+                { id: 'reagent7', name: '甲醇', remaining: 60, capacity: 100, expiry: '2025-04-20', status: 'normal' },
+                { id: 'reagent8', name: '丙酮', remaining: 35, capacity: 100, expiry: '2025-07-10', status: 'normal' }
+            ],
+            instruments: [
+                { id: 'inst1', name: 'PCR仪-01', runtime: 1850, maintenanceThreshold: 2000, status: 'warning', locked: false },
+                { id: 'inst2', name: '高速离心机', runtime: 1200, maintenanceThreshold: 1500, status: 'normal', locked: false },
+                { id: 'inst3', name: '紫外分光光度计', runtime: 2300, maintenanceThreshold: 2000, status: 'warning', locked: true },
+                { id: 'inst4', name: '凝胶成像系统', runtime: 850, maintenanceThreshold: 1500, status: 'normal', locked: false },
+                { id: 'inst5', name: '高效液相色谱', runtime: 1500, maintenanceThreshold: 2000, status: 'normal', locked: false }
+            ],
+            waste: [
+                { id: 'waste1', name: '化学废液桶A', level: 92, capacity: 100, status: 'danger' },
+                { id: 'waste2', name: '化学废液桶B', level: 65, capacity: 100, status: 'normal' },
+                { id: 'waste3', name: '生物废弃物', level: 45, capacity: 100, status: 'normal' },
+                { id: 'waste4', name: '利器收纳盒', level: 78, capacity: 100, status: 'normal' }
+            ],
+            p3Lab: {
+                accessStatus: 'locked',
+                currentPerson: null,
+                authorizedPersons: ['张博士', '李研究员', '王主任']
+            }
+        };
+
+        const scheduleData = [
+            { id: 's1', table: '生物实验台-01', time: '08:00-10:00', project: '基因测序项目', person: '张博士', priority: 1 },
+            { id: 's2', table: '生物实验台-01', time: '10:30-12:00', project: '引物合成', person: '李研究员', priority: 2 },
+            { id: 's3', table: '生物实验台-02', time: '09:00-11:00', project: '疫苗研发', person: '王工程师', priority: 1 },
+            { id: 's4', table: '化学实验台-01', time: '08:00-12:00', project: '有机合成', person: '赵技术员', priority: 1, conflict: true },
+            { id: 's5', table: '化学实验台-01', time: '11:00-14:00', project: '样品分析', person: '陈博士', priority: 2, conflict: true },
+            { id: 's6', table: '化学实验台-02', time: '13:00-16:00', project: '材料测试', person: '刘助理', priority: 2 },
+            { id: 's7', table: 'PCR仪-01', time: '08:00-11:00', project: 'PCR扩增', person: '张博士', priority: 1 },
+            { id: 's8', table: 'PCR仪-01', time: '14:00-17:00', project: '定量PCR', person: '李研究员', priority: 2 }
+        ];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1a);
+            scene.fog = new THREE.Fog(0x0a0a1a, 30, 80);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(25, 20, 25);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2.1;
+            controls.minDistance = 10;
+            controls.maxDistance = 50;
+
+            const ambientLight = new THREE.AmbientLight(0x404080, 0.5);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+            mainLight.position.set(20, 30, 20);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0x00d4ff, 0.3);
+            fillLight.position.set(-10, 10, -10);
+            scene.add(fillLight);
+
+            createFloor();
+            createWalls();
+            createP3Lab();
+            createExperimentTables();
+            createReagentCabinets();
+            createInstrumentArea();
+            createWasteArea();
+            createCeilingLights();
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.domElement.addEventListener('click', onMouseClick);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+
+            updateAlertsList();
+            updateOrdersList();
+            updateWorkordersList();
+            updateSchedule();
+            addInitialAlerts();
+
+            animate();
+        }
+
+        function createFloor() {
+            const floorGeometry = new THREE.PlaneGeometry(50, 40);
+            const floorMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a2a4a,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const gridHelper = new THREE.GridHelper(50, 50, 0x00d4ff, 0x1a3a5a);
+            gridHelper.position.y = 0.01;
+            scene.add(gridHelper);
+        }
+
+        function createWalls() {
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2a3a5a,
+                roughness: 0.9,
+                metalness: 0.1
+            });
+
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(50, 8, 0.3), wallMaterial);
+            backWall.position.set(0, 4, -20);
+            backWall.receiveShadow = true;
+            scene.add(backWall);
+
+            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 8, 40), wallMaterial);
+            leftWall.position.set(-25, 4, 0);
+            leftWall.receiveShadow = true;
+            scene.add(leftWall);
+
+            const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 8, 40), wallMaterial);
+            rightWall.position.set(25, 4, 0);
+            rightWall.receiveShadow = true;
+            scene.add(rightWall);
+        }
+
+        function createCeilingLights() {
+            const lightPositions = [
+                [-15, 7.5, -10], [0, 7.5, -10], [15, 7.5, -10],
+                [-15, 7.5, 5], [0, 7.5, 5], [15, 7.5, 5],
+                [-15, 7.5, 15], [0, 7.5, 15], [15, 7.5, 15]
+            ];
+
+            lightPositions.forEach(pos => {
+                const lightGeo = new THREE.BoxGeometry(3, 0.1, 1.5);
+                const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffee });
+                const light = new THREE.Mesh(lightGeo, lightMat);
+                light.position.set(...pos);
+                scene.add(light);
+
+                const pointLight = new THREE.PointLight(0xffffff, 0.5, 20);
+                pointLight.position.set(pos[0], pos[1] - 0.5, pos[2]);
+                scene.add(pointLight);
+            });
+        }
+
+        function createP3Lab() {
+            const p3LabGroup = new THREE.Group();
+            p3LabGroup.position.set(-18, 0, -12);
+
+            const wallMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x3a2a4a,
+                roughness: 0.7,
+                metalness: 0.3,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const frontWall = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 0.3), wallMaterial);
+            frontWall.position.set(0, 2.5, 4);
+            p3LabGroup.add(frontWall);
+
+            const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5, 8), wallMaterial);
+            leftWall.position.set(-5, 2.5, 0);
+            p3LabGroup.add(leftWall);
+
+            const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5, 8), wallMaterial);
+            rightWall.position.set(5, 2.5, 0);
+            p3LabGroup.add(rightWall);
+
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(10, 5, 0.3), wallMaterial);
+            backWall.position.set(0, 2.5, -4);
+            p3LabGroup.add(backWall);
+
+            const doorFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 3.5, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0xff4444, metalness: 0.8, roughness: 0.3 })
+            );
+            doorFrame.position.set(0, 1.75, 4.1);
+            p3LabGroup.add(doorFrame);
+
+            const door = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 3.3, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0x881111, metalness: 0.5, roughness: 0.5 })
+            );
+            door.position.set(0, 1.75, 4.2);
+            door.name = 'p3door';
+            p3LabGroup.add(door);
+
+            const readerGeo = new THREE.BoxGeometry(0.3, 0.4, 0.1);
+            const readerMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            const reader = new THREE.Mesh(readerGeo, readerMat);
+            reader.position.set(1.2, 2, 4.3);
+            p3LabGroup.add(reader);
+
+            const readerLight = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+            );
+            readerLight.position.set(1.2, 2.1, 4.36);
+            readerLight.name = 'p3accesslight';
+            p3LabGroup.add(readerLight);
+
+            const signGeo = new THREE.BoxGeometry(2, 0.5, 0.1);
+            const signMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const sign = new THREE.Mesh(signGeo, signMat);
+            sign.position.set(0, 4.5, 4.2);
+            p3LabGroup.add(sign);
+
+            const floorGeo = new THREE.PlaneGeometry(10, 8);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a2a3a });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = 0.01;
+            p3LabGroup.add(floor);
+
+            const cabinet = createEquipment(1.5, 1.8, 0.8, 0x445566);
+            cabinet.position.set(-3, 0.9, -2);
+            p3LabGroup.add(cabinet);
+
+            const workbench = createEquipment(3, 0.8, 1.5, 0x556677);
+            workbench.position.set(3, 0.4, -1);
+            p3LabGroup.add(workbench);
+
+            labObjects.p3Lab = { group: p3LabGroup, type: 'p3lab', name: 'P3生物安全实验室' };
+            scene.add(p3LabGroup);
+        }
+
+        function createExperimentTables() {
+            const positions = [
+                { x: -5, z: -5 },
+                { x: 0, z: -5 },
+                { x: 5, z: -5 },
+                { x: -5, z: 3 },
+                { x: 0, z: 3 },
+                { x: 5, z: 3 }
+            ];
+
+            labData.experimentTables.forEach((table, index) => {
+                const pos = positions[index];
+                const tableGroup = createExperimentTable(table);
+                tableGroup.position.set(pos.x, 0, pos.z);
+                labObjects[table.id] = { group: tableGroup, type: 'table', data: table };
+                scene.add(tableGroup);
+            });
+        }
+
+        function createExperimentTable(tableData) {
+            const group = new THREE.Group();
+
+            const tableColor = tableData.status === 'danger' ? 0xff4444 : 0x5a6a7a;
+            const tableTop = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 0.15, 2),
+                new THREE.MeshStandardMaterial({ color: tableColor, metalness: 0.3, roughness: 0.7 })
+            );
+            tableTop.position.y = 0.8;
+            tableTop.castShadow = true;
+            tableTop.name = 'tabletop';
+            group.add(tableTop);
+
+            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.8, roughness: 0.3 });
+            const legPositions = [[-1.8, -0.8], [1.8, -0.8], [-1.8, 0.8], [1.8, 0.8]];
+            legPositions.forEach(pos => {
+                const leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 0.1), legMaterial);
+                leg.position.set(pos[0], 0.4, pos[1]);
+                leg.castShadow = true;
+                group.add(leg);
+            });
+
+            const screen = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.5, 0.05),
+                new THREE.MeshBasicMaterial({ color: tableData.status === 'danger' ? 0xff4444 : 0x00ff88 })
+            );
+            screen.position.set(0, 1.2, -0.8);
+            group.add(screen);
+
+            const bottle1 = createReagentBottle(0xff6644, 0.15, 0.4);
+            bottle1.position.set(-1.2, 1, 0.3);
+            group.add(bottle1);
+
+            const bottle2 = createReagentBottle(0x44ff66, 0.12, 0.35);
+            bottle2.position.set(-0.8, 1, 0.5);
+            group.add(bottle2);
+
+            const flask = createFlask(0x44aaff);
+            flask.position.set(0.8, 1, 0);
+            group.add(flask);
+
+            if (tableData.status === 'danger') {
+                const alarmLight = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                );
+                alarmLight.position.set(1.5, 1.5, 0);
+                alarmLight.name = 'alarmlight';
+                group.add(alarmLight);
+            }
+
+            return group;
+        }
+
+        function createReagentBottle(color, radius, height) {
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.8, radius, height * 0.8, 16),
+                new THREE.MeshPhysicalMaterial({ color: color, transparent: true, opacity: 0.6, roughness: 0.1, metalness: 0.1 })
+            );
+            body.position.y = height * 0.4;
+            group.add(body);
+
+            const cap = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.5, radius * 0.5, height * 0.2, 16),
+                new THREE.MeshStandardMaterial({ color: 0x666666 })
+            );
+            cap.position.y = height * 0.9;
+            group.add(cap);
+
+            return group;
+        }
+
+        function createFlask(color) {
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.SphereGeometry(0.2, 16, 16),
+                new THREE.MeshPhysicalMaterial({ color: color, transparent: true, opacity: 0.5 })
+            );
+            body.scale.set(1, 0.8, 1);
+            group.add(body);
+
+            const neck = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.08, 0.3, 16),
+                new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 })
+            );
+            neck.position.y = 0.3;
+            group.add(neck);
+
+            return group;
+        }
+
+        function createReagentCabinets() {
+            const cabinetGroup = new THREE.Group();
+            cabinetGroup.position.set(15, 0, -12);
+
+            const cabinetMaterial = new THREE.MeshStandardMaterial({ color: 0x4a5a6a, metalness: 0.6, roughness: 0.4 });
+            const cabinet = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 1), cabinetMaterial);
+            cabinet.position.y = 1.5;
+            cabinet.castShadow = true;
+            cabinetGroup.add(cabinet);
+
+            const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x5a6a7a, metalness: 0.7, roughness: 0.3 });
+            const leftDoor = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 0.9), doorMaterial);
+            leftDoor.position.set(-2.45, 1.5, 0.05);
+            leftDoor.name = 'leftDoor';
+            cabinetGroup.add(leftDoor);
+
+            const rightDoor = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 0.9), doorMaterial);
+            rightDoor.position.set(2.45, 1.5, 0.05);
+            rightDoor.name = 'rightDoor';
+            cabinetGroup.add(rightDoor);
+
+            const shelfY = [0.6, 1.5, 2.4];
+            const reagentColors = [0xff4444, 0x44ff44, 0x4444ff, 0xffff44, 0xff44ff, 0x44ffff];
+            
+            labData.reagents.slice(0, 6).forEach((reagent, index) => {
+                const row = Math.floor(index / 2);
+                const col = index % 2;
+                const bottle = createReagentBottle(
+                    reagentColors[index], 
+                    reagent.status === 'warning' ? 0.08 : 0.15, 
+                    0.35
+                );
+                bottle.position.set(-1 + col * 2, shelfY[row], 0);
+                
+                if (reagent.status === 'warning') {
+                    bottle.userData.flashing = true;
+                    bottle.userData.baseColor = reagentColors[index];
+                }
+                
+                cabinetGroup.add(bottle);
+            });
+
+            labObjects.reagentCabinet = { group: cabinetGroup, type: 'cabinet', data: labData.reagents };
+            scene.add(cabinetGroup);
+        }
+
+        function createInstrumentArea() {
+            const positions = [
+                { x: -15, z: 10 },
+                { x: -8, z: 10 },
+                { x: -1, z: 10 },
+                { x: 6, z: 10 },
+                { x: 13, z: 10 }
+            ];
+
+            labData.instruments.forEach((inst, index) => {
+                const pos = positions[index];
+                const instGroup = createInstrument(inst);
+                instGroup.position.set(pos.x, 0, pos.z);
+                labObjects[inst.id] = { group: instGroup, type: 'instrument', data: inst };
+                scene.add(instGroup);
+            });
+        }
+
+        function createInstrument(instData) {
+            const group = new THREE.Group();
+
+            const baseColor = instData.locked ? 0x664444 : 0x3a4a5a;
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 0.8, 1.8),
+                new THREE.MeshStandardMaterial({ color: baseColor, metalness: 0.7, roughness: 0.3 })
+            );
+            base.position.y = 0.4;
+            base.castShadow = true;
+            group.add(base);
+
+            const bodyColor = instData.status === 'warning' ? 0xff8800 : (instData.locked ? 0xaa4444 : 0x4a5a6a);
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(2.2, 1.5, 1.5),
+                new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0.6, roughness: 0.4 })
+            );
+            body.position.y = 1.55;
+            body.castShadow = true;
+            body.name = 'instrumentBody';
+            group.add(body);
+
+            if (instData.status === 'warning' || instData.locked) {
+                const edges = new THREE.EdgesGeometry(new THREE.BoxGeometry(2.2, 1.5, 1.5));
+                const lineMaterial = new THREE.LineBasicMaterial({ 
+                    color: instData.locked ? 0xff0000 : 0xff8800 
+                });
+                const wireframe = new THREE.LineSegments(edges, lineMaterial);
+                wireframe.position.y = 1.55;
+                wireframe.name = 'warningBorder';
+                group.add(wireframe);
+            }
+
+            const screen = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 0.6, 0.05),
+                new THREE.MeshBasicMaterial({ color: instData.locked ? 0xff0000 : 0x00ff88 })
+            );
+            screen.position.set(0, 1.8, 0.78);
+            group.add(screen);
+
+            const top = new THREE.Mesh(
+                new THREE.BoxGeometry(2.3, 0.1, 1.6),
+                new THREE.MeshStandardMaterial({ color: 0x2a3a4a, metalness: 0.8, roughness: 0.2 })
+            );
+            top.position.y = 2.35;
+            group.add(top);
+
+            return group;
+        }
+
+        function createWasteArea() {
+            const wasteGroup = new THREE.Group();
+            wasteGroup.position.set(18, 0, 5);
+
+            const binColors = [0x333333, 0x333333, 0x224422, 0xcc4444];
+            const binPositions = [
+                { x: -1.5, z: 0 },
+                { x: -1.5, z: 2 },
+                { x: 1.5, z: 0 },
+                { x: 1.5, z: 2 }
+            ];
+
+            labData.waste.forEach((waste, index) => {
+                const pos = binPositions[index];
+                const bin = createWasteBin(waste, binColors[index]);
+                bin.position.set(pos.x, 0, pos.z);
+                wasteGroup.add(bin);
+            });
+
+            labObjects.wasteArea = { group: wasteGroup, type: 'waste', data: labData.waste };
+            scene.add(wasteGroup);
+        }
+
+        function createWasteBin(wasteData, color) {
+            const group = new THREE.Group();
+
+            const binMaterial = new THREE.MeshStandardMaterial({ 
+                color: wasteData.status === 'danger' ? 0xff0000 : color,
+                metalness: 0.3,
+                roughness: 0.7
+            });
+            
+            const bin = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.5, 0.6, 1.2, 16),
+                binMaterial
+            );
+            bin.position.y = 0.6;
+            bin.castShadow = true;
+            bin.name = 'wastebin';
+            group.add(bin);
+
+            const levelGeo = new THREE.CylinderGeometry(0.45, 0.55, 1.1 * (wasteData.level / 100), 16);
+            const levelMat = new THREE.MeshBasicMaterial({ 
+                color: wasteData.status === 'danger' ? 0xff0000 : 0x44aa44,
+                transparent: true,
+                opacity: 0.6
+            });
+            const level = new THREE.Mesh(levelGeo, levelMat);
+            level.position.y = 0.55 * (wasteData.level / 100);
+            level.name = 'wastelevel';
+            group.add(level);
+
+            return group;
+        }
+
+        function createEquipment(width, height, depth, color) {
+            const geo = new THREE.BoxGeometry(width, height, depth);
+            const mat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.5, roughness: 0.5 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.castShadow = true;
+            return mesh;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseClick(event) {
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            for (const key in labObjects) {
+                const obj = labObjects[key];
+                const intersects = raycaster.intersectObjects(obj.group.children, true);
+                if (intersects.length > 0) {
+                    handleObjectClick(obj);
+                    break;
+                }
+            }
+        }
+
+        function handleObjectClick(obj) {
+            switch (obj.type) {
+                case 'p3lab':
+                    openModal('access-modal');
+                    break;
+                case 'table':
+                    showTableDetails(obj.data);
+                    break;
+                case 'cabinet':
+                    showCabinetDetails(obj.data);
+                    break;
+                case 'instrument':
+                    showInstrumentDetails(obj.data);
+                    break;
+                case 'waste':
+                    showWasteDetails(obj.data);
+                    break;
+            }
+        }
+
+        function onMouseMove(event) {
+            const mouse = new THREE.Vector2();
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+
+            let hovered = false;
+            for (const key in labObjects) {
+                const obj = labObjects[key];
+                const intersects = raycaster.intersectObjects(obj.group.children, true);
+                if (intersects.length > 0) {
+                    showTooltip(event.clientX, event.clientY, obj);
+                    hovered = true;
+                    break;
+                }
+            }
+            
+            if (!hovered) {
+                document.getElementById('info-tooltip').style.display = 'none';
+            }
+        }
+
+        function showTooltip(x, y, obj) {
+            const tooltip = document.getElementById('info-tooltip');
+            let content = `<h3>${obj.name || (obj.data && obj.data.name) || '设备'}</h3>`;
+            
+            if (obj.type === 'table' && obj.data) {
+                content += `
+                    <div class="info-row"><span class="info-label">项目名称</span><span class="info-value">${obj.data.project}</span></div>
+                    <div class="info-row"><span class="info-label">负责人</span><span class="info-value">${obj.data.person}</span></div>
+                    <div class="info-row"><span class="info-label">温度</span><span class="info-value ${obj.data.temp > obj.data.tempThreshold ? 'danger' : ''}">${obj.data.temp}°C</span></div>
+                    <div class="info-row"><span class="info-label">pH值</span><span class="info-value ${obj.data.ph < obj.data.phMin || obj.data.ph > obj.data.phMax ? 'danger' : ''}">${obj.data.ph}</span></div>
+                `;
+            } else if (obj.type === 'instrument' && obj.data) {
+                content += `
+                    <div class="info-row"><span class="info-label">运行时间</span><span class="info-value ${obj.data.status === 'warning' ? 'warning' : ''}">${obj.data.runtime}h</span></div>
+                    <div class="info-row"><span class="info-label">保养阈值</span><span class="info-value">${obj.data.maintenanceThreshold}h</span></div>
+                    <div class="info-row"><span class="info-label">状态</span><span class="info-value ${obj.data.locked ? 'danger' : ''}">${obj.data.locked ? '已锁定' : '运行中'}</span></div>
+                `;
+            } else if (obj.type === 'p3lab') {
+                content += `
+                    <div class="info-row"><span class="info-label">门禁状态</span><span class="info-value">${labData.p3Lab.accessStatus === 'locked' ? '已锁定' : '已解锁'}</span></div>
+                    <div class="info-row"><span class="info-label">授权人员</span><span class="info-value">${labData.p3Lab.authorizedPersons.length}人</span></div>
+                    <div class="info-row"><span class="info-label">点击</span><span class="info-value">进入门禁系统</span></div>
+                `;
+            } else if (obj.type === 'cabinet') {
+                const lowCount = obj.data.filter(r => r.status === 'warning').length;
+                content += `
+                    <div class="info-row"><span class="info-label">试剂总数</span><span class="info-value">${obj.data.length}</span></div>
+                    <div class="info-row"><span class="info-label">低库存</span><span class="info-value warning">${lowCount}种</span></div>
+                    <div class="info-row"><span class="info-label">点击</span><span class="info-value">查看详情</span></div>
+                `;
+            } else if (obj.type === 'waste') {
+                const dangerCount = obj.data.filter(w => w.status === 'danger').length;
+                content += `
+                    <div class="info-row"><span class="info-label">废液桶数</span><span class="info-value">${obj.data.length}</span></div>
+                    <div class="info-row"><span class="info-label">需处理</span><span class="info-value ${dangerCount > 0 ? 'danger' : ''}">${dangerCount}个</span></div>
+                `;
+            }
+            
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+        }
+
+        function showTableDetails(data) {
+            if (data.status === 'danger') {
+                const safetyCabinet = labObjects.reagentCabinet.group;
+                const leftDoor = safetyCabinet.getObjectByName('leftDoor');
+                const rightDoor = safetyCabinet.getObjectByName('rightDoor');
+                if (leftDoor) leftDoor.rotation.y = -Math.PI / 3;
+                if (rightDoor) rightDoor.rotation.y = Math.PI / 3;
+            }
+        }
+
+        function showCabinetDetails(data) {
+            const warningReagents = data.filter(r => r.status === 'warning');
+            if (warningReagents.length > 0) {
+                currentPurchaseReagent = warningReagents[0];
+                document.getElementById('purchase-id').value = 'PO-' + Date.now().toString().slice(-8);
+                document.getElementById('purchase-reagent').value = warningReagents[0].name;
+                document.getElementById('purchase-current').value = warningReagents[0].remaining + '%';
+                document.getElementById('purchase-amount').value = Math.ceil((100 - warningReagents[0].remaining) / 100 * 500) + 'ml';
+                openModal('purchase-modal');
+            }
+        }
+
+        function showInstrumentDetails(data) {
+            if (data.status === 'warning' || data.locked) {
+                currentMaintenanceInstrument = data;
+                document.getElementById('maint-id').value = 'WO-' + Date.now().toString().slice(-8);
+                document.getElementById('maint-instrument').value = data.name;
+                document.getElementById('maint-runtime').value = data.runtime + '小时';
+                document.getElementById('maint-date').value = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+                openModal('maintenance-modal');
+            }
+        }
+
+        function showWasteDetails(data) {
+            const dangerWaste = data.filter(w => w.status === 'danger');
+            if (dangerWaste.length > 0) {
+                addAlert('warning', '废液桶液位过高', `${dangerWaste[0].name}液位已达${dangerWaste[0].level}%，请及时处理`);
+                const workorder = {
+                    id: 'WT-' + Date.now().toString().slice(-8),
+                    type: '转运',
+                    item: dangerWaste[0].name,
+                    status: 'pending',
+                    time: new Date().toLocaleTimeString()
+                };
+                workorderList.push(workorder);
+                updateWorkordersList();
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            
+            if (autoRotate) {
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 0.5;
+            } else {
+                controls.autoRotate = false;
+            }
+            
+            for (const key in labObjects) {
+                const obj = labObjects[key];
+                obj.group.traverse((child) => {
+                    if (child.userData && child.userData.flashing) {
+                        const intensity = (Math.sin(time * 3) + 1) / 2;
+                        if (child.material) {
+                            child.material.opacity = 0.4 + intensity * 0.4;
+                        }
+                    }
+                    if (child.name === 'alarmlight') {
+                        const intensity = (Math.sin(time * 5) + 1) / 2;
+                        child.material.color.setHSL(0, 1, 0.3 + intensity * 0.3);
+                    }
+                    if (child.name === 'warningBorder') {
+                        const intensity = (Math.sin(time * 2) + 1) / 2;
+                        child.material.opacity = 0.5 + intensity * 0.5;
+                    }
+                });
+            }
+            
+            const wasteObj = labObjects.wasteArea;
+            if (wasteObj) {
+                wasteObj.group.traverse((child) => {
+                    if (child.name === 'wastebin' && child.material && child.material.color.getHex() === 0xff0000) {
+                        const intensity = (Math.sin(time * 4) + 1) / 2;
+                        child.material.opacity = 0.6 + intensity * 0.4;
+                    }
+                    if (child.name === 'wastelevel' && child.material && child.material.color.getHex() === 0xff0000) {
+                        const intensity = (Math.sin(time * 4) + 1) / 2;
+                        child.material.opacity = 0.4 + intensity * 0.4;
+                    }
+                });
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN');
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('zh-CN');
+        }
+
+        function resetCamera() {
+            camera.position.set(25, 20, 25);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+
+        function toggleRotation() {
+            autoRotate = !autoRotate;
+        }
+
+        function showStatistics() {
+            openModal('statistics-modal');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function addInitialAlerts() {
+            addAlert('danger', '温度超阈值', '化学实验台-01温度32.5°C超过阈值30°C，安全柜已闭锁');
+            addAlert('danger', 'pH值异常', '化学实验台-03 pH值9.2超出正常范围');
+            addAlert('warning', '试剂库存不足', 'PCR试剂盒、琼脂糖、溴化乙锭库存低于20%');
+        }
+
+        function addAlert(type, title, desc) {
+            const alert = {
+                type: type,
+                title: title,
+                desc: desc,
+                time: new Date().toLocaleTimeString()
+            };
+            alertList.unshift(alert);
+            if (alertList.length > 10) alertList.pop();
+            updateAlertsList();
+            updateAlertCount();
+        }
+
+        function updateAlertsList() {
+            const container = document.getElementById('alerts-list');
+            container.innerHTML = alertList.map(alert => `
+                <div class="alert-item ${alert.type}">
+                    <div class="alert-title">${alert.title}</div>
+                    <div class="alert-desc">${alert.desc}</div>
+                    <div class="alert-time">${alert.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateAlertCount() {
+            const dangerCount = alertList.filter(a => a.type === 'danger').length;
+            document.getElementById('active-alerts').textContent = dangerCount;
+        }
+
+        function submitPurchase() {
+            const order = {
+                id: document.getElementById('purchase-id').value,
+                reagent: document.getElementById('purchase-reagent').value,
+                amount: document.getElementById('purchase-amount').value,
+                status: 'pending',
+                time: new Date().toLocaleTimeString()
+            };
+            orderList.unshift(order);
+            updateOrdersList();
+            closeModal('purchase-modal');
+            addAlert('success', '采购申请已提交', `已提交${order.reagent}的采购申请`);
+        }
+
+        function updateOrdersList() {
+            const container = document.getElementById('orders-list');
+            if (orderList.length === 0) {
+                container.innerHTML = '<div style="color: #8899aa; text-align: center; padding: 20px;">暂无采购申请</div>';
+                return;
+            }
+            container.innerHTML = orderList.map(order => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-id">${order.id}</span>
+                        <span class="order-status ${order.status}">${order.status === 'pending' ? '待审批' : order.status === 'approved' ? '已批准' : '已完成'}</span>
+                    </div>
+                    <div class="info-row"><span class="info-label">试剂</span><span class="info-value">${order.reagent}</span></div>
+                    <div class="info-row"><span class="info-label">采购量</span><span class="info-value">${order.amount}</span></div>
+                    <div class="alert-time">${order.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function submitMaintenance() {
+            const workorder = {
+                id: document.getElementById('maint-id').value,
+                instrument: document.getElementById('maint-instrument').value,
+                type: document.getElementById('maint-type').value,
+                status: 'pending',
+                time: new Date().toLocaleTimeString()
+            };
+            workorderList.unshift(workorder);
+            updateWorkordersList();
+            closeModal('maintenance-modal');
+            addAlert('success', '保养工单已创建', `已创建${workorder.instrument}的保养工单`);
+        }
+
+        function updateWorkordersList() {
+            const container = document.getElementById('workorders-list');
+            if (workorderList.length === 0) {
+                container.innerHTML = '<div style="color: #8899aa; text-align: center; padding: 20px;">暂无保养工单</div>';
+                return;
+            }
+            container.innerHTML = workorderList.map(wo => `
+                <div class="workorder-item">
+                    <div class="order-header">
+                        <span class="order-id">${wo.id}</span>
+                        <span class="order-status ${wo.status}">${wo.status === 'pending' ? '待处理' : wo.status === 'processing' ? '处理中' : '已完成'}</span>
+                    </div>
+                    <div class="info-row"><span class="info-label">设备</span><span class="info-value">${wo.instrument || wo.item}</span></div>
+                    <div class="info-row"><span class="info-label">类型</span><span class="info-value">${wo.type || '转运'}</span></div>
+                    <div class="alert-time">${wo.time}</div>
+                    ${wo.status === 'pending' ? `<button class="btn btn-success" style="width: 100%; margin-top: 10px; padding: 6px;" onclick="completeWorkorder('${wo.id}')">完成处理</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function completeWorkorder(id) {
+            const wo = workorderList.find(w => w.id === id);
+            if (wo) {
+                wo.status = 'completed';
+                updateWorkordersList();
+                addAlert('success', '工单已完成', `${wo.instrument || wo.item}的工单已处理完成`);
+                
+                if (currentMaintenanceInstrument && currentMaintenanceInstrument.name === wo.instrument) {
+                    currentMaintenanceInstrument.locked = false;
+                    currentMaintenanceInstrument.status = 'normal';
+                }
+            }
+        }
+
+        function simulateFaceScan() {
+            const select = document.getElementById('person-select');
+            const isAuthorized = select.value === 'authorized';
+            const personName = select.options[select.selectedIndex].text;
+            const statusDiv = document.getElementById('access-status');
+            const scanArea = document.getElementById('face-scan-area');
+            
+            scanArea.style.borderColor = '#ffa500';
+            statusDiv.textContent = '正在识别中...';
+            statusDiv.style.color = '#ffa500';
+            
+            setTimeout(() => {
+                if (isAuthorized) {
+                    scanArea.style.borderColor = '#00ff88';
+                    statusDiv.textContent = `识别成功！欢迎 ${personName}`;
+                    statusDiv.style.color = '#00ff88';
+                    labData.p3Lab.accessStatus = 'unlocked';
+                    
+                    const p3Obj = labObjects.p3Lab.group;
+                    const door = p3Obj.getObjectByName('p3door');
+                    const light = p3Obj.getObjectByName('p3accesslight');
+                    if (door) door.rotation.y = -Math.PI / 2;
+                    if (light) light.material.color.setHex(0x00ff00);
+                    
+                    addAlert('success', 'P3实验室门禁解锁', `${personName}已授权进入`);
+                } else {
+                    scanArea.style.borderColor = '#ff4444';
+                    statusDiv.textContent = '识别失败！未授权人员';
+                    statusDiv.style.color = '#ff4444';
+                    
+                    const p3Obj = labObjects.p3Lab.group;
+                    const light = p3Obj.getObjectByName('p3accesslight');
+                    if (light) light.material.color.setHex(0xff0000);
+                    
+                    addAlert('danger', '非授权进入警报', `${personName}尝试进入P3实验室，已拒绝`);
+                }
+            }, 1500);
+        }
+
+        function updateSchedule() {
+            const container = document.getElementById('schedule-container');
+            const grouped = {};
+            
+            scheduleData.forEach(s => {
+                if (!grouped[s.table]) grouped[s.table] = [];
+                grouped[s.table].push(s);
+            });
+            
+            container.innerHTML = Object.entries(grouped).map(([table, bookings]) => `
+                <div class="schedule-item">
+                    <div class="schedule-header">
+                        <span>${table}</span>
+                        ${bookings.some(b => b.conflict) ? '<span style="color: #ff4444;">⚡ 冲突</span>' : ''}
+                    </div>
+                    ${bookings.map(b => `
+                        <div class="schedule-booking ${b.conflict ? 'conflict' : ''}">
+                            <div class="booking-time">${b.time} ${b.conflict ? '<span style="color: #ff4444; float: right;">建议调整</span>' : ''}</div>
+                            <div class="booking-project">${b.project}</div>
+                            <div class="booking-person">${b.person} (优先级: ${b.priority})</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function simulateAlert() {
+            const alerts = [
+                { type: 'danger', title: '模拟温度警报', titleEn: 'Temperature Alert', msg: '实验台-02温度达到35.6°C，超过安全阈值' },
+                { type: 'warning', title: '模拟试剂警报', titleEn: 'Reagent Alert', msg: '乙醇剩余量达到18%，建议采购' },
+                { type: 'danger', title: '模拟门禁警报', titleEn: 'Access Alert', msg: '检测到非授权人员靠近P3实验室' }
+            ];
+            const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
+            addAlert(randomAlert.type, randomAlert.title, randomAlert.msg);
+        }
+
+        function exportExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            const equipmentData = [
+                ['设备名称', '运行时间(h)', '保养阈值(h)', '使用率(%)', '状态'],
+                ['PCR仪-01', 1850, 2000, 78, '运行中'],
+                ['高速离心机', 1200, 1500, 65, '运行中'],
+                ['紫外分光光度计', 2300, 2000, 45, '已锁定'],
+                ['凝胶成像系统', 850, 1500, 55, '运行中'],
+                ['高效液相色谱', 1500, 2000, 60, '运行中']
+            ];
+            const ws1 = XLSX.utils.aoa_to_sheet(equipmentData);
+            XLSX.utils.book_append_sheet(wb, ws1, '设备使用率');
+            
+            const reagentData = [
+                ['试剂名称', '当前剩余', '总量', '消耗率(%)', '有效期'],
+                ['乙醇(95%)', '4250ml', '5000ml', 15, '2025-06-15'],
+                ['氯化钠', '1200g', '2000g', 40, '2026-03-20'],
+                ['PCR试剂盒', '75份', '500份', 85, '2024-08-10'],
+                ['琼脂糖', '90g', '500g', 82, '2025-12-01'],
+                ['Tris-HCl', '1100ml', '2000ml', 45, '2025-09-30']
+            ];
+            const ws2 = XLSX.utils.aoa_to_sheet(reagentData);
+            XLSX.utils.book_append_sheet(wb, ws2, '试剂消耗');
+            
+            const eventData = [
+                ['事件类型', '事件描述', '发生时间', '处理状态'],
+                ['温度超阈值', '化学实验台-01温度32.5°C', '2024-01-15 09:15', '已处理'],
+                ['pH异常', '化学实验台-03 pH值9.2', '2024-01-15 10:30', '处理中'],
+                ['非授权进入', '外来人员尝试进入P3实验室', '2024-01-14 14:20', '已处理'],
+                ['试剂低库存', 'PCR试剂盒低于20%', '2024-01-15 08:00', '已申请采购'],
+                ['废液桶满', '化学废液桶A液位92%', '2024-01-15 11:00', '待转运']
+            ];
+            const ws3 = XLSX.utils.aoa_to_sheet(eventData);
+            XLSX.utils.book_append_sheet(wb, ws3, '异常事件');
+            
+            XLSX.writeFile(wb, '实验室数据统计_' + new Date().toISOString().split('T')[0] + '.xlsx');
+            
+            addAlert('success', '导出成功', 'Excel统计报表已下载');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

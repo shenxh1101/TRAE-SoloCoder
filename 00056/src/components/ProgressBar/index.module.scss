@@ -1,0 +1,64 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.track {
+  flex: 1;
+  height: 16rpx;
+  background-color: $color-border;
+  border-radius: $radius-round;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-round;
+  transition: width $transition-base ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: $spacing-sm;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  min-width: 80rpx;
+}
+
+.insideLabel {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.sizeSm {
+  .track {
+    height: 8rpx;
+  }
+  .label {
+    font-size: $font-size-xs;
+  }
+}
+
+.sizeMd {
+  .track {
+    height: 16rpx;
+  }
+}
+
+.sizeLg {
+  .track {
+    height: 24rpx;
+  }
+  .label {
+    font-size: $font-size-md;
+  }
+}

@@ -1,0 +1,46 @@
+@use '@/styles/variables.scss' as *;
+
+.placeholderPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl * 2;
+  background: $color-bg-page;
+}
+
+.icon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-xl;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.desc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  text-align: center;
+  line-height: $line-height-loose;
+}
+
+.button {
+  @include button-reset;
+  height: $button-height-md;
+  padding: 0 $spacing-xl * 2;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  margin-top: $spacing-xl;
+
+  &:active {
+    opacity: 0.9;
+  }
+}

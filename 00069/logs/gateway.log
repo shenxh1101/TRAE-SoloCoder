@@ -1,0 +1,4 @@
+2026-06-04 17:06:31,546 - api_gateway - INFO - Starting API Gateway on 0.0.0.0:5001
+2026-06-04 17:06:31,546 - api_gateway - INFO - Admin interface available at http://localhost:5001/_admin
+2026-06-04 17:11:35,616 - api_gateway - INFO - Starting API Gateway on 0.0.0.0:5001
+2026-06-04 17:11:35,616 - api_gateway - INFO - Admin interface available at http://localhost:5001/_admin
